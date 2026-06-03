@@ -24,6 +24,7 @@ export interface Rating {
   color_idx: number | null
   wheels: { nose: number[]; taste: number[] }
   note: string | null
+  purchase_price: number | null
   is_public: boolean
   created_at: string
   updated_at: string

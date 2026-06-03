@@ -33,6 +33,7 @@ export default function WhiskyDetail() {
   const [colorIdx, setColorIdx] = useState<number | null>(null)
   const [wheels, setWheels] = useState(EMPTY_WHEELS)
   const [note, setNote] = useState('')
+  const [purchasePrice, setPurchasePrice] = useState('')
   const [isPublic, setIsPublic] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -72,6 +73,7 @@ export default function WhiskyDetail() {
             setColorIdx(data.color_idx)
             setWheels(data.wheels ?? EMPTY_WHEELS)
             setNote(data.note ?? '')
+            setPurchasePrice(data.purchase_price != null ? String(data.purchase_price) : '')
             setIsPublic(data.is_public)
           }
         })
@@ -134,6 +136,7 @@ export default function WhiskyDetail() {
       color_idx: colorIdx,
       wheels,
       note: note.trim() || null,
+      purchase_price: purchasePrice ? parseFloat(purchasePrice) : null,
       is_public: isPublic,
       updated_at: new Date().toISOString(),
     }
@@ -243,7 +246,6 @@ export default function WhiskyDetail() {
             {drink.region && <span>{drink.region}</span>}
             {drink.age_years && <span>{drink.age_years} Jahre</span>}
             {drink.abv && <span>{drink.abv}%</span>}
-            {drink.price != null && <span className="text-stone-300">{drink.price} €</span>}
           </div>
           {avgOverall != null && (
             <div className="mt-2 flex items-baseline gap-1">
@@ -369,6 +371,20 @@ export default function WhiskyDetail() {
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"
               placeholder="Torfig, leicht salzig, langer Abgang…"
             />
+          </div>
+
+          <div>
+            <label className="block text-sm text-stone-300 mb-1">Kaufpreis (€, optional)</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={purchasePrice}
+              onChange={e => setPurchasePrice(e.target.value)}
+              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
+              placeholder="z. B. 65"
+            />
+            <p className="text-stone-600 text-xs mt-1">Nur für dich sichtbar – fließt in deinen Sammlungswert ein.</p>
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer select-none">

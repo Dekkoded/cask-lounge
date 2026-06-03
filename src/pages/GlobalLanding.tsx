@@ -10,6 +10,7 @@ interface VitrineEntry {
   id: string
   overall: number | null
   updated_at: string
+  purchase_price: number | null
   drinks: Drink | null
 }
 
@@ -64,7 +65,7 @@ export default function GlobalLanding() {
     if (!user) { setVitrineLoading(false); setLiveLoading(false); return }
     supabase
       .from('ratings')
-      .select('id, overall, updated_at, drinks(*)')
+      .select('id, overall, updated_at, purchase_price, drinks(*)')
       .eq('user_id', user.id)
       .order('overall', { ascending: false, nullsFirst: false })
       .then(({ data }) => {
@@ -134,8 +135,8 @@ export default function GlobalLanding() {
       (v.drinks?.region ?? '').toLowerCase().includes(q))
   )
 
-  const collectionValue = filteredVitrine.reduce((s, v) => s + (v.drinks?.price ?? 0), 0)
-  const pricedCount = filteredVitrine.filter(v => v.drinks?.price != null).length
+  const collectionValue = filteredVitrine.reduce((s, v) => s + (v.purchase_price ?? 0), 0)
+  const pricedCount = filteredVitrine.filter(v => v.purchase_price != null).length
 
   const headings: Record<View, string> = {
     ranking: 'Global',
