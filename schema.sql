@@ -300,6 +300,33 @@ create policy "ds_insert_own_member"
 create policy "ds_update_own"
   on public.drink_sessions for update using (user_id = (select auth.uid()));
 
+-- Reaktionen auf Live-Sessions (Emoji)
+create table public.session_reactions (
+  id          uuid primary key default gen_random_uuid(),
+  session_id  uuid not null references public.drink_sessions(id) on delete cascade,
+  user_id     uuid not null references public.profiles(id) on delete cascade default auth.uid(),
+  emoji       text not null,
+  created_at  timestamptz not null default now(),
+  unique (session_id, user_id, emoji)
+);
+alter table public.session_reactions enable row level security;
+
+-- Sichtbarkeit erbt von der Session: exists() respektiert deren RLS automatisch.
+create policy "sr_select_visible_session"
+  on public.session_reactions for select using (
+    exists (select 1 from public.drink_sessions s where s.id = session_id)
+  );
+create policy "sr_insert_own_visible"
+  on public.session_reactions for insert with check (
+    user_id = (select auth.uid())
+    and exists (select 1 from public.drink_sessions s where s.id = session_id)
+  );
+create policy "sr_delete_own"
+  on public.session_reactions for delete using (user_id = (select auth.uid()));
+
+create index on public.session_reactions (session_id);
+alter publication supabase_realtime add table public.session_reactions;
+
 -- =====================================================================
 -- 8. INDIZES (Performance für die häufigen Abfragen)
 -- =====================================================================

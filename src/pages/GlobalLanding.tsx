@@ -22,7 +22,10 @@ interface LiveSession {
   started_at: string
   profiles: { display_name: string | null; username: string } | null
   drinks: { name: string } | null
+  session_reactions: { emoji: string; user_id: string }[]
 }
+
+const REACTIONS = ['🥃', '🔥', '👏', '😍', '🤤']
 
 export default function GlobalLanding() {
   const { user } = useAuth()
@@ -84,6 +87,7 @@ export default function GlobalLanding() {
     const channel = supabase
       .channel('live-sessions')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'drink_sessions' }, () => loadFeed())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_reactions' }, () => loadFeed())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [user])
@@ -91,7 +95,7 @@ export default function GlobalLanding() {
   const loadFeed = () => {
     supabase
       .from('drink_sessions')
-      .select('id, user_id, drink_name, message, started_at, profiles(display_name, username), drinks(name)')
+      .select('id, user_id, drink_name, message, started_at, profiles(display_name, username), drinks(name), session_reactions(emoji, user_id)')
       .order('started_at', { ascending: false })
       .limit(30)
       .then(({ data }) => {
@@ -117,6 +121,17 @@ export default function GlobalLanding() {
     }
     setShowDialog(false)
     setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
+    loadFeed()
+  }
+
+  const toggleReaction = async (sessionId: string, emoji: string, active: boolean) => {
+    if (!user) return
+    if (active) {
+      await supabase.from('session_reactions').delete()
+        .eq('session_id', sessionId).eq('user_id', user.id).eq('emoji', emoji)
+    } else {
+      await supabase.from('session_reactions').insert({ session_id: sessionId, user_id: user.id, emoji })
+    }
     loadFeed()
   }
 
@@ -355,6 +370,7 @@ export default function GlobalLanding() {
                     <p className="text-stone-600 text-xs mt-1">
                       {new Date(s.started_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </p>
+                    <ReactionBar reactions={s.session_reactions} myId={user?.id} onToggle={(emoji, active) => toggleReaction(s.id, emoji, active)} />
                   </div>
                 </div>
               </div>
@@ -409,6 +425,45 @@ export default function GlobalLanding() {
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+function ReactionBar({
+  reactions,
+  myId,
+  onToggle,
+}: {
+  reactions: { emoji: string; user_id: string }[]
+  myId: string | undefined
+  onToggle: (emoji: string, active: boolean) => void
+}) {
+  const counts = new Map<string, number>()
+  const mine = new Set<string>()
+  for (const r of reactions ?? []) {
+    counts.set(r.emoji, (counts.get(r.emoji) ?? 0) + 1)
+    if (r.user_id === myId) mine.add(r.emoji)
+  }
+  return (
+    <div className="flex flex-wrap gap-1.5 mt-3">
+      {REACTIONS.map(e => {
+        const c = counts.get(e) ?? 0
+        const active = mine.has(e)
+        return (
+          <button
+            key={e}
+            onClick={() => onToggle(e, active)}
+            className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-sm border transition-colors ${
+              active
+                ? 'bg-amber-500/20 border-amber-500/50 text-amber-300'
+                : 'bg-stone-800 border-stone-700 text-stone-400 hover:bg-stone-700'
+            }`}
+          >
+            <span>{e}</span>
+            {c > 0 && <span className="text-xs font-medium">{c}</span>}
+          </button>
+        )
+      })}
     </div>
   )
 }
