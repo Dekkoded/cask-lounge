@@ -6,10 +6,8 @@ import { usePushNotifications } from '../hooks/usePushNotifications'
 
 function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
   return (
-    <div
-      onClick={onToggle}
-      className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${enabled ? 'bg-amber-500' : 'bg-stone-700'}`}
-    >
+    <div onClick={onToggle}
+      className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${enabled ? 'bg-amber-500' : 'bg-stone-700'}`}>
       <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${enabled ? 'left-7' : 'left-1'}`} />
     </div>
   )
@@ -21,6 +19,7 @@ export default function Profile() {
 
   const [displayName, setDisplayName] = useState('')
   const [username, setUsername] = useState('')
+  const [newEmail, setNewEmail] = useState('')
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
@@ -28,7 +27,10 @@ export default function Profile() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+  const [emailMsg, setEmailMsg] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const { subscribed, loading: pushLoading, subscribe, unsubscribe } = usePushNotifications()
 
   useEffect(() => {
@@ -43,7 +45,16 @@ export default function Profile() {
         }
         setLoading(false)
       })
+    setNewEmail(user.email ?? '')
   }, [user])
+
+  const checkUsername = async (val: string) => {
+    if (!val.trim()) { setUsernameError('Benutzername darf nicht leer sein'); return }
+    const { data } = await supabase.from('profiles')
+      .select('id').eq('username', val.trim()).neq('id', user!.id).maybeSingle()
+    if (data) setUsernameError('Dieser Benutzername ist bereits vergeben')
+    else setUsernameError(null)
+  }
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -53,23 +64,16 @@ export default function Profile() {
   }
 
   const handleSave = async () => {
-    if (!user) return
+    if (!user || usernameError) return
     setSaving(true)
     setError(null)
 
     let newAvatarUrl = avatarUrl
-
     if (avatarFile) {
       const ext = avatarFile.name.split('.').pop()
       const path = `${user.id}/avatar.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(path, avatarFile, { upsert: true })
-      if (uploadError) {
-        setError('Foto-Upload fehlgeschlagen: ' + uploadError.message)
-        setSaving(false)
-        return
-      }
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, avatarFile, { upsert: true })
+      if (uploadError) { setError('Foto-Upload fehlgeschlagen: ' + uploadError.message); setSaving(false); return }
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
       newAvatarUrl = urlData.publicUrl + `?t=${Date.now()}`
     }
@@ -89,6 +93,22 @@ export default function Profile() {
     setTimeout(() => setSaved(false), 2000)
   }
 
+  const handleEmailChange = async () => {
+    if (!newEmail.trim() || newEmail === user?.email) return
+    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() })
+    if (error) setEmailMsg('Fehler: ' + error.message)
+    else setEmailMsg('Bestätigungs-E-Mail gesendet. Prüfe dein Postfach.')
+    setTimeout(() => setEmailMsg(null), 4000)
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!user) return
+    await supabase.from('profiles').delete().eq('id', user.id)
+    await supabase.auth.admin
+    await signOut()
+    navigate('/')
+  }
+
   if (loading) {
     return (
       <div className="max-w-lg mx-auto p-6">
@@ -105,10 +125,6 @@ export default function Profile() {
 
   return (
     <div className="max-w-lg mx-auto p-6 pb-24">
-      <button onClick={() => navigate('/')} className="text-stone-400 hover:text-stone-200 text-sm mb-8">
-        ← Zurück
-      </button>
-
       <h1 className="text-2xl font-bold text-stone-100 mb-8">Mein Profil</h1>
 
       {/* Avatar */}
@@ -117,9 +133,7 @@ export default function Profile() {
           {avatar ? (
             <img src={avatar} alt="Avatar" className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all" />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all">
-              👤
-            </div>
+            <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all">👤</div>
           )}
           <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <span className="text-white text-xs font-medium">Ändern</span>
@@ -129,87 +143,101 @@ export default function Profile() {
         <p className="text-stone-500 text-xs mt-2">Tippen zum Ändern</p>
       </div>
 
-      {/* Formular */}
       <div className="flex flex-col gap-4">
+        {/* Anzeigename */}
         <div>
           <label className="block text-sm text-stone-300 mb-1">Anzeigename</label>
-          <input
-            value={displayName}
-            onChange={e => setDisplayName(e.target.value)}
+          <input value={displayName} onChange={e => setDisplayName(e.target.value)}
             placeholder="Wie soll dein Name angezeigt werden?"
-            className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-          />
+            className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
         </div>
 
+        {/* Username */}
         <div>
           <label className="block text-sm text-stone-300 mb-1">Benutzername</label>
-          <input
-            value={username}
-            onChange={e => setUsername(e.target.value.replace(/\s/g, ''))}
+          <input value={username}
+            onChange={e => { setUsername(e.target.value.replace(/\s/g, '')); setUsernameError(null) }}
+            onBlur={e => checkUsername(e.target.value)}
             placeholder="username"
-            className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 font-mono"
-          />
+            className={`w-full bg-stone-800 border rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none font-mono ${usernameError ? 'border-red-500 focus:border-red-500' : 'border-stone-700 focus:border-amber-500'}`} />
+          {usernameError && <p className="text-red-400 text-xs mt-1">{usernameError}</p>}
         </div>
 
+        {/* E-Mail */}
         <div>
           <label className="block text-sm text-stone-300 mb-1">E-Mail</label>
-          <input
-            value={user?.email ?? ''}
-            disabled
-            className="w-full bg-stone-900 border border-stone-800 rounded-lg px-4 py-2.5 text-stone-500 cursor-not-allowed"
-          />
+          <div className="flex gap-2">
+            <input type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)}
+              className="flex-1 bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
+            {newEmail !== user?.email && (
+              <button onClick={handleEmailChange}
+                className="bg-stone-700 hover:bg-stone-600 text-stone-200 rounded-lg px-3 py-2.5 text-sm whitespace-nowrap">
+                Ändern
+              </button>
+            )}
+          </div>
+          {emailMsg && <p className="text-amber-400 text-xs mt-1">{emailMsg}</p>}
         </div>
 
-        {error && (
-          <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{error}</p>
-        )}
+        {error && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{error}</p>}
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-3 transition-colors mt-2"
-        >
+        <button onClick={handleSave} disabled={saving || !!usernameError}
+          className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-3 transition-colors mt-2">
           {saving ? 'Wird gespeichert…' : saved ? '✓ Gespeichert!' : 'Speichern'}
         </button>
 
         {/* Benachrichtigungen */}
         <div className="border-t border-stone-800 pt-4 flex flex-col gap-3">
           <p className="text-sm font-medium text-stone-300">Benachrichtigungen</p>
-
           <div className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3">
             <div>
               <p className="text-stone-200 text-sm font-medium">E-Mail</p>
               <p className="text-stone-500 text-xs mt-0.5">Benachrichtigung per E-Mail</p>
             </div>
             <Toggle enabled={emailNotifications} onToggle={() => {
-              setEmailNotifications(v => !v)
-              supabase.from('profiles').update({ email_notifications: !emailNotifications }).eq('id', user!.id)
+              const next = !emailNotifications
+              setEmailNotifications(next)
+              supabase.from('profiles').update({ email_notifications: next }).eq('id', user!.id)
             }} />
           </div>
-
           {'Notification' in window && (
             <div className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3">
               <div>
                 <p className="text-stone-200 text-sm font-medium">Push</p>
-                <p className="text-stone-500 text-xs mt-0.5">
-                  {subscribed ? 'Aktiv' : 'Benachrichtigung auf diesem Gerät'}
-                </p>
+                <p className="text-stone-500 text-xs mt-0.5">{subscribed ? 'Aktiv' : 'Benachrichtigung auf diesem Gerät'}</p>
               </div>
-              <button
-                onClick={subscribed ? unsubscribe : subscribe}
-                disabled={pushLoading}
-                className="disabled:opacity-50"
-              >
+              <button onClick={subscribed ? unsubscribe : subscribe} disabled={pushLoading} className="disabled:opacity-50">
                 <Toggle enabled={subscribed} onToggle={() => {}} />
               </button>
             </div>
           )}
         </div>
 
-        <button
-          onClick={signOut}
-          className="text-stone-500 hover:text-red-400 text-sm text-center py-2 transition-colors"
-        >
+        {/* Account löschen */}
+        <div className="border-t border-stone-800 pt-4">
+          {!showDeleteConfirm ? (
+            <button onClick={() => setShowDeleteConfirm(true)}
+              className="text-red-500 hover:text-red-400 text-sm transition-colors">
+              Account löschen
+            </button>
+          ) : (
+            <div className="bg-red-950 border border-red-800 rounded-xl p-4 flex flex-col gap-3">
+              <p className="text-red-300 text-sm font-medium">Bist du sicher? Dies kann nicht rückgängig gemacht werden.</p>
+              <div className="flex gap-2">
+                <button onClick={handleDeleteAccount}
+                  className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg px-4 py-2 text-sm">
+                  Ja, Account löschen
+                </button>
+                <button onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 bg-stone-700 hover:bg-stone-600 text-stone-200 rounded-lg px-4 py-2 text-sm">
+                  Abbrechen
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <button onClick={signOut} className="text-stone-500 hover:text-red-400 text-sm text-center py-2 transition-colors">
           Abmelden
         </button>
       </div>
