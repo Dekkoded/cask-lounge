@@ -336,12 +336,12 @@ export default function GroupHome() {
         <div className="flex flex-col gap-2">
           {members.map(m => (
             <div key={m.user_id} className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3">
-              <div>
-                <p className="font-medium text-stone-200">
+              <Link to={`/user/${m.user_id}`} className="min-w-0">
+                <p className="font-medium text-stone-200 hover:text-amber-400 transition-colors truncate">
                   {m.profiles?.display_name ?? m.profiles?.username}
                 </p>
-                <p className="text-xs text-stone-500">@{m.profiles?.username}</p>
-              </div>
+                <p className="text-xs text-stone-500 truncate">@{m.profiles?.username}</p>
+              </Link>
               <div className="flex items-center gap-2">
                 {m.user_id === group.owner_id && (
                   <span className="text-xs bg-amber-500/20 text-amber-400 rounded px-2 py-0.5">Owner</span>

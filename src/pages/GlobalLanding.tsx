@@ -353,7 +353,9 @@ export default function GlobalLanding() {
                   <span className="text-2xl">🥃</span>
                   <div className="flex-1">
                     <p className="font-semibold text-stone-100">
-                      {s.profiles?.display_name ?? s.profiles?.username ?? '?'} trinkt gerade
+                      <Link to={`/user/${s.user_id}`} className="hover:text-amber-400 transition-colors">
+                        {s.profiles?.display_name ?? s.profiles?.username ?? '?'}
+                      </Link> trinkt gerade
                     </p>
                     <p className="text-amber-400 font-medium">
                       {s.drinks?.name ?? s.drink_name ?? '—'}

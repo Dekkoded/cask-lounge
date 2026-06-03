@@ -9,6 +9,7 @@ import Signup from './pages/Signup'
 import AddWhisky from './pages/AddWhisky'
 import EditWhisky from './pages/EditWhisky'
 import WhiskyDetail from './pages/WhiskyDetail'
+import MemberProfile from './pages/MemberProfile'
 import Groups from './pages/Groups'
 import GroupHome from './pages/GroupHome'
 import Tasting from './pages/Tasting'
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/whisky/:id" element={<WhiskyDetail />} />
+          <Route path="/user/:id" element={<MemberProfile />} />
 
           {/* Geschützt */}
           <Route path="/add-whisky" element={<RequireAuth><AddWhisky /></RequireAuth>} />

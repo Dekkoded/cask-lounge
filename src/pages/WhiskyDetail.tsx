@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import type { Drink, Rating } from '../lib/types'
@@ -288,9 +288,9 @@ export default function WhiskyDetail() {
               <div key={r.id} className="bg-stone-900 rounded-xl p-4">
                 <div className="flex items-start justify-between mb-2">
                   <div>
-                    <p className="font-semibold text-stone-200">
+                    <Link to={`/user/${r.user_id}`} className="font-semibold text-stone-200 hover:text-amber-400 transition-colors">
                       {r.profiles?.display_name ?? r.profiles?.username ?? 'Anonym'}
-                    </p>
+                    </Link>
                     <p className="text-xs text-stone-500">
                       {new Date(r.updated_at).toLocaleDateString('de-DE')}
                     </p>
