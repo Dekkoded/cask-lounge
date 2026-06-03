@@ -39,6 +39,7 @@ export default function WhiskyDetail() {
   const [deletingRating, setDeletingRating] = useState(false)
   const [deletingDrink, setDeletingDrink] = useState(false)
   const [confirmDeleteDrink, setConfirmDeleteDrink] = useState(false)
+  const [othersRated, setOthersRated] = useState(false)
 
   // Teilen-State
   const [groups, setGroups] = useState<Group[]>([])
@@ -76,6 +77,10 @@ export default function WhiskyDetail() {
 
       supabase.from('groups').select('id, name')
         .then(({ data }) => setGroups(data ?? []))
+
+      supabase.from('ratings').select('id', { count: 'exact', head: true })
+        .eq('drink_id', id).neq('user_id', user.id)
+        .then(({ count }) => setOthersRated((count ?? 0) > 0))
     }
   }, [id, user])
 
@@ -173,9 +178,13 @@ export default function WhiskyDetail() {
   }
 
   const handleDeleteDrink = async () => {
-    if (!drink) return
+    if (!drink || othersRated) return
     setDeletingDrink(true)
     setError(null)
+    if (myRating) {
+      await supabase.from('group_ratings').delete().eq('rating_id', myRating.id)
+      await supabase.from('ratings').delete().eq('id', myRating.id)
+    }
     const { error } = await supabase.from('drinks').delete().eq('id', drink.id)
     setDeletingDrink(false)
     if (error) { setError('Whisky konnte nicht gelöscht werden: ' + error.message); return }
@@ -406,10 +415,14 @@ export default function WhiskyDetail() {
         </div>
       )}
 
-      {/* Whisky löschen (nur Ersteller) */}
+      {/* Whisky löschen (nur Ersteller, solange niemand sonst bewertet hat) */}
       {user && drink.created_by === user.id && (
         <div className="mt-6">
-          {!confirmDeleteDrink ? (
+          {othersRated ? (
+            <p className="text-stone-600 text-xs">
+              Dieser Whisky wurde bereits von anderen bewertet und kann daher nicht mehr gelöscht werden.
+            </p>
+          ) : !confirmDeleteDrink ? (
             <button onClick={() => setConfirmDeleteDrink(true)}
               className="text-red-500 hover:text-red-400 text-sm transition-colors">
               Diesen Whisky löschen
