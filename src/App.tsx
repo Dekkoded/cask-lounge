@@ -1,9 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import InstallPrompt from './components/InstallPrompt'
 import TopBar from './components/TopBar'
+import BottomNav from './components/BottomNav'
 import GlobalLanding from './pages/GlobalLanding'
 
 const Login = lazy(() => import('./pages/Login'))
@@ -18,12 +19,13 @@ const GroupHome = lazy(() => import('./pages/GroupHome'))
 const Tasting = lazy(() => import('./pages/Tasting'))
 const Profile = lazy(() => import('./pages/Profile'))
 
-export default function App() {
+function AppShell() {
+  const { user } = useAuth()
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <InstallPrompt />
-        <TopBar />
+    <>
+      <InstallPrompt />
+      <TopBar />
+      <main className={user ? 'pb-20' : ''}>
         <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-stone-500 text-sm">Lädt…</div>}>
           <Routes>
             {/* Öffentlich */}
@@ -46,6 +48,17 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
+      </main>
+      {user && <BottomNav />}
+    </>
+  )
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppShell />
       </BrowserRouter>
     </AuthProvider>
   )

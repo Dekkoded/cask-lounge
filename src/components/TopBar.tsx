@@ -16,10 +16,10 @@ export default function TopBar() {
         </button>
         {user ? (
           <button
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/members')}
             className="text-stone-500 hover:text-stone-300 text-sm transition-colors"
           >
-            Profil
+            Mitglieder
           </button>
         ) : (
           <div className="flex items-center gap-3">

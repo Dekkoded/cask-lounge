@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+declare const process: { env: Record<string, string | undefined> }
+
 export default defineConfig({
+  server: process.env.PORT ? { port: Number(process.env.PORT), strictPort: true } : undefined,
   plugins: [
     react(),
     tailwindcss(),

@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 
@@ -19,7 +19,8 @@ export default function Groups() {
   const [groups, setGroups] = useState<Group[]>([])
   const [loading, setLoading] = useState(true)
 
-  const [showCreate, setShowCreate] = useState(false)
+  const [searchParams] = useSearchParams()
+  const [showCreate, setShowCreate] = useState(searchParams.get('create') === '1')
   const [newName, setNewName] = useState('')
   const [newDesc, setNewDesc] = useState('')
   const [creating, setCreating] = useState(false)
