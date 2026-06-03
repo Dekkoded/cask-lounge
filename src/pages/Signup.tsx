@@ -43,7 +43,7 @@ export default function Signup() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-3xl font-bold text-amber-400 mb-2 text-center">🥃 Whisky is Life</h1>
+        <h1 className="text-3xl font-bold text-amber-400 mb-2 text-center">Cask Lounge</h1>
         <p className="text-stone-400 text-center mb-8">Konto erstellen</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -55,7 +55,6 @@ export default function Signup() {
               value={username}
               onChange={e => setUsername(e.target.value.replace(/\s/g, ''))}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="z. B. leon"
             />
           </div>
 
@@ -67,7 +66,6 @@ export default function Signup() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="du@example.com"
             />
           </div>
 
