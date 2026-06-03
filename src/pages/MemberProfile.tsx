@@ -120,7 +120,7 @@ export default function MemberProfile() {
                 <div className="flex items-center gap-2 text-sm text-stone-400">
                   {w.region && <span className="truncate">{w.region}</span>}
                   {i === 0 && w.overall != null && (
-                    <span className="text-amber-400 text-xs font-medium whitespace-nowrap">★ Lieblings</span>
+                    <span className="text-amber-400 text-xs font-medium whitespace-nowrap">★ Favourite</span>
                   )}
                 </div>
               </div>
