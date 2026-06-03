@@ -48,11 +48,12 @@ export default function GlobalLanding() {
 
       {/* Suche */}
       <input
+        type="search"
         value={search}
         onChange={e => setSearch(e.target.value)}
         placeholder="Suchen nach Name, Brennerei, Region…"
         autoComplete="off"
-        className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6"
+        className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6 [&::-webkit-search-cancel-button]:hidden"
       />
 
       {/* Liste */}
