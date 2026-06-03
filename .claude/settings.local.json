@@ -30,7 +30,10 @@
       "Bash(sips -c 680 680 logo/cask_lounge_1024.png --out logo/cask_lounge_cropped.png)",
       "Bash(sips -z 192 192 logo/cask_lounge_cropped.png --out public/icons/icon-192.png)",
       "Bash(sips -z 512 512 logo/cask_lounge_cropped.png --out public/icons/icon-512.png)",
-      "Bash(sips -z 180 180 logo/cask_lounge_cropped.png --out public/apple-touch-icon.png)"
+      "Bash(sips -z 180 180 logo/cask_lounge_cropped.png --out public/apple-touch-icon.png)",
+      "Read(//private/tmp/**)",
+      "Bash(curl -s https://www.casklounge.com/)",
+      "Bash(curl -s https://www.casklounge.com/assets/index-CMv-1RBv.js)"
     ]
   }
 }

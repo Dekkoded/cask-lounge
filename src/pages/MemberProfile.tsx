@@ -8,11 +8,12 @@ interface MemberInfo {
   avatar_url: string | null
 }
 
-interface FavDrink {
+interface RatedDrink {
   id: string
   name: string
   region: string | null
   photo_url: string | null
+  overall: number | null
 }
 
 export default function MemberProfile() {
@@ -20,9 +21,8 @@ export default function MemberProfile() {
   const navigate = useNavigate()
 
   const [member, setMember] = useState<MemberInfo | null>(null)
-  const [count, setCount] = useState(0)
   const [topRegion, setTopRegion] = useState<string | null>(null)
-  const [favorite, setFavorite] = useState<(FavDrink & { overall: number | null }) | null>(null)
+  const [whiskies, setWhiskies] = useState<RatedDrink[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
 
@@ -40,8 +40,7 @@ export default function MemberProfile() {
           .eq('user_id', id).eq('is_public', true)
           .order('overall', { ascending: false, nullsFirst: false })
           .then(({ data: rows }) => {
-            const list = (rows as unknown as { overall: number | null; drinks: FavDrink | null }[]) ?? []
-            setCount(list.length)
+            const list = (rows as unknown as { overall: number | null; drinks: Omit<RatedDrink, 'overall'> | null }[]) ?? []
 
             const regionCounts = new Map<string, number>()
             for (const r of list) {
@@ -50,8 +49,7 @@ export default function MemberProfile() {
             }
             setTopRegion([...regionCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null)
 
-            const fav = list.find(r => r.drinks)
-            setFavorite(fav?.drinks ? { ...fav.drinks, overall: fav.overall } : null)
+            setWhiskies(list.filter(r => r.drinks).map(r => ({ ...r.drinks!, overall: r.overall })))
             setLoading(false)
           })
       })
@@ -94,9 +92,9 @@ export default function MemberProfile() {
         {member.display_name && <p className="text-stone-500 text-sm font-mono">@{member.username}</p>}
       </div>
 
-      <div className="grid grid-cols-2 gap-2 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-6">
         <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
-          <p className="text-2xl font-bold text-amber-400">{count}</p>
+          <p className="text-2xl font-bold text-amber-400">{whiskies.length}</p>
           <p className="text-stone-500 text-xs mt-1">Bewertet</p>
         </div>
         <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
@@ -105,27 +103,36 @@ export default function MemberProfile() {
         </div>
       </div>
 
-      <p className="text-sm font-medium text-stone-300 mb-2">Lieblings-Whisky</p>
-      {favorite ? (
-        <Link to={`/whisky/${favorite.id}`} className="flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors">
-          {favorite.photo_url ? (
-            <img src={favorite.photo_url} alt={favorite.name} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
-          ) : (
-            <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-stone-100 truncate">{favorite.name}</p>
-            {favorite.region && <p className="text-sm text-stone-400 truncate">{favorite.region}</p>}
-          </div>
-          {favorite.overall != null && (
-            <div className="text-right flex-shrink-0">
-              <p className="text-2xl font-bold text-amber-400">{favorite.overall}</p>
-              <p className="text-xs text-stone-500">/10</p>
-            </div>
-          )}
-        </Link>
-      ) : (
+      <p className="text-sm font-medium text-stone-300 mb-2">Bewertete Whiskys</p>
+      {whiskies.length === 0 ? (
         <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">Noch keine öffentliche Bewertung.</div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {whiskies.map((w, i) => (
+            <Link key={w.id} to={`/whisky/${w.id}`} className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors">
+              {w.photo_url ? (
+                <img src={w.photo_url} alt={w.name} className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+              ) : (
+                <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-stone-100 truncate">{w.name}</p>
+                <div className="flex items-center gap-2 text-sm text-stone-400">
+                  {w.region && <span className="truncate">{w.region}</span>}
+                  {i === 0 && w.overall != null && (
+                    <span className="text-amber-400 text-xs font-medium whitespace-nowrap">★ Lieblings</span>
+                  )}
+                </div>
+              </div>
+              {w.overall != null && (
+                <div className="text-right flex-shrink-0">
+                  <p className="text-xl font-bold text-amber-400">{w.overall}</p>
+                  <p className="text-xs text-stone-500">/10</p>
+                </div>
+              )}
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   )
