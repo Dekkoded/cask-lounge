@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { compressImage } from '../lib/image'
 
 export default function AddWhisky() {
   const navigate = useNavigate()
@@ -25,11 +26,11 @@ export default function AddWhisky() {
     let photo_url: string | null = null
 
     if (photo) {
-      const ext = photo.name.split('.').pop()
-      const path = `${user.id}/${Date.now()}.${ext}`
+      const compressed = await compressImage(photo)
+      const path = `${user.id}/${Date.now()}.jpg`
       const { error: uploadError } = await supabase.storage
         .from('drink-photos')
-        .upload(path, photo)
+        .upload(path, compressed, { contentType: 'image/jpeg' })
 
       if (uploadError) {
         setError('Foto-Upload fehlgeschlagen: ' + uploadError.message)

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { usePushNotifications } from '../hooks/usePushNotifications'
+import { compressImage } from '../lib/image'
 
 function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
   return (
@@ -31,6 +32,7 @@ export default function Profile() {
   const [emailMsg, setEmailMsg] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [stats, setStats] = useState<{ count: number; avg: number | null; topRegion: string | null } | null>(null)
   const { subscribed, loading: pushLoading, subscribe, unsubscribe } = usePushNotifications()
 
   useEffect(() => {
@@ -46,6 +48,20 @@ export default function Profile() {
         setLoading(false)
       })
     setNewEmail(user.email ?? '')
+
+    supabase.from('ratings').select('overall, drinks(region)').eq('user_id', user.id)
+      .then(({ data }) => {
+        const rows = (data as unknown as { overall: number | null; drinks: { region: string | null } | null }[]) ?? []
+        const scored = rows.filter(r => r.overall != null)
+        const avg = scored.length ? scored.reduce((s, r) => s + (r.overall ?? 0), 0) / scored.length : null
+        const regionCounts = new Map<string, number>()
+        for (const r of rows) {
+          const region = r.drinks?.region
+          if (region) regionCounts.set(region, (regionCounts.get(region) ?? 0) + 1)
+        }
+        const topRegion = [...regionCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+        setStats({ count: rows.length, avg, topRegion })
+      })
   }, [user])
 
   const checkUsername = async (val: string) => {
@@ -70,9 +86,9 @@ export default function Profile() {
 
     let newAvatarUrl = avatarUrl
     if (avatarFile) {
-      const ext = avatarFile.name.split('.').pop()
-      const path = `${user.id}/avatar.${ext}`
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, avatarFile, { upsert: true })
+      const compressed = await compressImage(avatarFile, 512, 0.85)
+      const path = `${user.id}/avatar.jpg`
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, compressed, { upsert: true, contentType: 'image/jpeg' })
       if (uploadError) { setError('Foto-Upload fehlgeschlagen: ' + uploadError.message); setSaving(false); return }
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
       newAvatarUrl = urlData.publicUrl + `?t=${Date.now()}`
@@ -151,6 +167,23 @@ export default function Profile() {
         <p className="text-stone-500 text-xs mt-2">Tippen zum Ändern</p>
       </div>
 
+      {stats && stats.count > 0 && (
+        <div className="grid grid-cols-3 gap-2 mb-8">
+          <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
+            <p className="text-2xl font-bold text-amber-400">{stats.count}</p>
+            <p className="text-stone-500 text-xs mt-1">Bewertet</p>
+          </div>
+          <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
+            <p className="text-2xl font-bold text-amber-400">{stats.avg != null ? stats.avg.toFixed(1) : '—'}</p>
+            <p className="text-stone-500 text-xs mt-1">Ø Punkte</p>
+          </div>
+          <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
+            <p className="text-base font-bold text-amber-400 truncate">{stats.topRegion ?? '—'}</p>
+            <p className="text-stone-500 text-xs mt-1">Top-Region</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-4">
         {/* Anzeigename */}
         <div>
@@ -202,10 +235,14 @@ export default function Profile() {
               <p className="text-stone-200 text-sm font-medium">E-Mail</p>
               <p className="text-stone-500 text-xs mt-0.5">Benachrichtigung per E-Mail</p>
             </div>
-            <Toggle enabled={emailNotifications} onToggle={() => {
+            <Toggle enabled={emailNotifications} onToggle={async () => {
               const next = !emailNotifications
               setEmailNotifications(next)
-              supabase.from('profiles').update({ email_notifications: next }).eq('id', user!.id)
+              const { error } = await supabase.from('profiles').update({ email_notifications: next }).eq('id', user!.id)
+              if (error) {
+                setEmailNotifications(!next)
+                setError('Einstellung konnte nicht gespeichert werden: ' + error.message)
+              }
             }} />
           </div>
           {'Notification' in window && (

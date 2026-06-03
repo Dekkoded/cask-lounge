@@ -30,6 +30,7 @@ export default function GlobalLanding() {
   const [scores, setScores] = useState<GlobalDrinkScore[]>([])
   const [vitrine, setVitrine] = useState<VitrineEntry[]>([])
   const [search, setSearch] = useState('')
+  const [regionFilter, setRegionFilter] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [vitrineLoading, setVitrineLoading] = useState(true)
   const [searchReadonly, setSearchReadonly] = useState(true)
@@ -43,6 +44,7 @@ export default function GlobalLanding() {
   const [sessionDrinkName, setSessionDrinkName] = useState('')
   const [sessionMessage, setSessionMessage] = useState('')
   const [posting, setPosting] = useState(false)
+  const [postError, setPostError] = useState<string | null>(null)
 
   useEffect(() => {
     supabase
@@ -73,6 +75,15 @@ export default function GlobalLanding() {
     loadFeed()
   }, [user])
 
+  useEffect(() => {
+    if (!user) return
+    const channel = supabase
+      .channel('live-sessions')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'drink_sessions' }, () => loadFeed())
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [user])
+
   const loadFeed = () => {
     supabase
       .from('drink_sessions')
@@ -88,6 +99,7 @@ export default function GlobalLanding() {
   const handlePost = async () => {
     if (!user) return
     setPosting(true)
+    setPostError(null)
     const { error } = await supabase.from('drink_sessions').insert({
       user_id: user.id,
       drink_id: sessionDrinkId || null,
@@ -95,18 +107,22 @@ export default function GlobalLanding() {
       message: sessionMessage.trim() || null,
     })
     setPosting(false)
-    if (!error) {
-      setShowDialog(false)
-      setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
-      loadFeed()
+    if (error) {
+      setPostError('Konnte nicht geteilt werden: ' + error.message)
+      return
     }
+    setShowDialog(false)
+    setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
+    loadFeed()
   }
 
   const q = search.toLowerCase()
+  const regions = [...new Set(scores.map(s => s.region).filter((r): r is string => !!r))].sort()
   const filtered = scores.filter(s =>
-    s.name.toLowerCase().includes(q) ||
-    (s.producer ?? '').toLowerCase().includes(q) ||
-    (s.region ?? '').toLowerCase().includes(q)
+    (!regionFilter || s.region === regionFilter) &&
+    (s.name.toLowerCase().includes(q) ||
+      (s.producer ?? '').toLowerCase().includes(q) ||
+      (s.region ?? '').toLowerCase().includes(q))
   )
   const filteredVitrine = vitrine.filter(v =>
     (v.drinks?.name ?? '').toLowerCase().includes(q) ||
@@ -163,6 +179,22 @@ export default function GlobalLanding() {
           onFocus={() => setSearchReadonly(false)}
           className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6 [&::-webkit-search-cancel-button]:hidden"
         />
+      )}
+
+      {/* Region-Filter (nur Global) */}
+      {view === 'ranking' && regions.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mt-2 [&::-webkit-scrollbar]:hidden">
+          <button onClick={() => setRegionFilter(null)}
+            className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === null ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
+            Alle
+          </button>
+          {regions.map(r => (
+            <button key={r} onClick={() => setRegionFilter(r)}
+              className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === r ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
+              {r}
+            </button>
+          ))}
+        </div>
       )}
 
       {/* Ranking */}
@@ -302,7 +334,7 @@ export default function GlobalLanding() {
       {/* Live */}
       {view === 'live' && (
         <div className="flex flex-col gap-4">
-          <button onClick={() => setShowDialog(true)}
+          <button onClick={() => { setPostError(null); setShowDialog(true) }}
             className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl py-3 text-lg">
             🥃 Ich trinke gerade…
           </button>
@@ -367,12 +399,14 @@ export default function GlobalLanding() {
                     className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
                 </div>
 
+                {postError && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{postError}</p>}
+
                 <div className="flex gap-3">
                   <button onClick={handlePost} disabled={posting || (!sessionDrinkId && !sessionDrinkName.trim())}
                     className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
                     {posting ? 'Wird gesendet…' : 'Benachrichtigen 🥃'}
                   </button>
-                  <button onClick={() => setShowDialog(false)}
+                  <button onClick={() => { setShowDialog(false); setPostError(null) }}
                     className="bg-stone-800 text-stone-300 rounded-xl px-4">
                     Abbrechen
                   </button>

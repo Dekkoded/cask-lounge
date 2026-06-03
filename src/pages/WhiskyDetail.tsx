@@ -36,6 +36,9 @@ export default function WhiskyDetail() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [deletingRating, setDeletingRating] = useState(false)
+  const [deletingDrink, setDeletingDrink] = useState(false)
+  const [confirmDeleteDrink, setConfirmDeleteDrink] = useState(false)
 
   // Teilen-State
   const [groups, setGroups] = useState<Group[]>([])
@@ -151,6 +154,32 @@ export default function WhiskyDetail() {
       setSaved(false)
       setTab('uebersicht')
     }, 1200)
+  }
+
+  const handleDeleteRating = async () => {
+    if (!myRating) return
+    setDeletingRating(true)
+    setError(null)
+    await supabase.from('group_ratings').delete().eq('rating_id', myRating.id)
+    const { error } = await supabase.from('ratings').delete().eq('id', myRating.id)
+    setDeletingRating(false)
+    if (error) { setError('Löschen fehlgeschlagen: ' + error.message); return }
+    setMyRating(null)
+    setNose(5); setTaste(5); setFinish(5); setColorIdx(null)
+    setWheels(EMPTY_WHEELS); setNote(''); setIsPublic(true)
+    setSharedGroups(new Set())
+    setPublicRatings(prev => prev.filter(r => r.id !== myRating.id))
+    setTab('uebersicht')
+  }
+
+  const handleDeleteDrink = async () => {
+    if (!drink) return
+    setDeletingDrink(true)
+    setError(null)
+    const { error } = await supabase.from('drinks').delete().eq('id', drink.id)
+    setDeletingDrink(false)
+    if (error) { setError('Whisky konnte nicht gelöscht werden: ' + error.message); return }
+    navigate('/')
   }
 
   if (!drink) {
@@ -362,6 +391,42 @@ export default function WhiskyDetail() {
                 ))}
               </div>
               {shareMsg && <p className="text-amber-400 text-sm mt-2">{shareMsg}</p>}
+            </div>
+          )}
+
+          {myRating && (
+            <button
+              onClick={handleDeleteRating}
+              disabled={deletingRating}
+              className="text-red-500 hover:text-red-400 disabled:opacity-50 text-sm text-center py-2 transition-colors"
+            >
+              {deletingRating ? 'Wird gelöscht…' : 'Meine Bewertung löschen'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Whisky löschen (nur Ersteller) */}
+      {user && drink.created_by === user.id && (
+        <div className="mt-6">
+          {!confirmDeleteDrink ? (
+            <button onClick={() => setConfirmDeleteDrink(true)}
+              className="text-red-500 hover:text-red-400 text-sm transition-colors">
+              Diesen Whisky löschen
+            </button>
+          ) : (
+            <div className="bg-red-950 border border-red-800 rounded-xl p-4 flex flex-col gap-3">
+              <p className="text-red-300 text-sm font-medium">Whisky samt aller Bewertungen löschen? Das kann nicht rückgängig gemacht werden.</p>
+              <div className="flex gap-2">
+                <button onClick={handleDeleteDrink} disabled={deletingDrink}
+                  className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm">
+                  {deletingDrink ? 'Wird gelöscht…' : 'Ja, löschen'}
+                </button>
+                <button onClick={() => setConfirmDeleteDrink(false)} disabled={deletingDrink}
+                  className="flex-1 bg-stone-700 hover:bg-stone-600 disabled:opacity-50 text-stone-200 rounded-lg px-4 py-2 text-sm">
+                  Abbrechen
+                </button>
+              </div>
             </div>
           )}
         </div>
