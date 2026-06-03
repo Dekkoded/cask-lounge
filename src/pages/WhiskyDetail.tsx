@@ -217,10 +217,12 @@ export default function WhiskyDetail() {
           className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'uebersicht' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
           Übersicht
         </button>
-        <button onClick={() => setTab('bewertung')}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'bewertung' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-          {myRating ? 'Meine Bewertung' : '+ Bewerten'}
-        </button>
+        {user && (
+          <button onClick={() => setTab('bewertung')}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'bewertung' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
+            {myRating ? 'Meine Bewertung' : '+ Bewerten'}
+          </button>
+        )}
       </div>
 
       {/* Übersicht */}
@@ -229,11 +231,15 @@ export default function WhiskyDetail() {
           {publicRatings.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-stone-500 mb-3">Noch keine öffentlichen Bewertungen.</p>
-              {user && (
+              {user ? (
                 <button onClick={() => setTab('bewertung')}
                   className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm">
                   Als Erster bewerten
                 </button>
+              ) : (
+                <a href="/login" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm inline-block">
+                  Anmelden zum Bewerten
+                </a>
               )}
             </div>
           ) : (
