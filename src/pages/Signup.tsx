@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Signup() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const next = searchParams.get('next')
 
   const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
@@ -37,7 +39,7 @@ export default function Signup() {
     }
 
     // Direkt nach Signup anmelden (Supabase bestätigt Session automatisch bei deaktivierter E-Mail-Bestätigung)
-    navigate('/', { replace: true })
+    navigate(next ?? '/', { replace: true })
   }
 
   return (
@@ -99,7 +101,7 @@ export default function Signup() {
 
         <p className="text-stone-500 text-sm text-center mt-6">
           Schon ein Konto?{' '}
-          <Link to="/login" className="text-amber-400 hover:text-amber-300">
+          <Link to={next ? `/login?next=${encodeURIComponent(next)}` : '/login'} className="text-amber-400 hover:text-amber-300">
             Anmelden
           </Link>
         </p>

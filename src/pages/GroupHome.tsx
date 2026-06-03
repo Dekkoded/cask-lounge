@@ -47,6 +47,7 @@ export default function GroupHome() {
   const [tastings, setTastings] = useState<Tasting[]>([])
   const [tab, setTab] = useState<Tab>('archiv')
   const [copied, setCopied] = useState(false)
+  const [linkCopied, setLinkCopied] = useState(false)
   const [showNewTasting, setShowNewTasting] = useState(false)
   const [tastingTitle, setTastingTitle] = useState('')
   const [tastingDate, setTastingDate] = useState('')
@@ -164,6 +165,23 @@ export default function GroupHome() {
     navigator.clipboard.writeText(group.invite_code)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const shareInvite = async () => {
+    if (!group) return
+    const url = `${window.location.origin}/join/${group.invite_code}`
+    const shareData = {
+      title: `Cask Lounge – ${group.name}`,
+      text: `Tritt meiner Whisky-Gruppe „${group.name}" auf Cask Lounge bei:`,
+      url,
+    }
+    if (navigator.share) {
+      try { await navigator.share(shareData) } catch { /* Abbruch durch Nutzer */ }
+    } else {
+      await navigator.clipboard.writeText(url)
+      setLinkCopied(true)
+      setTimeout(() => setLinkCopied(false), 2000)
+    }
   }
 
   if (!group) {
@@ -361,14 +379,20 @@ export default function GroupHome() {
             </div>
           ))}
 
-          {/* Einladen-Hinweis */}
+          {/* Einladen */}
           <div className="mt-4 bg-stone-900 rounded-xl p-4 text-center">
-            <p className="text-stone-400 text-sm mb-2">Neue Mitglieder einladen</p>
+            <p className="text-stone-400 text-sm mb-3">Neue Mitglieder einladen</p>
+            <button
+              onClick={shareInvite}
+              className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors mb-2"
+            >
+              {linkCopied ? '✓ Link kopiert!' : 'Einladungslink teilen'}
+            </button>
             <button
               onClick={copyInviteCode}
-              className="bg-stone-700 hover:bg-stone-600 text-stone-200 rounded-lg px-4 py-2 text-sm font-mono"
+              className="text-stone-500 hover:text-stone-300 text-xs font-mono"
             >
-              {copied ? '✓ Kopiert!' : `Code kopieren: ${group.invite_code}`}
+              {copied ? '✓ Code kopiert!' : `Oder Code kopieren: ${group.invite_code}`}
             </button>
           </div>
         </div>

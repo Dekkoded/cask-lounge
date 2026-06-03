@@ -15,6 +15,7 @@ const WhiskyDetail = lazy(() => import('./pages/WhiskyDetail'))
 const MemberProfile = lazy(() => import('./pages/MemberProfile'))
 const Members = lazy(() => import('./pages/Members'))
 const Groups = lazy(() => import('./pages/Groups'))
+const JoinGroup = lazy(() => import('./pages/JoinGroup'))
 const GroupHome = lazy(() => import('./pages/GroupHome'))
 const Tasting = lazy(() => import('./pages/Tasting'))
 const Profile = lazy(() => import('./pages/Profile'))
@@ -35,6 +36,7 @@ function AppShell() {
             <Route path="/whisky/:id" element={<WhiskyDetail />} />
             <Route path="/user/:id" element={<MemberProfile />} />
             <Route path="/members" element={<Members />} />
+            <Route path="/join/:code" element={<JoinGroup />} />
 
             {/* Geschützt */}
             <Route path="/add-whisky" element={<RequireAuth><AddWhisky /></RequireAuth>} />

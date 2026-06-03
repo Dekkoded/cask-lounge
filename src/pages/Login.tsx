@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/'
+  const [searchParams] = useSearchParams()
+  const next = searchParams.get('next')
+  const from = next ?? (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -72,7 +74,7 @@ export default function Login() {
 
             <p className="text-stone-500 text-sm text-center mt-4">
               Noch kein Konto?{' '}
-              <Link to="/signup" className="text-amber-400 hover:text-amber-300">Registrieren</Link>
+              <Link to={next ? `/signup?next=${encodeURIComponent(next)}` : '/signup'} className="text-amber-400 hover:text-amber-300">Registrieren</Link>
             </p>
           </>
         ) : (
