@@ -10,6 +10,7 @@ export default function GlobalLanding() {
   const [scores, setScores] = useState<GlobalDrinkScore[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [searchReadonly, setSearchReadonly] = useState(true)
 
   useEffect(() => {
     supabase
@@ -49,10 +50,13 @@ export default function GlobalLanding() {
       {/* Suche */}
       <input
         type="search"
+        name="whisky-suche"
         value={search}
         onChange={e => setSearch(e.target.value)}
         placeholder="Suchen nach Name, Brennerei, Region…"
         autoComplete="off"
+        readOnly={searchReadonly}
+        onFocus={() => setSearchReadonly(false)}
         className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6 [&::-webkit-search-cancel-button]:hidden"
       />
 
