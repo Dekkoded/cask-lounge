@@ -18,7 +18,7 @@ type Tab = 'uebersicht' | 'bewertung'
 export default function WhiskyDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
 
   const [drink, setDrink] = useState<Drink | null>(null)
   const [myRating, setMyRating] = useState<Rating | null>(null)
@@ -178,12 +178,15 @@ export default function WhiskyDetail() {
   }
 
   const handleDeleteDrink = async () => {
-    if (!drink || othersRated) return
+    if (!drink) return
+    if (othersRated && !isAdmin) return
     setDeletingDrink(true)
     setError(null)
-    if (myRating) {
-      await supabase.from('group_ratings').delete().eq('rating_id', myRating.id)
-      await supabase.from('ratings').delete().eq('id', myRating.id)
+    const { data: rids } = await supabase.from('ratings').select('id').eq('drink_id', drink.id)
+    const ids = (rids ?? []).map(r => r.id)
+    if (ids.length) {
+      await supabase.from('group_ratings').delete().in('rating_id', ids)
+      await supabase.from('ratings').delete().in('id', ids)
     }
     const { error } = await supabase.from('drinks').delete().eq('id', drink.id)
     setDeletingDrink(false)
@@ -415,16 +418,25 @@ export default function WhiskyDetail() {
         </div>
       )}
 
-      {/* Whisky löschen (nur Ersteller, solange niemand sonst bewertet hat) */}
-      {user && drink.created_by === user.id && (
-        <div className="mt-6">
-          {othersRated ? (
+      {/* Whisky verwalten (Ersteller solange ungeteilt, Admin immer) */}
+      {user && (isAdmin || drink.created_by === user.id) && (
+        <div className="mt-6 flex flex-col gap-3">
+          {isAdmin && <p className="text-amber-500/70 text-xs">Admin-Modus</p>}
+
+          {(isAdmin || !othersRated) && (
+            <button onClick={() => navigate(`/whisky/${drink.id}/edit`)}
+              className="text-stone-400 hover:text-stone-200 text-sm text-left transition-colors">
+              Whisky bearbeiten
+            </button>
+          )}
+
+          {othersRated && !isAdmin ? (
             <p className="text-stone-600 text-xs">
-              Dieser Whisky wurde bereits von anderen bewertet und kann daher nicht mehr gelöscht werden.
+              Dieser Whisky wurde bereits von anderen bewertet und kann daher nicht mehr bearbeitet oder gelöscht werden.
             </p>
           ) : !confirmDeleteDrink ? (
             <button onClick={() => setConfirmDeleteDrink(true)}
-              className="text-red-500 hover:text-red-400 text-sm transition-colors">
+              className="text-red-500 hover:text-red-400 text-sm text-left transition-colors">
               Diesen Whisky löschen
             </button>
           ) : (
