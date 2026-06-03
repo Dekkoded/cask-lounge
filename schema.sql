@@ -327,6 +327,31 @@ create policy "sr_delete_own"
 create index on public.session_reactions (session_id);
 alter publication supabase_realtime add table public.session_reactions;
 
+-- Kommentare auf Live-Sessions
+create table public.session_comments (
+  id          uuid primary key default gen_random_uuid(),
+  session_id  uuid not null references public.drink_sessions(id) on delete cascade,
+  user_id     uuid not null references public.profiles(id) on delete cascade default auth.uid(),
+  body        text not null,
+  created_at  timestamptz not null default now()
+);
+alter table public.session_comments enable row level security;
+
+create policy "sc_select_visible_session"
+  on public.session_comments for select using (
+    exists (select 1 from public.drink_sessions s where s.id = session_id)
+  );
+create policy "sc_insert_own_visible"
+  on public.session_comments for insert with check (
+    user_id = (select auth.uid())
+    and exists (select 1 from public.drink_sessions s where s.id = session_id)
+  );
+create policy "sc_delete_own"
+  on public.session_comments for delete using (user_id = (select auth.uid()));
+
+create index on public.session_comments (session_id, created_at);
+alter publication supabase_realtime add table public.session_comments;
+
 -- =====================================================================
 -- 8. INDIZES (Performance für die häufigen Abfragen)
 -- =====================================================================
