@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s 'https://yhwenelftfgmwisquqnc.supabase.co/rest/v1/profiles?select=id&limit=1' -H 'apikey: sb_publishable_IZPBsFdeGsNQvj7SezZOpQ_mhUmB8xa' -H 'Authorization: Bearer sb_publishable_IZPBsFdeGsNQvj7SezZOpQ_mhUmB8xa')",
+      "Bash(npx tsc *)",
+      "Bash(npx web-push *)",
+      "Bash(ipconfig getifaddr *)",
+      "Bash(npm list *)",
+      "Bash(npx serve *)",
+      "Bash(pkill -f \"serve dist\")",
+      "Bash(curl -s http://localhost:4173)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

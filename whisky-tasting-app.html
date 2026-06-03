@@ -1,0 +1,490 @@
+<div id="app"></div>
+
+<style>
+  :root{
+    --bg:#1a1410; --panel:#241b14; --panel2:#2e231a; --line:#3a2c20;
+    --gold:#c9a04e; --gold-soft:#d8b66e; --cream:#ece3d4; --muted:#9a8a76;
+    --green:#5d7a4a; --red:#a94b3c;
+    --nose:#c9a04e; --taste:#b9772e;
+    --r:14px; --rs:10px;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  #app{font-family:var(--sans);color:var(--cream);max-width:760px;margin:0 auto;padding:0 16px 80px}
+  h1,h2,h3{font-family:var(--serif);font-weight:400;margin:0}
+  button{font-family:var(--sans);cursor:pointer}
+  .wm-bg{position:fixed;inset:0;background:
+    radial-gradient(1200px 600px at 70% -10%, #2a1f16 0%, transparent 60%),
+    radial-gradient(900px 500px at 0% 110%, #20180f 0%, transparent 55%),
+    var(--bg);z-index:-1}
+  .brand{text-align:center;padding:34px 0 8px}
+  .brand .logo{font-family:var(--serif);font-size:13px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+  .brand h1{font-size:30px;color:var(--cream);margin-top:4px;line-height:1.15}
+  .brand .sub{color:var(--muted);font-size:13px;margin-top:6px;font-style:italic}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin:14px 0}
+  label.fld{display:block;font-size:12px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+  input[type=text],select,textarea{width:100%;background:#1d160f;border:1px solid var(--line);border-radius:var(--rs);
+    color:var(--cream);padding:11px 12px;font-size:15px;font-family:var(--sans);outline:none}
+  input[type=text]:focus,textarea:focus,select:focus{border-color:var(--gold)}
+  textarea{resize:vertical;min-height:60px}
+  .btn{background:var(--gold);color:#241b14;border:none;border-radius:var(--rs);padding:12px 18px;font-size:15px;font-weight:600}
+  .btn:hover{background:var(--gold-soft)}
+  .btn.sm{padding:8px 14px;font-size:13px;border-radius:8px}
+  .btn.block{width:100%}
+  .btn.danger{background:transparent;color:var(--red);border:1px solid var(--red)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px;gap:10px}
+  .who{font-size:13px;color:var(--muted)}
+  .who b{color:var(--gold-soft)}
+  .grid{display:grid;gap:12px}
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;font-style:italic}
+  .wlist-item{display:flex;gap:14px;align-items:center;cursor:pointer;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--r);padding:12px;transition:border-color .15s}
+  .wlist-item:hover{border-color:var(--gold)}
+  .thumb{width:58px;height:58px;border-radius:10px;flex:none;background:#15100a;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb .dram{width:26px;height:34px;border-radius:3px 3px 8px 8px}
+  .wlist-body{flex:1;min-width:0}
+  .wlist-body .nm{font-family:var(--serif);font-size:17px;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wlist-body .meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .scorebadge{flex:none;text-align:center;min-width:62px}
+  .scorebadge .n{font-family:var(--serif);font-size:26px;color:var(--gold)}
+  .scorebadge .l{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+  .swgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .swatch{cursor:pointer;border-radius:8px;border:2px solid transparent;padding:6px;text-align:center;background:#1d160f}
+  .swatch .chip{height:30px;border-radius:6px;border:1px solid rgba(0,0,0,.25)}
+  .swatch .cn{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.2}
+  .swatch.on{border-color:var(--gold)}
+  .slider-row{margin:18px 0}
+  .slider-row .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .slider-row .nm{font-size:15px;color:var(--cream)}
+  .slider-row .val{font-family:var(--serif);font-size:22px;color:var(--gold)}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:6px;background:var(--line);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+    background:var(--gold);border:3px solid #241b14;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--gold);border:3px solid #241b14;cursor:pointer}
+  .overall-box{text-align:center;padding:16px;border-radius:var(--r);background:var(--panel2);border:1px solid var(--gold);margin-top:8px}
+  .overall-box .big{font-family:var(--serif);font-size:42px;color:var(--gold)}
+  .overall-box .lbl{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+  .raters{display:grid;gap:10px;margin-top:10px}
+  .rater{background:var(--panel2);border:1px solid var(--line);border-radius:var(--rs);padding:12px 14px}
+  .rater .rh{display:flex;justify-content:space-between;align-items:center}
+  .rater .rh .who2{font-size:15px;color:var(--cream);font-weight:600}
+  .rater .rh .sc{font-family:var(--serif);font-size:20px;color:var(--gold)}
+  .rater .sub{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+  .rater .note{font-size:13px;color:var(--cream);margin-top:8px;font-style:italic;line-height:1.45}
+  .photo-preview{width:100%;max-height:280px;object-fit:cover;border-radius:var(--r);border:1px solid var(--line);margin-top:8px}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+  .divider{height:1px;background:var(--line);margin:18px 0}
+  .stat-row{display:flex;gap:10px;margin-top:10px}
+  .stat{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:var(--rs);padding:10px;text-align:center}
+  .stat .n{font-family:var(--serif);font-size:20px;color:var(--gold)}
+  .stat .l{font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+  .back{background:none;border:none;color:var(--gold);font-size:14px;padding:6px 0;display:inline-flex;align-items:center;gap:6px}
+  .yourbadge{font-size:11px;color:var(--green);border:1px solid var(--green);border-radius:999px;padding:2px 8px}
+  .loadwrap{text-align:center;color:var(--muted);padding:60px 0;font-style:italic}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--gold);color:#241b14;
+    padding:11px 20px;border-radius:999px;font-weight:600;font-size:14px;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+  .wheel-wrap{text-align:center}
+  .wheel-tabs{display:inline-flex;gap:4px;background:#1d160f;border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:10px}
+  .wheel-tab{border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:600;padding:7px 18px;border-radius:999px}
+  .wheel-tab.on{color:#241b14}
+  .wheel-tab.on.nose{background:var(--nose)}
+  .wheel-tab.on.taste{background:var(--taste);color:#fff}
+  .radar{touch-action:manipulation;max-width:100%;height:auto}
+  .radar text{font-family:var(--sans);fill:var(--muted)}
+  .legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+  .legend .lk{display:inline-flex;align-items:center;gap:6px}
+  .legend .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .axis-readout{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 16px;margin-top:12px;font-size:12px}
+  .axis-readout .ar{display:flex;justify-content:space-between;color:var(--muted)}
+  .axis-readout .ar b{color:var(--gold-soft)}
+</style>
+
+<div class="wm-bg"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const KEY = "wil_state_v2";
+  const hasStore = typeof window!=="undefined" && window.storage && typeof window.storage.get==="function";
+
+  async function loadState(){
+    if(!hasStore){ try{return JSON.parse(sessionStorage.getItem(KEY))||{whiskies:[]};}catch(e){return {whiskies:[]};} }
+    try{ const res=await window.storage.get(KEY,true); return (res&&res.value)?JSON.parse(res.value):{whiskies:[]}; }
+    catch(e){ return {whiskies:[]}; }
+  }
+  async function saveState(s){
+    if(!hasStore){ try{sessionStorage.setItem(KEY,JSON.stringify(s));}catch(e){} return true; }
+    try{ await window.storage.set(KEY,JSON.stringify(s),true); return true; }catch(e){ return false; }
+  }
+
+  /* ---------- domain ---------- */
+  const COLORS = [
+    {n:"Klarwasser",h:"#e9e2c9"},{n:"Strohgelb",h:"#e6d28a"},{n:"Weißwein",h:"#e3c465"},
+    {n:"Goldgelb",h:"#d9a83c"},{n:"Bernstein",h:"#c47e22"},{n:"Altgold",h:"#b8691a"},
+    {n:"Kupfer",h:"#a85423"},{n:"Sherry-Eiche",h:"#8a3d1c"},{n:"Mahagoni",h:"#6e2c17"},{n:"Tiefbraun",h:"#4d1f12"}
+  ];
+  // 12 flavour-wheel axes (from the user's reference sheet + standard Smoky)
+  const AXES = ["Fruity","Floral","Spicy","Cereal","Peaty","Sulphury","Feinty","Nutty","Woody","Winey","Chocolate","Smoky"];
+  const AXES_DE = {Fruity:"Fruchtig",Floral:"Floral",Spicy:"Würzig",Cereal:"Getreidig",Peaty:"Torfig",Sulphury:"Schwefelig",Feinty:"Hefig",Nutty:"Nussig",Woody:"Holzig",Winey:"Weinig",Chocolate:"Schoko",Smoky:"Rauchig"};
+  const NAX = AXES.length;
+  const CRITERIA = [{k:"nose",nm:"Nase"},{k:"taste",nm:"Geschmack"},{k:"finish",nm:"Abgang"}];
+
+  /* ---------- state ---------- */
+  let STATE={whiskies:[]}, ME=null, VIEW="list", activeId=null, draft=null, newPhoto=null;
+  let wheelTab="nose"; // which wheel is being edited in rate view
+  const root=document.getElementById("app");
+
+  const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  const r1=n=>Math.round(n*10)/10;
+
+  function emptyWheel(){ return AXES.map(()=>0); }
+  function ratingAvg(r){
+    const v=CRITERIA.map(c=>r.scores[c.k]).filter(x=>typeof x==="number");
+    return v.length?r1(v.reduce((a,b)=>a+b,0)/v.length):null;
+  }
+  function groupAvg(w){
+    const a=(w.ratings||[]).map(ratingAvg).filter(x=>x!=null);
+    return a.length?r1(a.reduce((x,y)=>x+y,0)/a.length):null;
+  }
+  function myRating(w){ return (w.ratings||[]).find(r=>r.user===ME); }
+  // average wheel across all raters for a given kind ("nose"|"taste")
+  function avgWheel(w, kind){
+    const ws=(w.ratings||[]).map(r=>(r.wheels&&r.wheels[kind])?r.wheels[kind]:null).filter(Boolean);
+    if(!ws.length) return null;
+    return AXES.map((_,i)=> r1(ws.reduce((a,arr)=>a+(arr[i]||0),0)/ws.length));
+  }
+
+  function toast(m){ const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),1900); }
+  async function persist(){ const ok=await saveState(STATE); if(!ok) toast("Speichern fehlgeschlagen"); return ok; }
+
+  /* ---------- radar SVG ---------- */
+  // geometry
+  const CX=160,CY=160,R=118,MAXV=5;
+  function pt(i,v){ const a=-Math.PI/2+(i*2*Math.PI/NAX); const rad=(v/MAXV)*R; return [CX+rad*Math.cos(a),CY+rad*Math.sin(a)]; }
+  function gridSVG(){
+    let s="";
+    for(let ring=1;ring<=MAXV;ring++){
+      const pts=AXES.map((_,i)=>pt(i,ring).map(n=>r1(n)).join(",")).join(" ");
+      s+=`<polygon points="${pts}" fill="none" stroke="#3a2c20" stroke-width="1"/>`;
+    }
+    AXES.forEach((_,i)=>{ const[x,y]=pt(i,MAXV); s+=`<line x1="${CX}" y1="${CY}" x2="${r1(x)}" y2="${r1(y)}" stroke="#3a2c20" stroke-width="1"/>`; });
+    // labels
+    AXES.forEach((ax,i)=>{
+      const a=-Math.PI/2+(i*2*Math.PI/NAX);
+      const lx=CX+(R+16)*Math.cos(a), ly=CY+(R+16)*Math.sin(a);
+      let anchor="middle";
+      if(Math.cos(a)>0.3) anchor="start"; else if(Math.cos(a)<-0.3) anchor="end";
+      s+=`<text x="${r1(lx)}" y="${r1(ly+3)}" text-anchor="${anchor}" font-size="10" style="text-transform:uppercase;letter-spacing:.5px">${esc(AXES_DE[ax])}</text>`;
+    });
+    return s;
+  }
+  function polySVG(vals,color,fillOp,sw){
+    const pts=vals.map((v,i)=>pt(i,v).map(n=>r1(n)).join(",")).join(" ");
+    return `<polygon points="${pts}" fill="${color}" fill-opacity="${fillOp}" stroke="${color}" stroke-width="${sw||2}" stroke-linejoin="round"/>`;
+  }
+  // interactive editing radar; values array mutated via clickable hotspots
+  function interactiveRadar(vals,color){
+    let hot="";
+    // hotspots: for each axis, 5 tap zones (rings 1..5)
+    AXES.forEach((_,i)=>{
+      for(let v=1;v<=MAXV;v++){
+        const[x,y]=pt(i,v);
+        hot+=`<circle class="hot" data-ax="${i}" data-v="${v}" cx="${r1(x)}" cy="${r1(y)}" r="13" fill="transparent" style="cursor:pointer"/>`;
+      }
+    });
+    // value dots on current poly
+    let dots="";
+    vals.forEach((v,i)=>{ if(v>0){ const[x,y]=pt(i,v); dots+=`<circle cx="${r1(x)}" cy="${r1(y)}" r="4" fill="${color}"/>`; } });
+    return `<svg class="radar" viewBox="-46 -12 412 364" width="360" xmlns="http://www.w3.org/2000/svg">
+      ${gridSVG()}
+      ${polySVG(vals,color,0.22,2)}
+      ${dots}
+      ${hot}
+    </svg>`;
+  }
+  // read-only overlay radar (group avg + optional individuals faint)
+  function displayRadar(avg, individuals, color){
+    let ind="";
+    (individuals||[]).forEach(arr=>{ ind+=polySVG(arr,color,0.05,1); });
+    const main = avg?polySVG(avg,color,0.3,2.5):"";
+    let dots="";
+    if(avg) avg.forEach((v,i)=>{ if(v>0){const[x,y]=pt(i,v);dots+=`<circle cx="${r1(x)}" cy="${r1(y)}" r="3.5" fill="${color}"/>`;} });
+    return `<svg class="radar" viewBox="-46 -12 412 364" width="340" xmlns="http://www.w3.org/2000/svg">
+      ${gridSVG()}${ind}${main}${dots}
+    </svg>`;
+  }
+
+  /* ---------- render router ---------- */
+  function render(){
+    if(ME===null) return renderLogin();
+    if(VIEW==="new") return renderNew();
+    if(VIEW==="rate") return renderRate();
+    if(VIEW==="detail") return renderDetail();
+    return renderList();
+  }
+  function brandHTML(){
+    return `<div class="brand"><div class="logo">Whisky is life · whisky is love</div>
+      <h1>Das Tasting-Buch</h1><div class="sub">Bewertungen der Runde, an einem Ort</div></div>`;
+  }
+
+  /* ---------- login ---------- */
+  function renderLogin(){
+    root.innerHTML=brandHTML()+`<div class="card">
+      <label class="fld">Wer bist du?</label>
+      <input type="text" id="nameIn" placeholder="Dein Name (z. B. Leon)" autocomplete="off"/>
+      <div class="hint">Unter diesem Namen bewertest du. Alle in der Runde sehen die Bewertungen aller.</div>
+      <div style="margin-top:14px"><button class="btn block" id="enter">Reinkommen</button></div></div>`;
+    const inp=document.getElementById("nameIn");
+    const go=()=>{const v=inp.value.trim();if(!v){inp.focus();return;}ME=v;try{localStorage.setItem("wil_me",v);}catch(e){}VIEW="list";render();};
+    document.getElementById("enter").onclick=go;
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+    try{const s=localStorage.getItem("wil_me");if(s)inp.value=s;}catch(e){}
+    inp.focus();
+  }
+
+  /* ---------- list ---------- */
+  function renderList(){
+    const ws=[...STATE.whiskies].sort((a,b)=>(b.created||0)-(a.created||0));
+    let items;
+    if(!ws.length) items=`<div class="empty">Noch keine Whiskys erfasst.<br>Leg den ersten an für euer nächstes Tasting.</div>`;
+    else items=`<div class="grid">`+ws.map(w=>{
+      const g=groupAvg(w), col=COLORS[w.color!=null?w.color:3];
+      const thumb=w.photo?`<img src="${w.photo}" alt=""/>`:`<div class="dram" style="background:${col.h}"></div>`;
+      const nR=(w.ratings||[]).length, mine=myRating(w);
+      return `<div class="wlist-item" data-id="${w.id}">
+        <div class="thumb">${thumb}</div>
+        <div class="wlist-body"><div class="nm">${esc(w.name)}</div>
+        <div class="meta">${esc(w.distillery||"—")}${w.age?(" · "+esc(w.age)+" J."):""} · ${nR} ${nR===1?"Bewertung":"Bewertungen"}${mine?' · <span style="color:var(--green)">deine dabei</span>':""}</div></div>
+        <div class="scorebadge"><div class="n">${g!=null?g.toFixed(1):"–"}</div><div class="l">Schnitt</div></div></div>`;
+    }).join("")+`</div>`;
+    root.innerHTML=brandHTML()+`<div class="topbar">
+      <div class="who">Angemeldet als <b>${esc(ME)}</b> · <a href="#" id="logout" style="color:var(--muted)">wechseln</a></div>
+      <button class="btn sm" id="addBtn">+ Whisky</button></div>${items}`;
+    document.getElementById("addBtn").onclick=()=>{VIEW="new";render();};
+    document.getElementById("logout").onclick=e=>{e.preventDefault();ME=null;render();};
+    root.querySelectorAll(".wlist-item").forEach(el=>el.onclick=()=>{activeId=el.getAttribute("data-id");VIEW="detail";render();});
+  }
+
+  /* ---------- new ---------- */
+  function renderNew(){
+    newPhoto=null;
+    root.innerHTML=brandHTML()+`<button class="back" id="back">‹ Zurück</button>
+      <h2 style="font-family:var(--serif);font-size:20px;margin:18px 0 4px">Neuer Whisky</h2>
+      <div class="card">
+        <label class="fld">Name *</label><input type="text" id="w_name" placeholder="z. B. Ardnahoe Càraid Ìleach"/>
+        <div style="height:12px"></div>
+        <label class="fld">Brennerei</label><input type="text" id="w_dist" placeholder="z. B. Ardnahoe"/>
+        <div class="row" style="margin-top:12px">
+          <div style="flex:1;min-width:120px"><label class="fld">Region / Land</label><input type="text" id="w_region" placeholder="z. B. Islay"/></div>
+          <div style="width:90px"><label class="fld">Alter (J.)</label><input type="text" id="w_age" placeholder="12" inputmode="numeric"/></div>
+          <div style="width:90px"><label class="fld">ABV %</label><input type="text" id="w_abv" placeholder="46" inputmode="decimal"/></div>
+        </div>
+        <div style="margin-top:14px"><label class="fld">Foto (optional)</label>
+          <input type="file" id="w_photo" accept="image/*" style="font-size:13px;color:var(--muted)"/>
+          <div id="photoBox"></div>
+          <div class="hint">Bild wird verkleinert und für alle gespeichert.</div></div>
+        <div style="margin-top:18px"><button class="btn block" id="create">Anlegen & bewerten</button></div></div>`;
+    document.getElementById("back").onclick=()=>{VIEW="list";render();};
+    document.getElementById("w_photo").onchange=onPhotoPick;
+    document.getElementById("create").onclick=createWhisky;
+  }
+  function onPhotoPick(e){
+    const f=e.target.files&&e.target.files[0]; if(!f)return;
+    const rd=new FileReader();
+    rd.onload=ev=>{const img=new Image();img.onload=()=>{
+      const max=900;let{width:w,height:h}=img;
+      if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s);}
+      const cv=document.createElement("canvas");cv.width=w;cv.height=h;cv.getContext("2d").drawImage(img,0,0,w,h);
+      newPhoto=cv.toDataURL("image/jpeg",0.78);
+      document.getElementById("photoBox").innerHTML=`<img class="photo-preview" src="${newPhoto}" alt="Vorschau"/>`;
+    };img.src=ev.target.result;};
+    rd.readAsDataURL(f);
+  }
+  async function createWhisky(){
+    const name=document.getElementById("w_name").value.trim();
+    if(!name){toast("Name fehlt");document.getElementById("w_name").focus();return;}
+    const w={id:uid(),name,distillery:document.getElementById("w_dist").value.trim(),
+      region:document.getElementById("w_region").value.trim(),age:document.getElementById("w_age").value.trim(),
+      abv:document.getElementById("w_abv").value.trim(),photo:newPhoto,color:3,createdBy:ME,created:Date.now(),ratings:[]};
+    STATE.whiskies.push(w);
+    const b=document.getElementById("create");b.disabled=true;b.textContent="Speichere…";
+    await persist(); activeId=w.id; VIEW="rate"; wheelTab="nose"; render();
+  }
+
+  /* ---------- rate ---------- */
+  function renderRate(){
+    const w=STATE.whiskies.find(x=>x.id===activeId);
+    if(!w){VIEW="list";return render();}
+    const ex=myRating(w);
+    draft=ex?JSON.parse(JSON.stringify(ex)):{user:ME,color:(w.color!=null?w.color:3),
+      wheels:{nose:emptyWheel(),taste:emptyWheel()},scores:{nose:5,taste:5,finish:5},note:"",ts:Date.now()};
+    if(!draft.wheels) draft.wheels={nose:emptyWheel(),taste:emptyWheel()};
+    if(!draft.wheels.nose) draft.wheels.nose=emptyWheel();
+    if(!draft.wheels.taste) draft.wheels.taste=emptyWheel();
+    if(draft.color==null) draft.color=(w.color!=null?w.color:3);
+
+    const colorSwatches=COLORS.map((c,i)=>`<div class="swatch ${draft.color===i?"on":""}" data-ci="${i}">
+      <div class="chip" style="background:${c.h}"></div><div class="cn">${c.n}</div></div>`).join("");
+    const sliders=CRITERIA.map(c=>`<div class="slider-row" data-crit="${c.k}">
+      <div class="top"><span class="nm">${c.nm}</span><span class="val" id="val_${c.k}">${draft.scores[c.k]}</span></div>
+      <input type="range" min="1" max="10" step="1" value="${draft.scores[c.k]}" data-k="${c.k}"/></div>`).join("");
+
+    root.innerHTML=brandHTML()+`<button class="back" id="back">‹ Zurück</button>
+      <h2 style="font-family:var(--serif);font-size:20px;margin:18px 0 4px">${esc(w.name)}</h2>
+      <div class="hint" style="margin-bottom:6px">${esc(w.distillery||"")}${w.region?(" · "+esc(w.region)):""}${w.abv?(" · "+esc(w.abv)+"% ABV"):""}</div>
+
+      <div class="card">
+        <label class="fld">Geschmacksrad</label>
+        <div class="hint" style="margin-top:0">Tippe je Achse auf einen Ring (1 = leicht, 5 = intensiv). Erneut auf denselben Ring = zurück auf 0.</div>
+        <div class="wheel-wrap">
+          <div class="wheel-tabs">
+            <button class="wheel-tab nose ${wheelTab==="nose"?"on":""}" data-tab="nose">Nase</button>
+            <button class="wheel-tab taste ${wheelTab==="taste"?"on":""}" data-tab="taste">Geschmack</button>
+          </div>
+          <div id="radarHost"></div>
+        </div>
+      </div>
+
+      <div class="card"><label class="fld">Farbe</label><div class="swgrid">${colorSwatches}</div></div>
+
+      <div class="card"><label class="fld">Bewertung (1–10)</label>${sliders}
+        <div class="overall-box"><div class="big" id="overall">${ratingAvg(draft)??"–"}</div>
+        <div class="lbl">Dein Gesamteindruck (Schnitt)</div></div></div>
+
+      <div class="card"><label class="fld">Notiz (optional)</label>
+        <textarea id="note" placeholder="Was ist dir aufgefallen?">${esc(draft.note||"")}</textarea></div>
+
+      <button class="btn block" id="save">${ex?"Bewertung aktualisieren":"Bewertung abgeben"}</button>`;
+
+    document.getElementById("back").onclick=()=>{VIEW="detail";render();};
+    drawRateRadar();
+    root.querySelectorAll(".wheel-tab").forEach(t=>t.onclick=()=>{wheelTab=t.getAttribute("data-tab");renderRate();});
+    root.querySelectorAll(".swatch").forEach(s=>s.onclick=()=>{draft.color=+s.getAttribute("data-ci");
+      root.querySelectorAll(".swatch").forEach(x=>x.classList.remove("on"));s.classList.add("on");});
+    root.querySelectorAll('input[type=range]').forEach(sl=>sl.oninput=()=>{const k=sl.getAttribute("data-k");
+      draft.scores[k]=+sl.value;document.getElementById("val_"+k).textContent=sl.value;
+      const ov=ratingAvg(draft);document.getElementById("overall").textContent=ov!=null?ov.toFixed(1):"–";});
+    document.getElementById("save").onclick=saveRating;
+  }
+  function drawRateRadar(){
+    const color=wheelTab==="nose"?getCSS("--nose"):getCSS("--taste");
+    const vals=draft.wheels[wheelTab];
+    const host=document.getElementById("radarHost");
+    host.innerHTML=interactiveRadar(vals,color);
+    host.querySelectorAll(".hot").forEach(h=>{
+      h.onclick=()=>{const ax=+h.getAttribute("data-ax"),v=+h.getAttribute("data-v");
+        draft.wheels[wheelTab][ax]=(draft.wheels[wheelTab][ax]===v)?0:v; drawRateRadar();};
+    });
+  }
+  function getCSS(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#c9a04e";}
+
+  async function saveRating(){
+    const w=STATE.whiskies.find(x=>x.id===activeId); if(!w)return;
+    draft.note=document.getElementById("note").value.trim();
+    draft.ts=Date.now(); draft.user=ME;
+    w.ratings=w.ratings||[];
+    const i=w.ratings.findIndex(r=>r.user===ME);
+    if(i>=0)w.ratings[i]=draft; else w.ratings.push(draft);
+    w.color=Math.round(w.ratings.reduce((a,r)=>a+(r.color??3),0)/w.ratings.length);
+    const b=document.getElementById("save");b.disabled=true;b.textContent="Speichere…";
+    await persist(); toast("Bewertung gespeichert"); VIEW="detail"; render();
+  }
+
+  /* ---------- detail (dashboard) ---------- */
+  let detailWheel="nose";
+  function renderDetail(){
+    const w=STATE.whiskies.find(x=>x.id===activeId);
+    if(!w){VIEW="list";return render();}
+    const g=groupAvg(w), col=COLORS[w.color!=null?w.color:3];
+    const ratings=[...(w.ratings||[])].sort((a,b)=>(ratingAvg(b)||0)-(ratingAvg(a)||0));
+    const mine=myRating(w);
+    const photo=w.photo?`<img class="photo-preview" src="${w.photo}" alt="${esc(w.name)}"/>`:"";
+
+    const raterCards=ratings.length?ratings.map(r=>{
+      const av=ratingAvg(r), rc=COLORS[r.color!=null?r.color:3];
+      const subs=CRITERIA.map(c=>`${c.nm} <b style="color:var(--gold-soft)">${r.scores[c.k]}</b>`).join(" · ");
+      const note=r.note?`<div class="note">„${esc(r.note)}"</div>`:"";
+      return `<div class="rater"><div class="rh">
+        <span class="who2">${esc(r.user)} ${r.user===ME?'<span class="yourbadge">du</span>':""}</span>
+        <span class="sc">${av!=null?av.toFixed(1):"–"}</span></div>
+        <div class="sub"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:3px;background:${rc.h};display:inline-block"></span>${rc.n}</span><span>${subs}</span></div>
+        ${note}</div>`;
+    }).join(""):`<div class="hint">Noch keine Bewertungen. Sei der/die Erste.</div>`;
+
+    root.innerHTML=brandHTML()+`<button class="back" id="back">‹ Zurück</button>
+      <h2 style="font-family:var(--serif);font-size:20px;margin:18px 0 4px">${esc(w.name)}</h2>
+      <div class="hint" style="margin-bottom:8px">${esc(w.distillery||"—")}${w.region?(" · "+esc(w.region)):""}${w.age?(" · "+esc(w.age)+" J."):""}${w.abv?(" · "+esc(w.abv)+"% ABV"):""}</div>
+      ${photo}
+
+      <div class="card" style="text-align:center">
+        <div class="lbl" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Gesamtnote der Runde</div>
+        <div style="font-family:var(--serif);font-size:54px;color:var(--gold);line-height:1.1">${g!=null?g.toFixed(1):"–"}</div>
+        <div class="stat-row">
+          <div class="stat"><div class="n">${(w.ratings||[]).length}</div><div class="l">Bewertungen</div></div>
+          <div class="stat"><div class="n">${g!=null?g.toFixed(1):"–"}</div><div class="l">Ø Note</div></div>
+          <div class="stat"><div class="n" style="font-size:14px;display:flex;justify-content:center;align-items:center;gap:6px"><span style="width:16px;height:16px;border-radius:4px;background:${col.h};display:inline-block"></span></div><div class="l">${col.n}</div></div>
+        </div>
+      </div>
+
+      <div class="card wheel-wrap">
+        <label class="fld" style="text-align:left">Geschmacksrad der Runde</label>
+        <div class="wheel-tabs">
+          <button class="wheel-tab nose ${detailWheel==="nose"?"on":""}" data-dt="nose">Nase</button>
+          <button class="wheel-tab taste ${detailWheel==="taste"?"on":""}" data-dt="taste">Geschmack</button>
+        </div>
+        <div id="dashRadar"></div>
+        <div class="legend">
+          <span class="lk"><span class="dot" style="background:${detailWheel==="nose"?"var(--nose)":"var(--taste)"}"></span>Schnitt der Runde</span>
+          <span class="lk"><span class="dot" style="background:${detailWheel==="nose"?"var(--nose)":"var(--taste)"};opacity:.3"></span>einzelne Bewertungen</span>
+        </div>
+        <div id="axisReadout"></div>
+      </div>
+
+      <button class="btn block" id="rateBtn">${mine?"Deine Bewertung bearbeiten":"Jetzt bewerten"}</button>
+
+      <h3 style="font-family:var(--serif);font-size:18px;margin:18px 0 4px">Wer hat was gegeben</h3>
+      <div class="raters">${raterCards}</div>
+
+      <div class="divider"></div>
+      <button class="btn danger sm" id="del">Whisky löschen</button>`;
+
+    document.getElementById("back").onclick=()=>{VIEW="list";render();};
+    document.getElementById("rateBtn").onclick=()=>{VIEW="rate";wheelTab="nose";render();};
+    document.getElementById("del").onclick=async()=>{if(!confirm("Diesen Whisky inkl. aller Bewertungen löschen?"))return;
+      STATE.whiskies=STATE.whiskies.filter(x=>x.id!==activeId);await persist();VIEW="list";render();};
+    root.querySelectorAll(".wheel-tab").forEach(t=>t.onclick=()=>{detailWheel=t.getAttribute("data-dt");renderDetail();});
+    drawDashRadar(w);
+  }
+  function drawDashRadar(w){
+    const color=detailWheel==="nose"?getCSS("--nose"):getCSS("--taste");
+    const avg=avgWheel(w,detailWheel);
+    const inds=(w.ratings||[]).map(r=>(r.wheels&&r.wheels[detailWheel])?r.wheels[detailWheel]:null).filter(Boolean);
+    const host=document.getElementById("dashRadar");
+    if(!avg){ host.innerHTML=`<div class="hint">Noch kein ${detailWheel==="nose"?"Nasen":"Geschmacks"}-Profil erfasst.</div>`;
+      document.getElementById("axisReadout").innerHTML=""; return; }
+    host.innerHTML=displayRadar(avg,inds.length>1?inds:[],color);
+    // readout: sorted by intensity, top axes
+    const pairs=AXES.map((ax,i)=>({ax:AXES_DE[ax],v:avg[i]})).filter(p=>p.v>0).sort((a,b)=>b.v-a.v);
+    document.getElementById("axisReadout").innerHTML = pairs.length
+      ? `<div class="axis-readout">`+pairs.map(p=>`<div class="ar"><span>${esc(p.ax)}</span><b>${p.v.toFixed(1)}</b></div>`).join("")+`</div>`
+      : "";
+  }
+
+  /* ---------- boot ---------- */
+  async function boot(){
+    root.innerHTML=`<div class="loadwrap">Lade das Tasting-Buch…</div>`;
+    STATE=await loadState();
+    if(!STATE||!Array.isArray(STATE.whiskies))STATE={whiskies:[]};
+    try{const s=localStorage.getItem("wil_me");if(s)ME=s;}catch(e){}
+    render();
+  }
+  boot();
+})();
+</script>
