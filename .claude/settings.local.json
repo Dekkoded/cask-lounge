@@ -26,7 +26,11 @@
       "Bash(sips -g pixelWidth -g pixelHeight -g hasAlpha /Users/leon/whisky-app/logo/cask_lounge_1024.png)",
       "Bash(sips -z 192 192 logo/cask_lounge_1024.png --out public/icons/icon-192.png)",
       "Bash(sips -z 512 512 logo/cask_lounge_1024.png --out public/icons/icon-512.png)",
-      "Bash(sips -z 180 180 logo/cask_lounge_1024.png --out public/apple-touch-icon.png)"
+      "Bash(sips -z 180 180 logo/cask_lounge_1024.png --out public/apple-touch-icon.png)",
+      "Bash(sips -c 680 680 logo/cask_lounge_1024.png --out logo/cask_lounge_cropped.png)",
+      "Bash(sips -z 192 192 logo/cask_lounge_cropped.png --out public/icons/icon-192.png)",
+      "Bash(sips -z 512 512 logo/cask_lounge_cropped.png --out public/icons/icon-512.png)",
+      "Bash(sips -z 180 180 logo/cask_lounge_cropped.png --out public/apple-touch-icon.png)"
     ]
   }
 }
