@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
+import { amazonSearchUrl } from '../lib/affiliate'
 
 const EMPTY_WHEELS = { nose: Array(12).fill(0), taste: Array(12).fill(0) }
 
@@ -251,6 +252,16 @@ export default function WhiskyDetail() {
           )}
         </div>
       </div>
+
+      {/* Auf Amazon suchen */}
+      <a
+        href={amazonSearchUrl(`${drink.name} ${drink.producer ?? ''} Whisky`)}
+        target="_blank"
+        rel="noopener noreferrer sponsored"
+        className="flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors mb-6"
+      >
+        🛒 Auf Amazon suchen
+      </a>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
