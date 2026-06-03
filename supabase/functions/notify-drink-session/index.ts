@@ -62,9 +62,18 @@ Deno.serve(async (req) => {
     )
     console.log('Push results:', pushResults.length)
 
-    // E-Mail-Adressen über Admin-API holen
+    // E-Mail-Adressen holen — nur wenn email_notifications aktiviert
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, email_notifications')
+      .in('id', memberIds)
+
+    const emailEnabledIds = (profiles ?? [])
+      .filter((p: { id: string; email_notifications: boolean }) => p.email_notifications !== false)
+      .map((p: { id: string }) => p.id)
+
     const emails: string[] = []
-    for (const uid of memberIds) {
+    for (const uid of emailEnabledIds) {
       const { data: { user } } = await supabase.auth.admin.getUserById(uid)
       if (user?.email) emails.push(user.email)
     }

@@ -4,6 +4,17 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { usePushNotifications } from '../hooks/usePushNotifications'
 
+function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+  return (
+    <div
+      onClick={onToggle}
+      className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${enabled ? 'bg-amber-500' : 'bg-stone-700'}`}
+    >
+      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${enabled ? 'left-7' : 'left-1'}`} />
+    </div>
+  )
+}
+
 export default function Profile() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
@@ -13,6 +24,7 @@ export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [emailNotifications, setEmailNotifications] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -27,6 +39,7 @@ export default function Profile() {
           setDisplayName(data.display_name ?? '')
           setUsername(data.username ?? '')
           setAvatarUrl(data.avatar_url)
+          setEmailNotifications(data.email_notifications ?? true)
         }
         setLoading(false)
       })
@@ -65,6 +78,7 @@ export default function Profile() {
       display_name: displayName.trim() || null,
       username: username.trim(),
       avatar_url: newAvatarUrl,
+      email_notifications: emailNotifications,
     }).eq('id', user.id)
 
     setSaving(false)
@@ -158,28 +172,39 @@ export default function Profile() {
           {saving ? 'Wird gespeichert…' : saved ? '✓ Gespeichert!' : 'Speichern'}
         </button>
 
-        {/* Push Notifications */}
-        {'Notification' in window && (
-          <div className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3 mt-2">
+        {/* Benachrichtigungen */}
+        <div className="border-t border-stone-800 pt-4 flex flex-col gap-3">
+          <p className="text-sm font-medium text-stone-300">Benachrichtigungen</p>
+
+          <div className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3">
             <div>
-              <p className="text-stone-200 text-sm font-medium">Push-Benachrichtigungen</p>
-              <p className="text-stone-500 text-xs mt-0.5">
-                {subscribed ? 'Aktiv — du wirst benachrichtigt' : 'Erhalte Infos wenn jemand trinkt'}
-              </p>
+              <p className="text-stone-200 text-sm font-medium">E-Mail</p>
+              <p className="text-stone-500 text-xs mt-0.5">Benachrichtigung per E-Mail</p>
             </div>
-            <button
-              onClick={subscribed ? unsubscribe : subscribe}
-              disabled={pushLoading}
-              className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors disabled:opacity-50 ${
-                subscribed
-                  ? 'bg-stone-700 hover:bg-stone-600 text-stone-300'
-                  : 'bg-amber-500 hover:bg-amber-400 text-stone-950'
-              }`}
-            >
-              {pushLoading ? '…' : subscribed ? 'Deaktivieren' : 'Aktivieren'}
-            </button>
+            <Toggle enabled={emailNotifications} onToggle={() => {
+              setEmailNotifications(v => !v)
+              supabase.from('profiles').update({ email_notifications: !emailNotifications }).eq('id', user!.id)
+            }} />
           </div>
-        )}
+
+          {'Notification' in window && (
+            <div className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3">
+              <div>
+                <p className="text-stone-200 text-sm font-medium">Push</p>
+                <p className="text-stone-500 text-xs mt-0.5">
+                  {subscribed ? 'Aktiv' : 'Benachrichtigung auf diesem Gerät'}
+                </p>
+              </div>
+              <button
+                onClick={subscribed ? unsubscribe : subscribe}
+                disabled={pushLoading}
+                className="disabled:opacity-50"
+              >
+                <Toggle enabled={subscribed} onToggle={() => {}} />
+              </button>
+            </div>
+          )}
+        </div>
 
         <button
           onClick={signOut}
