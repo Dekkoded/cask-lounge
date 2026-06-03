@@ -134,6 +134,9 @@ export default function GlobalLanding() {
       (v.drinks?.region ?? '').toLowerCase().includes(q))
   )
 
+  const collectionValue = filteredVitrine.reduce((s, v) => s + (v.drinks?.price ?? 0), 0)
+  const pricedCount = filteredVitrine.filter(v => v.drinks?.price != null).length
+
   const headings: Record<View, string> = {
     ranking: 'Global',
     vitrine: 'Meine Sammlung',
@@ -275,6 +278,15 @@ export default function GlobalLanding() {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
+            {collectionValue > 0 && (
+              <div className="bg-stone-900 rounded-xl px-4 py-3 flex items-baseline justify-between">
+                <span className="text-stone-400 text-sm">Sammlungswert</span>
+                <span className="text-amber-400 font-bold">
+                  {collectionValue.toLocaleString('de-DE', { maximumFractionDigits: 0 })} €
+                  <span className="text-stone-500 text-xs font-normal ml-1">({pricedCount})</span>
+                </span>
+              </div>
+            )}
             {filteredVitrine.filter(v => v.drinks).map(v => (
               <Link
                 key={v.id}

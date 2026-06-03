@@ -6,6 +6,7 @@ export interface Drink {
   region: string | null
   age_years: number | null
   abv: number | null
+  price: number | null
   photo_url: string | null
   attributes: Record<string, unknown>
   created_by: string | null

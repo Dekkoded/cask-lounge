@@ -243,6 +243,7 @@ export default function WhiskyDetail() {
             {drink.region && <span>{drink.region}</span>}
             {drink.age_years && <span>{drink.age_years} Jahre</span>}
             {drink.abv && <span>{drink.abv}%</span>}
+            {drink.price != null && <span className="text-stone-300">{drink.price} €</span>}
           </div>
           {avgOverall != null && (
             <div className="mt-2 flex items-baseline gap-1">

@@ -13,6 +13,7 @@ export default function AddWhisky() {
   const [region, setRegion] = useState('')
   const [ageYears, setAgeYears] = useState('')
   const [abv, setAbv] = useState('')
+  const [price, setPrice] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -61,6 +62,7 @@ export default function AddWhisky() {
         region: region.trim() || null,
         age_years: ageYears ? parseInt(ageYears) : null,
         abv: abv ? parseFloat(abv) : null,
+        price: price ? parseFloat(price) : null,
         photo_url,
         created_by: user.id,
       })
@@ -160,6 +162,19 @@ export default function AddWhisky() {
               placeholder="43.0"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm text-stone-300 mb-1">Flaschenwert (€)</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+            className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
+            placeholder="z. B. 65"
+          />
         </div>
 
         <div>

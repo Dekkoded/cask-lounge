@@ -33,7 +33,9 @@
       "Bash(sips -z 180 180 logo/cask_lounge_cropped.png --out public/apple-touch-icon.png)",
       "Read(//private/tmp/**)",
       "Bash(curl -s https://www.casklounge.com/)",
-      "Bash(curl -s https://www.casklounge.com/assets/index-CMv-1RBv.js)"
+      "Bash(curl -s https://www.casklounge.com/assets/index-CMv-1RBv.js)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(lsof -i :5173 -sTCP:LISTEN -n -P)"
     ]
   }
 }
