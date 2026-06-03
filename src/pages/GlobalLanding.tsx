@@ -4,13 +4,23 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import type { GlobalDrinkScore, Drink } from '../lib/types'
 
-type View = 'ranking' | 'vitrine'
+type View = 'ranking' | 'vitrine' | 'live'
 
 interface VitrineEntry {
   id: string
   overall: number | null
   updated_at: string
   drinks: Drink | null
+}
+
+interface LiveSession {
+  id: string
+  user_id: string
+  drink_name: string | null
+  message: string | null
+  started_at: string
+  profiles: { display_name: string | null; username: string } | null
+  drinks: { name: string } | null
 }
 
 export default function GlobalLanding() {
@@ -24,6 +34,16 @@ export default function GlobalLanding() {
   const [vitrineLoading, setVitrineLoading] = useState(true)
   const [searchReadonly, setSearchReadonly] = useState(true)
 
+  // Live
+  const [sessions, setSessions] = useState<LiveSession[]>([])
+  const [liveLoading, setLiveLoading] = useState(true)
+  const [allDrinks, setAllDrinks] = useState<{ id: string; name: string }[]>([])
+  const [showDialog, setShowDialog] = useState(false)
+  const [sessionDrinkId, setSessionDrinkId] = useState('')
+  const [sessionDrinkName, setSessionDrinkName] = useState('')
+  const [sessionMessage, setSessionMessage] = useState('')
+  const [posting, setPosting] = useState(false)
+
   useEffect(() => {
     supabase
       .from('global_drink_scores')
@@ -36,7 +56,7 @@ export default function GlobalLanding() {
   }, [])
 
   useEffect(() => {
-    if (!user) { setVitrineLoading(false); return }
+    if (!user) { setVitrineLoading(false); setLiveLoading(false); return }
     supabase
       .from('ratings')
       .select('id, overall, updated_at, drinks(*)')
@@ -46,7 +66,41 @@ export default function GlobalLanding() {
         setVitrine((data as unknown as VitrineEntry[]) ?? [])
         setVitrineLoading(false)
       })
+
+    supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
+      .then(({ data }) => setAllDrinks(data ?? []))
+
+    loadFeed()
   }, [user])
+
+  const loadFeed = () => {
+    supabase
+      .from('drink_sessions')
+      .select('id, user_id, drink_name, message, started_at, profiles(display_name, username), drinks(name)')
+      .order('started_at', { ascending: false })
+      .limit(30)
+      .then(({ data }) => {
+        setSessions((data as unknown as LiveSession[]) ?? [])
+        setLiveLoading(false)
+      })
+  }
+
+  const handlePost = async () => {
+    if (!user) return
+    setPosting(true)
+    const { error } = await supabase.from('drink_sessions').insert({
+      user_id: user.id,
+      drink_id: sessionDrinkId || null,
+      drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
+      message: sessionMessage.trim() || null,
+    })
+    setPosting(false)
+    if (!error) {
+      setShowDialog(false)
+      setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
+      loadFeed()
+    }
+  }
 
   const q = search.toLowerCase()
   const filtered = scores.filter(s =>
@@ -78,7 +132,7 @@ export default function GlobalLanding() {
         </button>
       </div>
 
-      {/* Umschalter Ranking / Vitrine */}
+      {/* Umschalter */}
       {user && (
         <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
           <button onClick={() => setView('ranking')}
@@ -89,21 +143,27 @@ export default function GlobalLanding() {
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
             Meine Vitrine
           </button>
+          <button onClick={() => setView('live')}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${view === 'live' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
+            🥃 Live
+          </button>
         </div>
       )}
 
-      {/* Suche */}
-      <input
-        type="search"
-        name="whisky-suche"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder="Suchen nach Name, Brennerei, Region…"
-        autoComplete="off"
-        readOnly={searchReadonly}
-        onFocus={() => setSearchReadonly(false)}
-        className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6 [&::-webkit-search-cancel-button]:hidden"
-      />
+      {/* Suche (nur Global & Vitrine) */}
+      {view !== 'live' && (
+        <input
+          type="search"
+          name="whisky-suche"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Suchen nach Name, Brennerei, Region…"
+          autoComplete="off"
+          readOnly={searchReadonly}
+          onFocus={() => setSearchReadonly(false)}
+          className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6 [&::-webkit-search-cancel-button]:hidden"
+        />
+      )}
 
       {/* Ranking */}
       {view === 'ranking' && (
@@ -237,6 +297,90 @@ export default function GlobalLanding() {
             ))}
           </div>
         )
+      )}
+
+      {/* Live */}
+      {view === 'live' && (
+        <div className="flex flex-col gap-4">
+          <button onClick={() => setShowDialog(true)}
+            className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl py-3 text-lg">
+            🥃 Ich trinke gerade…
+          </button>
+          <p className="text-stone-500 text-xs text-center -mt-2">
+            Benachrichtigt alle, mit denen du eine Gruppe teilst.
+          </p>
+
+          {liveLoading ? (
+            <p className="text-stone-500 text-center py-8 animate-pulse">Lädt…</p>
+          ) : sessions.length === 0 ? (
+            <p className="text-stone-500 text-center py-8">Noch keine Trink-Sessions.</p>
+          ) : (
+            sessions.map(s => (
+              <div key={s.id} className="bg-stone-900 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🥃</span>
+                  <div className="flex-1">
+                    <p className="font-semibold text-stone-100">
+                      {s.profiles?.display_name ?? s.profiles?.username ?? '?'} trinkt gerade
+                    </p>
+                    <p className="text-amber-400 font-medium">
+                      {s.drinks?.name ?? s.drink_name ?? '—'}
+                    </p>
+                    {s.message && <p className="text-stone-400 text-sm mt-1">„{s.message}"</p>}
+                    <p className="text-stone-600 text-xs mt-1">
+                      {new Date(s.started_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+
+          {/* Dialog */}
+          {showDialog && (
+            <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50 p-4">
+              <div className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4">
+                <h3 className="text-lg font-bold text-stone-100">Was trinkst du gerade?</h3>
+
+                <div>
+                  <label className="text-sm text-stone-400 mb-1 block">Whisky aus Katalog wählen</label>
+                  <select value={sessionDrinkId} onChange={e => { setSessionDrinkId(e.target.value); setSessionDrinkName('') }}
+                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500">
+                    <option value="">— oder frei eingeben ↓</option>
+                    {allDrinks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </div>
+
+                {!sessionDrinkId && (
+                  <div>
+                    <label className="text-sm text-stone-400 mb-1 block">Oder Name frei eingeben</label>
+                    <input value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
+                      placeholder="z. B. Lagavulin 16"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm text-stone-400 mb-1 block">Nachricht (optional)</label>
+                  <input value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
+                    placeholder="z. B. Endlich geöffnet! 🎉"
+                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
+                </div>
+
+                <div className="flex gap-3">
+                  <button onClick={handlePost} disabled={posting || (!sessionDrinkId && !sessionDrinkName.trim())}
+                    className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
+                    {posting ? 'Wird gesendet…' : 'Benachrichtigen 🥃'}
+                  </button>
+                  <button onClick={() => setShowDialog(false)}
+                    className="bg-stone-800 text-stone-300 rounded-xl px-4">
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   )

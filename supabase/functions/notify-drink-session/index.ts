@@ -13,10 +13,6 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Gruppe laden
-    const { data: group } = await supabase
-      .from('groups').select('name').eq('id', record.group_id).single()
-
     // Trinkender laden
     const { data: drinker } = await supabase
       .from('profiles').select('display_name, username').eq('id', record.user_id).single()
@@ -29,13 +25,29 @@ Deno.serve(async (req) => {
       drinkName = drink?.name
     }
 
-    // Alle anderen Mitglieder ermitteln
-    const { data: members } = await supabase
-      .from('group_members').select('user_id')
-      .eq('group_id', record.group_id)
-      .neq('user_id', record.user_id)
+    // Empfänger ermitteln
+    let memberIds: string[] = []
+    if (record.group_id) {
+      // An eine bestimmte Gruppe (Alt-Verhalten)
+      const { data: members } = await supabase
+        .from('group_members').select('user_id')
+        .eq('group_id', record.group_id)
+        .neq('user_id', record.user_id)
+      memberIds = (members ?? []).map((m: { user_id: string }) => m.user_id)
+    } else {
+      // An alle, mit denen der Trinkende eine Gruppe teilt
+      const { data: myGroups } = await supabase
+        .from('group_members').select('group_id').eq('user_id', record.user_id)
+      const groupIds = (myGroups ?? []).map((g: { group_id: string }) => g.group_id)
+      if (groupIds.length > 0) {
+        const { data: members } = await supabase
+          .from('group_members').select('user_id')
+          .in('group_id', groupIds)
+          .neq('user_id', record.user_id)
+        memberIds = [...new Set((members ?? []).map((m: { user_id: string }) => m.user_id))]
+      }
+    }
 
-    const memberIds = (members ?? []).map((m: { user_id: string }) => m.user_id)
     if (memberIds.length === 0) return new Response('No members to notify', { status: 200 })
 
     const drinkerName = drinker?.display_name ?? drinker?.username ?? 'Jemand'
@@ -84,7 +96,6 @@ Deno.serve(async (req) => {
         <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; background: #1c1917; color: #e7e5e4; padding: 32px; border-radius: 16px;">
           <h1 style="color: #f59e0b; font-size: 28px; margin: 0 0 8px;">Cask Lounge</h1>
           <h2 style="font-size: 20px; margin: 0 0 16px;">${subject}</h2>
-          <p style="color: #a8a29e;">In der Gruppe <strong style="color: #e7e5e4;">${group?.name ?? ''}</strong></p>
           ${record.message ? `<blockquote style="border-left: 3px solid #f59e0b; margin: 16px 0; padding-left: 16px; color: #d6d3d1;">"${record.message}"</blockquote>` : ''}
           <p style="color: #57534e; font-size: 12px; margin-top: 32px;">Cask Lounge · casklounge.com</p>
         </div>

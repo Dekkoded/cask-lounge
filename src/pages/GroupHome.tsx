@@ -34,19 +34,7 @@ interface Tasting {
   hosted_by: string
 }
 
-interface DrinkSession {
-  id: string
-  user_id: string
-  drink_id: string | null
-  drink_name: string | null
-  message: string | null
-  rating_id: string | null
-  started_at: string
-  profiles: { display_name: string | null; username: string }
-  drinks: { name: string } | null
-}
-
-type Tab = 'archiv' | 'tastings' | 'live' | 'mitglieder'
+type Tab = 'archiv' | 'tastings' | 'mitglieder'
 
 export default function GroupHome() {
   const { id } = useParams<{ id: string }>()
@@ -57,22 +45,12 @@ export default function GroupHome() {
   const [members, setMembers] = useState<Member[]>([])
   const [archive, setArchive] = useState<ArchiveDrink[]>([])
   const [tastings, setTastings] = useState<Tasting[]>([])
-  const [sessions, setSessions] = useState<DrinkSession[]>([])
-  const [allDrinks, setAllDrinks] = useState<{ id: string; name: string }[]>([])
   const [tab, setTab] = useState<Tab>('archiv')
   const [copied, setCopied] = useState(false)
   const [showNewTasting, setShowNewTasting] = useState(false)
   const [tastingTitle, setTastingTitle] = useState('')
   const [tastingDate, setTastingDate] = useState('')
   const [creatingTasting, setCreatingTasting] = useState(false)
-  // Live-Session Dialog
-  const [showSessionDialog, setShowSessionDialog] = useState(false)
-  const [sessionDrinkId, setSessionDrinkId] = useState('')
-  const [sessionDrinkName, setSessionDrinkName] = useState('')
-  const [sessionMessage, setSessionMessage] = useState('')
-  const [startingSession, setStartingSession] = useState(false)
-  // Bewertung teilen nach Session
-  const [shareSessionId, setShareSessionId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -87,16 +65,6 @@ export default function GroupHome() {
 
     supabase.from('tastings').select('*').eq('group_id', id).order('created_at', { ascending: false })
       .then(({ data }) => { setTastings(data ?? []) })
-
-    supabase.from('drink_sessions')
-      .select('*, profiles(display_name, username), drinks(name)')
-      .eq('group_id', id)
-      .order('started_at', { ascending: false })
-      .limit(20)
-      .then(({ data }) => { setSessions((data as unknown as DrinkSession[]) ?? []) })
-
-    supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
-      .then(({ data }) => { setAllDrinks(data ?? []) })
 
     loadArchive(id)
   }, [id])
@@ -185,53 +153,6 @@ export default function GroupHome() {
     if (!error && data) navigate(`/groups/${id}/tasting/${data.id}`)
   }
 
-  const handleStartSession = async () => {
-    if (!user || !id) return
-    setStartingSession(true)
-    const drink = allDrinks.find(d => d.id === sessionDrinkId)
-    const { data, error } = await supabase.from('drink_sessions').insert({
-      group_id: id,
-      user_id: user.id,
-      drink_id: sessionDrinkId || null,
-      drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
-      message: sessionMessage.trim() || null,
-    }).select('id').single()
-    setStartingSession(false)
-    if (!error && data) {
-      setShowSessionDialog(false)
-      setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
-      setShareSessionId(data.id)
-      // Session sofort in Liste einfügen
-      setSessions(prev => [{
-        id: data.id, user_id: user.id,
-        drink_id: sessionDrinkId || null,
-        drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
-        message: sessionMessage.trim() || null,
-        rating_id: null,
-        started_at: new Date().toISOString(),
-        profiles: { display_name: null, username: '' },
-        drinks: drink ? { name: drink.name } : null,
-      }, ...prev])
-      setTab('live')
-    }
-  }
-
-  const handleShareRating = async (sessionId: string, drinkId: string) => {
-    if (!user || !id) return
-    // Eigene Bewertung für diesen Whisky suchen
-    const { data: rating } = await supabase.from('ratings')
-      .select('id').eq('drink_id', drinkId).eq('user_id', user.id).maybeSingle()
-    if (!rating) { alert('Du hast noch keine Bewertung für diesen Whisky.'); return }
-    // In Gruppe teilen
-    await supabase.from('group_ratings').upsert({
-      group_id: id, rating_id: rating.id, shared_by: user.id,
-    }, { onConflict: 'group_id,rating_id' })
-    // Session aktualisieren
-    await supabase.from('drink_sessions').update({ rating_id: rating.id }).eq('id', sessionId)
-    setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, rating_id: rating.id } : s))
-    setShareSessionId(null)
-  }
-
   const handleRemoveMember = async (userId: string) => {
     if (!id) return
     await supabase.from('group_members').delete().eq('group_id', id).eq('user_id', userId)
@@ -296,12 +217,12 @@ export default function GroupHome() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['archiv', 'tastings', 'live', 'mitglieder'] as Tab[]).map(t => (
+        {(['archiv', 'tastings', 'mitglieder'] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors ${
               tab === t ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'
             }`}>
-            {t === 'archiv' ? 'Archiv' : t === 'tastings' ? 'Tastings' : t === 'live' ? '🥃 Live' : 'Mitglieder'}
+            {t === 'archiv' ? 'Archiv' : t === 'tastings' ? 'Tastings' : 'Mitglieder'}
           </button>
         ))}
       </div>
@@ -407,106 +328,6 @@ export default function GroupHome() {
               </form>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Live */}
-      {tab === 'live' && (
-        <div className="flex flex-col gap-4">
-          {/* Ich trinke gerade Button */}
-          <button onClick={() => setShowSessionDialog(true)}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl py-3 text-lg">
-            🥃 Ich trinke gerade…
-          </button>
-
-          {/* Bewertung teilen nach Session */}
-          {shareSessionId && (() => {
-            const s = sessions.find(s => s.id === shareSessionId)
-            const drinkId = s?.drink_id
-            return drinkId ? (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex justify-between items-center">
-                <p className="text-sm text-amber-300">Bewertung für <strong>{s?.drinks?.name ?? s?.drink_name}</strong> teilen?</p>
-                <div className="flex gap-2">
-                  <button onClick={() => handleShareRating(shareSessionId, drinkId)}
-                    className="bg-amber-500 text-stone-950 rounded-lg px-3 py-1.5 text-sm font-semibold">
-                    Teilen
-                  </button>
-                  <button onClick={() => setShareSessionId(null)} className="text-stone-500 text-sm">Nein</button>
-                </div>
-              </div>
-            ) : null
-          })()}
-
-          {/* Session-Dialog */}
-          {showSessionDialog && (
-            <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50 p-4">
-              <div className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4">
-                <h3 className="text-lg font-bold text-stone-100">Was trinkst du gerade?</h3>
-
-                <div>
-                  <label className="text-sm text-stone-400 mb-1 block">Whisky aus Katalog wählen</label>
-                  <select value={sessionDrinkId} onChange={e => { setSessionDrinkId(e.target.value); setSessionDrinkName('') }}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500">
-                    <option value="">— oder frei eingeben ↓</option>
-                    {allDrinks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                  </select>
-                </div>
-
-                {!sessionDrinkId && (
-                  <div>
-                    <label className="text-sm text-stone-400 mb-1 block">Oder Name frei eingeben</label>
-                    <input value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
-                      placeholder="z. B. Lagavulin 16"
-                      className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
-                  </div>
-                )}
-
-                <div>
-                  <label className="text-sm text-stone-400 mb-1 block">Nachricht (optional)</label>
-                  <input value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
-                    placeholder="z. B. Endlich geöffnet! 🎉"
-                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
-                </div>
-
-                <div className="flex gap-3">
-                  <button onClick={handleStartSession} disabled={startingSession || (!sessionDrinkId && !sessionDrinkName.trim())}
-                    className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
-                    {startingSession ? 'Wird gesendet…' : 'Gruppe benachrichtigen 🥃'}
-                  </button>
-                  <button onClick={() => setShowSessionDialog(false)}
-                    className="bg-stone-800 text-stone-300 rounded-xl px-4">
-                    Abbrechen
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Session-Liste */}
-          {sessions.length === 0 ? (
-            <p className="text-stone-500 text-center py-8">Noch keine Trink-Sessions.</p>
-          ) : (
-            sessions.map(s => (
-              <div key={s.id} className="bg-stone-900 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🥃</span>
-                  <div className="flex-1">
-                    <p className="font-semibold text-stone-100">
-                      {s.profiles?.display_name ?? s.profiles?.username ?? '?'} trinkt gerade
-                    </p>
-                    <p className="text-amber-400 font-medium">
-                      {s.drinks?.name ?? s.drink_name ?? '—'}
-                    </p>
-                    {s.message && <p className="text-stone-400 text-sm mt-1">„{s.message}"</p>}
-                    <p className="text-stone-600 text-xs mt-1">
-                      {new Date(s.started_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    {s.rating_id && <p className="text-xs text-green-500 mt-1">✓ Bewertung geteilt</p>}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
         </div>
       )}
 
