@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { ReactionBar, CommentSection, type SessionReaction, type SessionComment } from '../components/SessionSocial'
 
 interface Group {
   id: string
@@ -17,6 +18,30 @@ interface Member {
   joined_at: string
   profiles: { username: string; display_name: string | null }
 }
+
+interface GroupSession {
+  id: string
+  user_id: string
+  drink_id: string | null
+  drink_name: string | null
+  message: string | null
+  started_at: string
+  profiles: { display_name: string | null; username: string } | null
+  drinks: { name: string } | null
+  session_reactions: SessionReaction[]
+  session_comments: SessionComment[]
+}
+
+interface RatingShare {
+  rating_id: string
+  shared_at: string
+  shared_by: string
+  ratings: { overall: number | null; drinks: { id: string; name: string; photo_url: string | null } | null } | null
+}
+
+type Activity =
+  | { kind: 'session'; ts: string; session: GroupSession }
+  | { kind: 'rating'; ts: string; share: RatingShare }
 
 interface ArchiveDrink {
   id: string
@@ -34,7 +59,7 @@ interface Tasting {
   hosted_by: string
 }
 
-type Tab = 'archiv' | 'tastings' | 'mitglieder'
+type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'mitglieder'
 
 export default function GroupHome() {
   const { id } = useParams<{ id: string }>()
@@ -45,13 +70,25 @@ export default function GroupHome() {
   const [members, setMembers] = useState<Member[]>([])
   const [archive, setArchive] = useState<ArchiveDrink[]>([])
   const [tastings, setTastings] = useState<Tasting[]>([])
-  const [tab, setTab] = useState<Tab>('archiv')
+  const [sessions, setSessions] = useState<GroupSession[]>([])
+  const [ratingShares, setRatingShares] = useState<RatingShare[]>([])
+  const [activityLoading, setActivityLoading] = useState(true)
+  const [tab, setTab] = useState<Tab>('aktivitaet')
   const [copied, setCopied] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [showNewTasting, setShowNewTasting] = useState(false)
   const [tastingTitle, setTastingTitle] = useState('')
   const [tastingDate, setTastingDate] = useState('')
   const [creatingTasting, setCreatingTasting] = useState(false)
+
+  // "Ich trinke gerade" posting
+  const [allDrinks, setAllDrinks] = useState<{ id: string; name: string }[]>([])
+  const [showPost, setShowPost] = useState(false)
+  const [sessionDrinkId, setSessionDrinkId] = useState('')
+  const [sessionDrinkName, setSessionDrinkName] = useState('')
+  const [sessionMessage, setSessionMessage] = useState('')
+  const [posting, setPosting] = useState(false)
+  const [postError, setPostError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -68,8 +105,86 @@ export default function GroupHome() {
     supabase.from('tastings').select('*').eq('group_id', id).order('created_at', { ascending: false })
       .then(({ data }) => { setTastings(data ?? []) })
 
+    supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
+      .then(({ data }) => setAllDrinks(data ?? []))
+
     loadArchive(id)
+    loadActivity(id)
   }, [id])
+
+  useEffect(() => {
+    if (!id) return
+    const channel = supabase
+      .channel(`group-activity-${id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'drink_sessions', filter: `group_id=eq.${id}` }, () => loadActivity(id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_reactions' }, () => loadActivity(id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_comments' }, () => loadActivity(id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'group_ratings', filter: `group_id=eq.${id}` }, () => loadActivity(id))
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [id])
+
+  const loadActivity = async (groupId: string) => {
+    const [{ data: sData }, { data: rData }] = await Promise.all([
+      supabase
+        .from('drink_sessions')
+        .select('id, user_id, drink_id, drink_name, message, started_at, profiles(display_name, username), drinks(name), session_reactions(emoji, user_id), session_comments(id, body, created_at, user_id, profiles(display_name, username))')
+        .eq('group_id', groupId)
+        .order('started_at', { ascending: false }),
+      supabase
+        .from('group_ratings')
+        .select('rating_id, shared_at, shared_by, ratings(overall, drinks(id, name, photo_url))')
+        .eq('group_id', groupId)
+        .order('shared_at', { ascending: false }),
+    ])
+    setSessions((sData as unknown as GroupSession[]) ?? [])
+    setRatingShares((rData as unknown as RatingShare[]) ?? [])
+    setActivityLoading(false)
+  }
+
+  const handlePost = async () => {
+    if (!user || !id) return
+    setPosting(true)
+    setPostError(null)
+    const { error } = await supabase.from('drink_sessions').insert({
+      group_id: id,
+      user_id: user.id,
+      drink_id: sessionDrinkId || null,
+      drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
+      message: sessionMessage.trim() || null,
+    })
+    setPosting(false)
+    if (error) {
+      setPostError('Konnte nicht geteilt werden: ' + error.message)
+      return
+    }
+    setShowPost(false)
+    setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
+    loadActivity(id)
+  }
+
+  const toggleReaction = async (sessionId: string, emoji: string, active: boolean) => {
+    if (!user || !id) return
+    if (active) {
+      await supabase.from('session_reactions').delete()
+        .eq('session_id', sessionId).eq('user_id', user.id).eq('emoji', emoji)
+    } else {
+      await supabase.from('session_reactions').insert({ session_id: sessionId, user_id: user.id, emoji })
+    }
+    loadActivity(id)
+  }
+
+  const postComment = async (sessionId: string, body: string) => {
+    if (!user || !id) return
+    await supabase.from('session_comments').insert({ session_id: sessionId, user_id: user.id, body })
+    loadActivity(id)
+  }
+
+  const deleteComment = async (commentId: string) => {
+    if (!id) return
+    await supabase.from('session_comments').delete().eq('id', commentId)
+    loadActivity(id)
+  }
 
   const loadArchive = async (groupId: string) => {
     // Quelle 1: via group_ratings geteilte Bewertungen
@@ -217,6 +332,16 @@ export default function GroupHome() {
     )
   }
 
+  const memberName = (userId: string) => {
+    const m = members.find(x => x.user_id === userId)
+    return m?.profiles?.display_name ?? m?.profiles?.username ?? '?'
+  }
+
+  const activity: Activity[] = [
+    ...sessions.map(s => ({ kind: 'session' as const, ts: s.started_at, session: s })),
+    ...ratingShares.map(r => ({ kind: 'rating' as const, ts: r.shared_at, share: r })),
+  ].sort((a, b) => b.ts.localeCompare(a.ts))
+
   return (
     <div className="max-w-lg mx-auto p-4">
       {/* Header */}
@@ -236,15 +361,139 @@ export default function GroupHome() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['archiv', 'tastings', 'mitglieder'] as Tab[]).map(t => (
+        {(['aktivitaet', 'archiv', 'tastings', 'mitglieder'] as Tab[]).map(t => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors ${
               tab === t ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'
             }`}>
-            {t === 'archiv' ? 'Archiv' : t === 'tastings' ? 'Tastings' : 'Mitglieder'}
+            {t === 'aktivitaet' ? 'Aktivität' : t === 'archiv' ? 'Archiv' : t === 'tastings' ? 'Tastings' : 'Mitglieder'}
           </button>
         ))}
       </div>
+
+      {/* Aktivität */}
+      {tab === 'aktivitaet' && (
+        <div className="flex flex-col gap-4">
+          <button onClick={() => { setPostError(null); setShowPost(true) }}
+            className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl py-3 text-lg">
+            🥃 Ich trinke gerade…
+          </button>
+
+          {activityLoading ? (
+            <p className="text-stone-500 text-center py-8 animate-pulse">Lädt…</p>
+          ) : activity.length === 0 ? (
+            <p className="text-stone-500 text-center py-8">
+              Noch keine Aktivität.
+              <br />
+              <span className="text-sm">Teile, was du gerade trinkst, oder eine Bewertung.</span>
+            </p>
+          ) : (
+            activity.map(a => a.kind === 'session' ? (
+              <div key={`s-${a.session.id}`} className="bg-stone-900 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">🥃</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-stone-100">
+                      <Link to={`/user/${a.session.user_id}`} className="hover:text-amber-400 transition-colors">
+                        {a.session.profiles?.display_name ?? a.session.profiles?.username ?? '?'}
+                      </Link> trinkt gerade
+                    </p>
+                    <p className="text-amber-400 font-medium">
+                      {a.session.drinks?.name ?? a.session.drink_name ?? '—'}
+                    </p>
+                    {a.session.message && <p className="text-stone-400 text-sm mt-1">„{a.session.message}"</p>}
+                    <p className="text-stone-600 text-xs mt-1">
+                      {new Date(a.session.started_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                    <ReactionBar reactions={a.session.session_reactions} myId={user?.id} onToggle={(emoji, active) => toggleReaction(a.session.id, emoji, active)} />
+                    <CommentSection
+                      comments={a.session.session_comments}
+                      myId={user?.id}
+                      onPost={body => postComment(a.session.id, body)}
+                      onDelete={deleteComment}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={`r-${a.share.rating_id}`}
+                to={a.share.ratings?.drinks ? `/whisky/${a.share.ratings.drinks.id}` : '#'}
+                className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
+              >
+                <span className="text-2xl">⭐</span>
+                {a.share.ratings?.drinks?.photo_url ? (
+                  <img src={a.share.ratings.drinks.photo_url} alt={a.share.ratings.drinks.name} className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-stone-100 text-sm">
+                    <span className="font-semibold">{memberName(a.share.shared_by)}</span> teilte eine Bewertung
+                  </p>
+                  <p className="text-amber-400 font-medium truncate">{a.share.ratings?.drinks?.name ?? '—'}</p>
+                  <p className="text-stone-600 text-xs mt-0.5">
+                    {new Date(a.share.shared_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+                {a.share.ratings?.overall != null && (
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xl font-bold text-amber-400">{a.share.ratings.overall}</p>
+                    <p className="text-xs text-stone-500">/10</p>
+                  </div>
+                )}
+              </Link>
+            ))
+          )}
+
+          {/* Post-Dialog */}
+          {showPost && (
+            <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50 p-4">
+              <div className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4">
+                <h3 className="text-lg font-bold text-stone-100">Was trinkst du gerade?</h3>
+
+                <div>
+                  <label className="text-sm text-stone-400 mb-1 block">Whisky aus Katalog wählen</label>
+                  <select value={sessionDrinkId} onChange={e => { setSessionDrinkId(e.target.value); setSessionDrinkName('') }}
+                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500">
+                    <option value="">— oder frei eingeben ↓</option>
+                    {allDrinks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
+                </div>
+
+                {!sessionDrinkId && (
+                  <div>
+                    <label className="text-sm text-stone-400 mb-1 block">Oder Name frei eingeben</label>
+                    <input value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
+                      placeholder="z. B. Lagavulin 16"
+                      className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-sm text-stone-400 mb-1 block">Nachricht (optional)</label>
+                  <input value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
+                    placeholder="z. B. Endlich geöffnet! 🎉"
+                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
+                </div>
+
+                {postError && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{postError}</p>}
+
+                <div className="flex gap-3">
+                  <button onClick={handlePost} disabled={posting || (!sessionDrinkId && !sessionDrinkName.trim())}
+                    className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
+                    {posting ? 'Wird gesendet…' : 'Teilen 🥃'}
+                  </button>
+                  <button onClick={() => { setShowPost(false); setPostError(null) }}
+                    className="bg-stone-800 text-stone-300 rounded-xl px-4">
+                    Abbrechen
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Archiv */}
       {tab === 'archiv' && (

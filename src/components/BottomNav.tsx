@@ -40,7 +40,7 @@ export default function BottomNav() {
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-stone-700 rounded-full mx-auto mb-2" />
-            <SheetItem icon="🥃" title="Live posten" sub="Teile, was du gerade trinkst" onClick={() => go('/?view=live')} />
+            <SheetItem icon="🥃" title="Live posten" sub="Teile in deiner Gruppe, was du gerade trinkst" onClick={openGroups} />
             <SheetItem icon="➕" title="Whisky hinzufügen" sub="Neuen Whisky in den Katalog" onClick={() => go('/add-whisky')} />
             <SheetItem icon="👥" title="Gruppe erstellen" sub="Starte eine neue Gruppe" onClick={() => go('/groups?create=1')} />
             <SheetItem icon="📋" title="Tasting erstellen" sub="In einer deiner Gruppen" onClick={() => go('/groups')} />
