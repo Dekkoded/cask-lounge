@@ -83,7 +83,7 @@ export default function GlobalLanding() {
         <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
           <button onClick={() => setView('ranking')}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${view === 'ranking' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-            Ranking
+            Global
           </button>
           <button onClick={() => setView('vitrine')}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
