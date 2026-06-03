@@ -45,14 +45,14 @@ export default function BottomNav() {
       )}
 
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-stone-950/95 backdrop-blur border-t border-stone-800/60 pb-[env(safe-area-inset-bottom)]">
-        <div className="max-w-2xl mx-auto flex items-end relative">
+        <div className="max-w-2xl mx-auto flex h-16 items-stretch">
           {tab(isGlobal, '🌍', 'Global', () => go('/'))}
           {tab(isVitrine, '🥃', 'Sammlung', () => go('/?view=vitrine'))}
-          <div className="flex-1 relative flex justify-center">
+          <div className="flex-1 flex justify-center items-start">
             <button
               onClick={() => setSheetOpen(true)}
               aria-label="Hinzufügen"
-              className="absolute -top-5 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-3xl font-light flex items-center justify-center shadow-lg shadow-black/40"
+              className="-mt-5 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-4xl font-light leading-none flex items-center justify-center shadow-lg shadow-black/40 ring-4 ring-stone-950"
             >
               +
             </button>
