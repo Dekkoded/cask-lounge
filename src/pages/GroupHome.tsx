@@ -55,6 +55,7 @@ export default function GroupHome() {
 
   useEffect(() => {
     if (!id) return
+    localStorage.setItem('lastGroupId', id)
 
     supabase.from('groups').select('*').eq('id', id).single()
       .then(({ data }) => { if (data) setGroup(data) })

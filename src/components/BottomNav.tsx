@@ -11,10 +11,15 @@ export default function BottomNav() {
   const view = searchParams.get('view')
   const isGlobal = path === '/' && view !== 'vitrine' && view !== 'live'
   const isVitrine = path === '/' && view === 'vitrine'
-  const isTastings = path.startsWith('/groups')
-  const isProfil = path.startsWith('/profile')
+  const isTastings = path === '/groups'
+  const isGruppen = path.startsWith('/groups/')
 
   const go = (to: string) => { setSheetOpen(false); navigate(to) }
+
+  const openGroups = () => {
+    const last = localStorage.getItem('lastGroupId')
+    go(last ? `/groups/${last}` : '/groups')
+  }
 
   const tab = (active: boolean, icon: string, label: string, onClick: () => void) => (
     <button
@@ -58,7 +63,7 @@ export default function BottomNav() {
             </button>
           </div>
           {tab(isTastings, '📋', 'Tastings', () => go('/groups'))}
-          {tab(isProfil, '👤', 'Profil', () => go('/profile'))}
+          {tab(isGruppen, '👥', 'Gruppen', openGroups)}
         </div>
       </nav>
     </>
