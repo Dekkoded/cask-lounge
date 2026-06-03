@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
@@ -16,6 +16,16 @@ export default function AddWhisky() {
   const [photo, setPhoto] = useState<File | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [similar, setSimilar] = useState<{ id: string; name: string; producer: string | null }[]>([])
+
+  const checkDuplicates = async () => {
+    const q = name.trim()
+    if (q.length < 2) { setSimilar([]); return }
+    const { data } = await supabase.from('drinks')
+      .select('id, name, producer').eq('category', 'whisky')
+      .ilike('name', `%${q}%`).limit(4)
+    setSimilar(data ?? [])
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -81,9 +91,26 @@ export default function AddWhisky() {
             required
             value={name}
             onChange={e => setName(e.target.value)}
+            onBlur={checkDuplicates}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
             placeholder="z. B. Lagavulin 16"
           />
+          {similar.length > 0 && (
+            <div className="mt-2 bg-stone-800/60 border border-stone-700 rounded-lg p-3">
+              <p className="text-xs text-stone-400 mb-2">Gibt es evtl. schon:</p>
+              <div className="flex flex-col gap-1">
+                {similar.map(d => (
+                  <Link
+                    key={d.id}
+                    to={`/whisky/${d.id}`}
+                    className="text-sm text-amber-400 hover:text-amber-300 truncate"
+                  >
+                    {d.name}{d.producer ? ` · ${d.producer}` : ''}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">

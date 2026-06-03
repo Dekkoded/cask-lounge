@@ -125,9 +125,10 @@ export default function GlobalLanding() {
       (s.region ?? '').toLowerCase().includes(q))
   )
   const filteredVitrine = vitrine.filter(v =>
-    (v.drinks?.name ?? '').toLowerCase().includes(q) ||
-    (v.drinks?.producer ?? '').toLowerCase().includes(q) ||
-    (v.drinks?.region ?? '').toLowerCase().includes(q)
+    (!regionFilter || v.drinks?.region === regionFilter) &&
+    ((v.drinks?.name ?? '').toLowerCase().includes(q) ||
+      (v.drinks?.producer ?? '').toLowerCase().includes(q) ||
+      (v.drinks?.region ?? '').toLowerCase().includes(q))
   )
 
   return (
@@ -145,6 +146,12 @@ export default function GlobalLanding() {
           className="bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 text-sm"
         >
           Gruppen
+        </button>
+        <button
+          onClick={() => navigate('/members')}
+          className="bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 text-sm"
+        >
+          Mitglieder
         </button>
       </div>
 
@@ -181,8 +188,8 @@ export default function GlobalLanding() {
         />
       )}
 
-      {/* Region-Filter (nur Global) */}
-      {view === 'ranking' && regions.length > 1 && (
+      {/* Region-Filter (Global & Vitrine) */}
+      {view !== 'live' && regions.length > 1 && (
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mt-2 [&::-webkit-scrollbar]:hidden">
           <button onClick={() => setRegionFilter(null)}
             className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === null ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
