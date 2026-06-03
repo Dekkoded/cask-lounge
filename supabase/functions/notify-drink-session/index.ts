@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
 
     const drinkerName = drinker?.display_name ?? drinker?.username ?? 'Jemand'
     const title = `${drinkerName} trinkt gerade 🥃`
-    const body = `${drinkName ?? 'einen Whisky'} · ${group?.name ?? ''}`
+    const body = `${drinkName ?? 'einen Whisky'}`
 
     // VAPID konfigurieren
     webpush.setVapidDetails(
