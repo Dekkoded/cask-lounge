@@ -1,0 +1,28 @@
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+
+export default function TopBar() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+
+  if (!user) return null
+
+  return (
+    <div className="sticky top-0 z-40 bg-stone-950/90 backdrop-blur border-b border-stone-800/50">
+      <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
+        <button
+          onClick={() => navigate('/')}
+          className="text-amber-400 font-bold text-lg tracking-tight"
+        >
+          Cask Lounge
+        </button>
+        <button
+          onClick={() => navigate('/profile')}
+          className="text-stone-500 hover:text-stone-300 text-sm transition-colors"
+        >
+          Profil
+        </button>
+      </div>
+    </div>
+  )
+}

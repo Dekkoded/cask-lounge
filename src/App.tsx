@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import InstallPrompt from './components/InstallPrompt'
+import TopBar from './components/TopBar'
 import GlobalLanding from './pages/GlobalLanding'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -17,6 +18,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <InstallPrompt />
+        <TopBar />
         <Routes>
           {/* Öffentlich */}
           <Route path="/" element={<GlobalLanding />} />

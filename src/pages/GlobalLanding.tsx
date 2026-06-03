@@ -32,7 +32,6 @@ export default function GlobalLanding() {
     <div className="max-w-2xl mx-auto p-4">
       {/* Header */}
       <div className="flex items-center justify-between py-4 mb-6">
-        <h1 className="text-2xl font-bold text-amber-400">Cask Lounge</h1>
         <div className="flex items-center gap-3">
           {user ? (
             <>
@@ -47,12 +46,6 @@ export default function GlobalLanding() {
                 className="bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 text-sm"
               >
                 Gruppen
-              </button>
-              <button
-                onClick={() => navigate('/profile')}
-                className="text-stone-500 hover:text-stone-300 text-sm"
-              >
-                Profil
               </button>
             </>
           ) : (
