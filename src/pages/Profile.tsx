@@ -101,10 +101,18 @@ export default function Profile() {
     setTimeout(() => setEmailMsg(null), 4000)
   }
 
+  const [deleting, setDeleting] = useState(false)
+
   const handleDeleteAccount = async () => {
     if (!user) return
-    await supabase.from('profiles').delete().eq('id', user.id)
-    await supabase.auth.admin
+    setDeleting(true)
+    setError(null)
+    const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' })
+    if (error) {
+      setError('Konto konnte nicht gelöscht werden: ' + error.message)
+      setDeleting(false)
+      return
+    }
     await signOut()
     navigate('/')
   }
@@ -224,12 +232,12 @@ export default function Profile() {
             <div className="bg-red-950 border border-red-800 rounded-xl p-4 flex flex-col gap-3">
               <p className="text-red-300 text-sm font-medium">Bist du sicher? Dies kann nicht rückgängig gemacht werden.</p>
               <div className="flex gap-2">
-                <button onClick={handleDeleteAccount}
-                  className="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-lg px-4 py-2 text-sm">
-                  Ja, Account löschen
+                <button onClick={handleDeleteAccount} disabled={deleting}
+                  className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm">
+                  {deleting ? 'Wird gelöscht…' : 'Ja, Account löschen'}
                 </button>
-                <button onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 bg-stone-700 hover:bg-stone-600 text-stone-200 rounded-lg px-4 py-2 text-sm">
+                <button onClick={() => setShowDeleteConfirm(false)} disabled={deleting}
+                  className="flex-1 bg-stone-700 hover:bg-stone-600 disabled:opacity-50 text-stone-200 rounded-lg px-4 py-2 text-sm">
                   Abbrechen
                 </button>
               </div>
