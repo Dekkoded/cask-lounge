@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { lookupDistillery } from '../lib/distilleries'
+import type { MapPin } from '../components/DistilleryMap'
 import type { GlobalDrinkScore, Drink } from '../lib/types'
+
+const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
 type View = 'ranking' | 'vitrine'
 
@@ -70,6 +74,18 @@ export default function GlobalLanding() {
 
   const collectionValue = filteredVitrine.reduce((s, v) => s + (v.purchase_price ?? 0), 0)
   const pricedCount = filteredVitrine.filter(v => v.purchase_price != null).length
+
+  const vitrinePins = (() => {
+    const byProducer = new Map<string, MapPin>()
+    for (const v of filteredVitrine) {
+      const producer = v.drinks?.producer
+      const geo = lookupDistillery(producer ?? null)
+      if (!geo || !producer || !v.drinks) continue
+      if (!byProducer.has(producer)) byProducer.set(producer, { name: producer, geo, whiskies: [] })
+      byProducer.get(producer)!.whiskies.push({ id: v.drinks.id, name: v.drinks.name })
+    }
+    return [...byProducer.values()]
+  })()
 
   const headings: Record<View, string> = {
     ranking: 'Global',
@@ -216,6 +232,14 @@ export default function GlobalLanding() {
                   {collectionValue.toLocaleString('de-DE', { maximumFractionDigits: 0 })} €
                   <span className="text-stone-500 text-xs font-normal ml-1">({pricedCount})</span>
                 </span>
+              </div>
+            )}
+            {vitrinePins.length > 0 && (
+              <div>
+                <p className="text-sm font-medium text-stone-300 mb-2">Brennereien</p>
+                <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl animate-pulse" />}>
+                  <DistilleryMap pins={vitrinePins} heightClass="h-72" />
+                </Suspense>
               </div>
             )}
             {filteredVitrine.filter(v => v.drinks).map(v => (
