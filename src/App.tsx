@@ -12,6 +12,7 @@ const Signup = lazy(() => import('./pages/Signup'))
 const AddWhisky = lazy(() => import('./pages/AddWhisky'))
 const EditWhisky = lazy(() => import('./pages/EditWhisky'))
 const WhiskyDetail = lazy(() => import('./pages/WhiskyDetail'))
+const WhiskyMap = lazy(() => import('./pages/WhiskyMap'))
 const MemberProfile = lazy(() => import('./pages/MemberProfile'))
 const Members = lazy(() => import('./pages/Members'))
 const Groups = lazy(() => import('./pages/Groups'))
@@ -34,6 +35,7 @@ function AppShell() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/whisky/:id" element={<WhiskyDetail />} />
+            <Route path="/map" element={<WhiskyMap />} />
             <Route path="/user/:id" element={<MemberProfile />} />
             <Route path="/members" element={<Members />} />
             <Route path="/join/:code" element={<JoinGroup />} />
