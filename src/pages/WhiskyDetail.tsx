@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -6,6 +6,9 @@ import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
 import { amazonSearchUrl } from '../lib/affiliate'
+import { lookupDistillery } from '../lib/distilleries'
+
+const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
 const EMPTY_WHEELS = { nose: Array(12).fill(0), taste: Array(12).fill(0) }
 
@@ -226,6 +229,8 @@ export default function WhiskyDetail() {
     ? Math.round(publicRatings.reduce((s, r) => s + (r.overall ?? 0), 0) / publicRatings.length * 10) / 10
     : null
 
+  const geo = lookupDistillery(drink.producer)
+
   return (
     <div className="max-w-2xl mx-auto p-6 pb-24">
       <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">
@@ -323,6 +328,21 @@ export default function WhiskyDetail() {
                 )}
               </div>
             ))
+          )}
+
+          {geo && (
+            <div className="mt-3">
+              <p className="text-sm font-medium text-stone-300 mb-2">
+                Herkunft <span className="text-stone-500 font-normal">· {drink.producer}, {geo.country}</span>
+              </p>
+              <Suspense fallback={<div className="h-56 bg-stone-900 rounded-xl animate-pulse" />}>
+                <DistilleryMap
+                  pins={[{ name: drink.producer!, geo, whiskies: [{ id: drink.id, name: drink.name }] }]}
+                  heightClass="h-56"
+                  singleZoom={8}
+                />
+              </Suspense>
+            </div>
           )}
         </div>
       )}

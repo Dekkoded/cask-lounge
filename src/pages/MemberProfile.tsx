@@ -1,6 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { lookupDistillery } from '../lib/distilleries'
+import type { MapPin } from '../components/DistilleryMap'
+
+const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
 interface MemberInfo {
   username: string
@@ -11,6 +15,7 @@ interface MemberInfo {
 interface RatedDrink {
   id: string
   name: string
+  producer: string | null
   region: string | null
   photo_url: string | null
   overall: number | null
@@ -36,7 +41,7 @@ export default function MemberProfile() {
         setMember(data)
 
         supabase.from('ratings')
-          .select('overall, drinks(id, name, region, photo_url)')
+          .select('overall, drinks(id, name, producer, region, photo_url)')
           .eq('user_id', id).eq('is_public', true)
           .order('overall', { ascending: false, nullsFirst: false })
           .then(({ data: rows }) => {
@@ -78,6 +83,17 @@ export default function MemberProfile() {
 
   const name = member.display_name ?? member.username
 
+  const pins = (() => {
+    const byProducer = new Map<string, MapPin>()
+    for (const w of whiskies) {
+      const geo = lookupDistillery(w.producer)
+      if (!geo || !w.producer) continue
+      if (!byProducer.has(w.producer)) byProducer.set(w.producer, { name: w.producer, geo, whiskies: [] })
+      byProducer.get(w.producer)!.whiskies.push({ id: w.id, name: w.name })
+    }
+    return [...byProducer.values()]
+  })()
+
   return (
     <div className="max-w-lg mx-auto p-6 pb-24">
       <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← Zurück</button>
@@ -102,6 +118,15 @@ export default function MemberProfile() {
           <p className="text-stone-500 text-xs mt-1">Top-Region</p>
         </div>
       </div>
+
+      {pins.length > 0 && (
+        <div className="mb-6">
+          <p className="text-sm font-medium text-stone-300 mb-2">Brennereien</p>
+          <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl animate-pulse" />}>
+            <DistilleryMap pins={pins} heightClass="h-72" />
+          </Suspense>
+        </div>
+      )}
 
       <p className="text-sm font-medium text-stone-300 mb-2">Bewertete Whiskys</p>
       {whiskies.length === 0 ? (
