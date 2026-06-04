@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import LegalLinks from '../components/LegalLinks'
 
 export default function Signup() {
   const navigate = useNavigate()
@@ -97,6 +98,13 @@ export default function Signup() {
           >
             {loading ? 'Konto wird erstellt…' : 'Konto erstellen'}
           </button>
+
+          <p className="text-stone-500 text-xs text-center">
+            Mit der Registrierung akzeptierst du unsere{' '}
+            <Link to="/agb" className="text-stone-400 hover:text-stone-200 underline">AGB</Link>{' '}
+            und{' '}
+            <Link to="/datenschutz" className="text-stone-400 hover:text-stone-200 underline">Datenschutzerklärung</Link>.
+          </p>
         </form>
 
         <p className="text-stone-500 text-sm text-center mt-6">
@@ -105,6 +113,8 @@ export default function Signup() {
             Anmelden
           </Link>
         </p>
+
+        <LegalLinks className="mt-10" />
       </div>
     </div>
   )

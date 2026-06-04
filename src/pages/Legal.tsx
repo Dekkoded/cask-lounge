@@ -1,0 +1,108 @@
+import { Link } from 'react-router-dom'
+
+type Doc = 'datenschutz' | 'agb' | 'impressum'
+
+const TITLES: Record<Doc, string> = {
+  datenschutz: 'Datenschutzerklärung',
+  agb: 'Allgemeine Geschäftsbedingungen',
+  impressum: 'Impressum',
+}
+
+function H2({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-lg font-semibold text-stone-100 mt-6 mb-2">{children}</h2>
+}
+
+function P({ children, className = 'text-stone-300' }: { children: React.ReactNode; className?: string }) {
+  return <p className={`${className} text-sm leading-relaxed`}>{children}</p>
+}
+
+function Placeholder({ children }: { children: React.ReactNode }) {
+  return <span className="text-amber-400">{children}</span>
+}
+
+function Impressum() {
+  return (
+    <div className="flex flex-col gap-1">
+      <P>Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz):</P>
+      <P><Placeholder>[Name des Betreibers]</Placeholder></P>
+      <P><Placeholder>[Straße und Hausnummer]</Placeholder></P>
+      <P><Placeholder>[PLZ und Ort]</Placeholder></P>
+      <H2>Kontakt</H2>
+      <P>E-Mail: <Placeholder>[E-Mail-Adresse]</Placeholder></P>
+      <H2>Verantwortlich für den Inhalt</H2>
+      <P><Placeholder>[Name, Anschrift]</Placeholder></P>
+    </div>
+  )
+}
+
+function Datenschutz() {
+  return (
+    <div className="flex flex-col gap-1">
+      <H2>1. Verantwortlicher</H2>
+      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist <Placeholder>[Name und Anschrift des Betreibers]</Placeholder>, erreichbar unter <Placeholder>[E-Mail-Adresse]</Placeholder>.</P>
+
+      <H2>2. Welche Daten wir verarbeiten</H2>
+      <P>Bei der Registrierung erheben wir deine E-Mail-Adresse, deinen Benutzernamen und ein verschlüsselt gespeichertes Passwort. Inhalte, die du erstellst (Bewertungen, Notizen, Kommentare, Fotos, Gruppen), werden gespeichert, um den Dienst bereitzustellen.</P>
+
+      <H2>3. Zweck und Rechtsgrundlage</H2>
+      <P>Die Verarbeitung erfolgt zur Erfüllung des Nutzungsvertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie auf Basis deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), etwa für Push- und E-Mail-Benachrichtigungen.</P>
+
+      <H2>4. Hosting und Auftragsverarbeiter</H2>
+      <P>Die Anwendung wird über Vercel bereitgestellt; Daten werden bei Supabase (Postgres-Datenbank, Authentifizierung, Datei-Speicher) verarbeitet. Mit diesen Anbietern bestehen Verträge zur Auftragsverarbeitung.</P>
+
+      <H2>5. Speicherdauer</H2>
+      <P>Deine Daten werden gespeichert, solange dein Konto besteht. Bei Löschung deines Kontos werden die zugehörigen Daten entfernt.</P>
+
+      <H2>6. Deine Rechte</H2>
+      <P>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Dein Konto kannst du jederzeit in den Profileinstellungen löschen. Bei Fragen wende dich an <Placeholder>[E-Mail-Adresse]</Placeholder>.</P>
+
+      <H2>7. Widerruf von Einwilligungen</H2>
+      <P>Erteilte Einwilligungen (z. B. für Benachrichtigungen) kannst du jederzeit mit Wirkung für die Zukunft in deinem Profil widerrufen.</P>
+
+      <P className="text-stone-500">Dieser Text ist eine Vorlage und ersetzt keine Rechtsberatung. Bitte vor Veröffentlichung prüfen und die markierten Felder ausfüllen.</P>
+    </div>
+  )
+}
+
+function AGB() {
+  return (
+    <div className="flex flex-col gap-1">
+      <H2>1. Geltungsbereich</H2>
+      <P>Diese Bedingungen gelten für die Nutzung der Anwendung Cask Lounge (im Folgenden „Dienst“).</P>
+
+      <H2>2. Leistungsbeschreibung</H2>
+      <P>Der Dienst ermöglicht das Erfassen, Bewerten und Teilen von Whisky-Verkostungen sowie die Organisation in Gruppen. Es besteht kein Anspruch auf ständige Verfügbarkeit.</P>
+
+      <H2>3. Konto und Pflichten der Nutzer</H2>
+      <P>Du bist für die Geheimhaltung deiner Zugangsdaten verantwortlich. Inhalte, die du einstellst, dürfen keine Rechte Dritter verletzen und nicht gegen geltendes Recht verstoßen.</P>
+
+      <H2>4. Inhalte</H2>
+      <P>Du behältst die Rechte an deinen Inhalten und räumst uns das Recht ein, sie im Rahmen des Dienstes anzuzeigen. Wir dürfen rechtswidrige Inhalte entfernen.</P>
+
+      <H2>5. Verantwortung für Alkohol</H2>
+      <P>Der Dienst richtet sich an volljährige Personen. Bitte genieße Alkohol verantwortungsvoll.</P>
+
+      <H2>6. Haftung</H2>
+      <P>Wir haften nur für Vorsatz und grobe Fahrlässigkeit sowie im Rahmen zwingender gesetzlicher Vorschriften.</P>
+
+      <H2>7. Kündigung</H2>
+      <P>Du kannst dein Konto jederzeit über die Profileinstellungen löschen.</P>
+
+      <P className="text-stone-500">Dieser Text ist eine Vorlage und ersetzt keine Rechtsberatung. Bitte vor Veröffentlichung prüfen.</P>
+    </div>
+  )
+}
+
+export default function Legal({ doc }: { doc: Doc }) {
+  return (
+    <div className="max-w-2xl mx-auto p-6 pb-24">
+      <Link to="/" className="text-stone-400 hover:text-stone-200 text-sm">← Zurück</Link>
+      <h1 className="text-2xl font-bold text-stone-100 mt-4 mb-2">{TITLES[doc]}</h1>
+      <div className="mt-4">
+        {doc === 'impressum' && <Impressum />}
+        {doc === 'datenschutz' && <Datenschutz />}
+        {doc === 'agb' && <AGB />}
+      </div>
+    </div>
+  )
+}

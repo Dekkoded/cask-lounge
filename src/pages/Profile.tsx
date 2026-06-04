@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { usePushNotifications } from '../hooks/usePushNotifications'
 import { compressImage } from '../lib/image'
+import { openIntro } from '../components/IntroTour'
+import LegalLinks from '../components/LegalLinks'
 
 function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
   return (
@@ -282,9 +284,15 @@ export default function Profile() {
           )}
         </div>
 
+        <button onClick={openIntro} className="text-stone-500 hover:text-stone-300 text-sm text-center py-2 transition-colors">
+          Intro-Tour ansehen
+        </button>
+
         <button onClick={signOut} className="text-stone-500 hover:text-red-400 text-sm text-center py-2 transition-colors">
           Abmelden
         </button>
+
+        <LegalLinks className="mt-4" />
       </div>
     </div>
   )

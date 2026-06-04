@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import InstallPrompt from './components/InstallPrompt'
+import IntroTour from './components/IntroTour'
 import TopBar from './components/TopBar'
 import BottomNav from './components/BottomNav'
 import GlobalLanding from './pages/GlobalLanding'
@@ -19,12 +20,14 @@ const JoinGroup = lazy(() => import('./pages/JoinGroup'))
 const GroupHome = lazy(() => import('./pages/GroupHome'))
 const Tasting = lazy(() => import('./pages/Tasting'))
 const Profile = lazy(() => import('./pages/Profile'))
+const Legal = lazy(() => import('./pages/Legal'))
 
 function AppShell() {
   const { user } = useAuth()
   return (
     <>
       <InstallPrompt />
+      <IntroTour />
       <TopBar />
       <main className={user ? 'pb-20' : ''}>
         <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-stone-500 text-sm">Lädt…</div>}>
@@ -37,6 +40,9 @@ function AppShell() {
             <Route path="/user/:id" element={<MemberProfile />} />
             <Route path="/members" element={<Members />} />
             <Route path="/join/:code" element={<JoinGroup />} />
+            <Route path="/impressum" element={<Legal doc="impressum" />} />
+            <Route path="/datenschutz" element={<Legal doc="datenschutz" />} />
+            <Route path="/agb" element={<Legal doc="agb" />} />
 
             {/* Geschützt */}
             <Route path="/add-whisky" element={<RequireAuth><AddWhisky /></RequireAuth>} />

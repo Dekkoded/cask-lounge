@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import LegalLinks from '../components/LegalLinks'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -100,6 +101,8 @@ export default function Login() {
             </button>
           </div>
         )}
+
+        <LegalLinks className="mt-10" />
       </div>
     </div>
   )
