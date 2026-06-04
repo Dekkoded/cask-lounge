@@ -14,6 +14,12 @@ export default function Signup() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
+  // Erscheint nur, wenn Supabase E-Mail-Bestätigung aktiv ist (signUp liefert dann keine Session).
+  const [awaitingCode, setAwaitingCode] = useState(false)
+  const [code, setCode] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [resendMsg, setResendMsg] = useState<string | null>(null)
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -25,7 +31,7 @@ export default function Signup() {
 
     setLoading(true)
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -33,22 +39,93 @@ export default function Signup() {
       },
     })
 
+    setLoading(false)
+
     if (error) {
       setError(error.message)
-      setLoading(false)
       return
     }
 
-    // Direkt nach Signup anmelden (Supabase bestätigt Session automatisch bei deaktivierter E-Mail-Bestätigung)
+    // Session vorhanden → E-Mail-Bestätigung ist deaktiviert, direkt rein.
+    // Keine Session → Bestätigung aktiv, 6-stelligen Code abfragen.
+    if (data.session) {
+      navigate(next ?? '/', { replace: true })
+    } else {
+      setAwaitingCode(true)
+    }
+  }
+
+  const handleVerify = async (e: FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setVerifying(true)
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code.trim(),
+      type: 'signup',
+    })
+
+    setVerifying(false)
+
+    if (error) {
+      setError(error.message)
+      return
+    }
+
     navigate(next ?? '/', { replace: true })
+  }
+
+  const handleResend = async () => {
+    setResendMsg(null)
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
+    setResendMsg(error ? 'Fehler: ' + error.message : 'Neuer Code gesendet.')
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-sm">
         <h1 className="text-3xl font-bold text-amber-400 mb-2 text-center">Cask Lounge</h1>
-        <p className="text-stone-400 text-center mb-8">Konto erstellen</p>
+        <p className="text-stone-400 text-center mb-8">{awaitingCode ? 'E-Mail bestätigen' : 'Konto erstellen'}</p>
 
+        {awaitingCode ? (
+          <form onSubmit={handleVerify} className="flex flex-col gap-4">
+            <p className="text-stone-400 text-sm text-center">
+              Wir haben dir einen 6-stelligen Code an <span className="text-stone-200">{email}</span> geschickt.
+            </p>
+
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              required
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-3 text-stone-100 text-center text-2xl tracking-[0.4em] font-mono focus:outline-none focus:border-amber-500"
+            />
+
+            {error && (
+              <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={verifying || code.length < 6}
+              className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors"
+            >
+              {verifying ? 'Wird geprüft…' : 'Bestätigen'}
+            </button>
+
+            <button type="button" onClick={handleResend}
+              className="text-stone-500 hover:text-stone-300 text-sm text-center transition-colors">
+              Code erneut senden
+            </button>
+            {resendMsg && <p className="text-amber-400 text-xs text-center">{resendMsg}</p>}
+          </form>
+        ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm text-stone-300 mb-1">Benutzername</label>
@@ -106,6 +183,7 @@ export default function Signup() {
             <Link to="/datenschutz" className="text-stone-400 hover:text-stone-200 underline">Datenschutzerklärung</Link>.
           </p>
         </form>
+        )}
 
         <p className="text-stone-500 text-sm text-center mt-6">
           Schon ein Konto?{' '}
