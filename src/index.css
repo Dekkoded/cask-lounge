@@ -19,17 +19,17 @@
    (Text auf Amber-Buttons). */
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-app: oklch(0.888 0.026 83);
-  --color-stone-50: oklch(0.165 0.013 60);
-  --color-stone-100: oklch(0.235 0.016 64);
-  --color-stone-200: oklch(0.300 0.018 68);
-  --color-stone-300: oklch(0.395 0.021 72);
-  --color-stone-400: oklch(0.465 0.024 74);
-  --color-stone-500: oklch(0.555 0.027 76);
-  --color-stone-600: oklch(0.680 0.030 78);
-  --color-stone-700: oklch(0.815 0.030 81);
-  --color-stone-800: oklch(0.902 0.026 83);
-  --color-stone-900: oklch(0.938 0.024 84);
+  --color-app: oklch(0.884 0.036 82);
+  --color-stone-50: oklch(0.205 0.018 64);
+  --color-stone-100: oklch(0.270 0.021 66);
+  --color-stone-200: oklch(0.335 0.023 69);
+  --color-stone-300: oklch(0.425 0.025 72);
+  --color-stone-400: oklch(0.495 0.027 74);
+  --color-stone-500: oklch(0.580 0.030 76);
+  --color-stone-600: oklch(0.695 0.033 78);
+  --color-stone-700: oklch(0.825 0.033 80);
+  --color-stone-800: oklch(0.912 0.030 82);
+  --color-stone-900: oklch(0.953 0.022 84);
 }
 
 body {
