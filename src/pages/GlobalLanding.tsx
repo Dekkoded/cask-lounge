@@ -169,7 +169,7 @@ export default function GlobalLanding() {
                   {rank + 1}
                 </span>
                 {s.photo_url ? (
-                  <img src={s.photo_url} alt={s.name} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={s.photo_url} alt={s.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}
@@ -253,7 +253,7 @@ export default function GlobalLanding() {
                 className="flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 {v.drinks!.photo_url ? (
-                  <img src={v.drinks!.photo_url} alt={v.drinks!.name} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={v.drinks!.photo_url} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}

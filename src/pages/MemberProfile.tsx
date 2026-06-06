@@ -148,7 +148,7 @@ export default function MemberProfile() {
           {whiskies.map((w, i) => (
             <Link key={w.id} to={`/whisky/${w.id}`} className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors">
               {w.photo_url ? (
-                <img src={w.photo_url} alt={w.name} className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                <img src={w.photo_url} alt={w.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
               ) : (
                 <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
               )}

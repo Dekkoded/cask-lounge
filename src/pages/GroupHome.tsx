@@ -425,7 +425,7 @@ export default function GroupHome() {
               >
                 <span className="text-2xl">⭐</span>
                 {a.share.ratings?.drinks?.photo_url ? (
-                  <img src={a.share.ratings.drinks.photo_url} alt={a.share.ratings.drinks.name} className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                  <img src={a.share.ratings.drinks.photo_url} alt={a.share.ratings.drinks.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
                 )}
@@ -519,7 +519,7 @@ export default function GroupHome() {
                 >
                   <span className="text-stone-600 font-mono text-sm w-5 text-center">{i + 1}</span>
                   {drink.photo_url ? (
-                    <img src={drink.photo_url} alt={drink.name} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <img src={drink.photo_url} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                   ) : (
                     <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                   )}

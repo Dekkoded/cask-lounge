@@ -188,7 +188,7 @@ export default function Compare() {
                     className="flex items-center gap-3 text-left rounded-lg p-2 hover:bg-stone-800 transition-colors"
                   >
                     {s.photo_url ? (
-                      <img src={s.photo_url} alt={s.name} className="w-10 h-10 object-cover rounded flex-shrink-0" />
+                      <img src={s.photo_url} alt={s.name} loading="lazy" decoding="async" className="w-10 h-10 object-cover rounded flex-shrink-0" />
                     ) : (
                       <div className="w-10 h-10 bg-stone-800 rounded flex items-center justify-center flex-shrink-0">🥃</div>
                     )}

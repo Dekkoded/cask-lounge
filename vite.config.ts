@@ -7,6 +7,22 @@ declare const process: { env: Record<string, string | undefined> }
 
 export default defineConfig({
   server: process.env.PORT ? { port: Number(process.env.PORT), strictPort: true } : undefined,
+  build: {
+    // Stabile Bibliotheken in eigene Chunks splitten: App-Code ändert sich
+    // häufig, diese Vendor-Chunks bleiben über Deploys hinweg im Cache und
+    // laden zudem parallel zum Haupt-Bundle.
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('@supabase')) return 'vendor-supabase'
+          if (id.includes('i18next')) return 'vendor-i18n'
+          if (id.includes('react-router') || id.includes('react-dom') || /node_modules\/react\//.test(id))
+            return 'vendor-react'
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwindcss(),
