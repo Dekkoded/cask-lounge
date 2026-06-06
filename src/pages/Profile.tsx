@@ -6,6 +6,7 @@ import { usePushNotifications } from '../hooks/usePushNotifications'
 import { compressImage } from '../lib/image'
 import { openIntro } from '../components/IntroTour'
 import LegalLinks from '../components/LegalLinks'
+import { getTheme, setTheme, type Theme } from '../lib/theme'
 
 function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
   return (
@@ -35,6 +36,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [stats, setStats] = useState<{ count: number; avg: number | null; topRegion: string | null } | null>(null)
+  const [theme, setThemeState] = useState<Theme>(getTheme())
   const { subscribed, loading: pushLoading, subscribe, unsubscribe } = usePushNotifications()
 
   useEffect(() => {
@@ -228,6 +230,30 @@ export default function Profile() {
           className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-3 transition-colors mt-2">
           {saving ? 'Wird gespeichert…' : saved ? '✓ Gespeichert!' : 'Speichern'}
         </button>
+
+        {/* Darstellung */}
+        <div className="border-t border-stone-800 pt-4 flex flex-col gap-3">
+          <p className="text-sm font-medium text-stone-300">Darstellung</p>
+          <div className="grid grid-cols-2 gap-2">
+            {([
+              { value: 'dark' as Theme, icon: '🌙', label: 'Dunkel' },
+              { value: 'light' as Theme, icon: '☀️', label: 'Hell' },
+            ]).map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => { setTheme(opt.value); setThemeState(opt.value) }}
+                className={`flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-medium transition-colors border ${
+                  theme === opt.value
+                    ? 'bg-amber-500 text-stone-950 border-amber-500'
+                    : 'bg-stone-900 text-stone-300 border-stone-700 hover:border-stone-600'
+                }`}
+              >
+                <span>{opt.icon}</span>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Benachrichtigungen */}
         <div className="border-t border-stone-800 pt-4 flex flex-col gap-3">

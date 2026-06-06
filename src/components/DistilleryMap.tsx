@@ -51,8 +51,8 @@ export default function DistilleryMap({
         {pins.map(p => (
           <Marker key={p.name} position={[p.geo.lat, p.geo.lng]} icon={pinIcon}>
             <Popup>
-              <p className="font-bold text-stone-900">{p.name}</p>
-              <p className="text-stone-500 text-xs mb-1">{p.geo.country}</p>
+              <p className="font-bold text-stone-950">{p.name}</p>
+              <p className="text-stone-950/60 text-xs mb-1">{p.geo.country}</p>
               <div className="flex flex-col gap-0.5">
                 {p.whiskies.map(w => (
                   <Link key={w.id} to={`/whisky/${w.id}`} className="text-amber-700 hover:underline text-sm">

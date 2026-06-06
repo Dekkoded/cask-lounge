@@ -49,7 +49,7 @@ export default function BottomNav() {
         </div>
       )}
 
-      <nav className="fixed bottom-0 inset-x-0 z-40 bg-stone-950/95 backdrop-blur border-t border-stone-800/60 pb-[env(safe-area-inset-bottom)]">
+      <nav className="fixed bottom-0 inset-x-0 z-40 bg-app/95 backdrop-blur border-t border-stone-800/60 pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-2xl mx-auto flex h-16 items-stretch">
           {tab(isGlobal, '🌍', 'Global', () => go('/'))}
           {tab(isVitrine, '🥃', 'Sammlung', () => go('/?view=vitrine'))}
@@ -57,7 +57,7 @@ export default function BottomNav() {
             <button
               onClick={() => setSheetOpen(true)}
               aria-label="Hinzufügen"
-              className="-mt-5 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-4xl font-light leading-none flex items-center justify-center shadow-lg shadow-black/40 ring-4 ring-stone-950"
+              className="-mt-5 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-4xl font-light leading-none flex items-center justify-center shadow-lg shadow-black/40 ring-4 ring-app"
             >
               +
             </button>

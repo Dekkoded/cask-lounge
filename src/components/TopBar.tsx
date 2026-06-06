@@ -6,7 +6,7 @@ export default function TopBar() {
   const { user } = useAuth()
 
   return (
-    <div className="sticky top-0 z-40 bg-stone-950/90 backdrop-blur border-b border-stone-800/50">
+    <div className="sticky top-0 z-40 bg-app/90 backdrop-blur border-b border-stone-800/50">
       <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}

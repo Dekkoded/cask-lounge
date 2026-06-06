@@ -8,6 +8,18 @@
     <meta name="theme-color" content="#1c1917" />
     <meta name="description" content="Tasting-Bewertungen & Gruppen" />
     <title>Cask Lounge</title>
+    <script>
+      // Theme vor dem ersten Paint setzen, um Flackern zu vermeiden.
+      (function () {
+        try {
+          if (localStorage.getItem('cl_theme') === 'light') {
+            document.documentElement.dataset.theme = 'light'
+            var m = document.querySelector('meta[name="theme-color"]')
+            if (m) m.setAttribute('content', '#fafaf9')
+          }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

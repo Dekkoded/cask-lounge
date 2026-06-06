@@ -1,10 +1,35 @@
 @import "tailwindcss";
 
+/* App-Hintergrund-Token: dunkel im Dark Mode, hell im Light Mode.
+   Eigener Token, weil stone-950 als dunkler Text auf Amber-Buttons
+   (text-stone-950) erhalten bleiben muss und nicht umkippen darf. */
+@theme {
+  --color-app: oklch(0.147 0.004 49.25);
+}
+
 :root {
   color-scheme: dark;
 }
 
+/* Light Mode: stone-Skala gespiegelt (hell <-> dunkel), damit alle
+   bestehenden bg-/text-/border-stone-* Utilities automatisch umkippen.
+   stone-950 bleibt bewusst dunkel (Text auf Amber). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-app: oklch(0.985 0.001 106.423);
+  --color-stone-50: oklch(0.147 0.004 49.25);
+  --color-stone-100: oklch(0.216 0.006 56.043);
+  --color-stone-200: oklch(0.268 0.007 34.298);
+  --color-stone-300: oklch(0.374 0.01 67.558);
+  --color-stone-400: oklch(0.444 0.011 73.639);
+  --color-stone-500: oklch(0.553 0.013 58.071);
+  --color-stone-600: oklch(0.709 0.01 56.259);
+  --color-stone-700: oklch(0.869 0.005 56.366);
+  --color-stone-800: oklch(0.923 0.003 48.717);
+  --color-stone-900: oklch(0.97 0.001 106.424);
+}
+
 body {
-  @apply bg-stone-950 text-stone-100 min-h-screen;
+  @apply bg-app text-stone-100 min-h-screen;
   font-family: system-ui, -apple-system, sans-serif;
 }
