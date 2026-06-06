@@ -364,6 +364,85 @@ create index on public.tasting_ratings (tasting_id, drink_id);
 create index on public.drink_sessions (group_id, started_at desc);
 
 -- =====================================================================
+-- 8b. BATTLES  (Head-to-Head Abstimmung innerhalb einer Gruppe)
+--     Ersteller stellt 2+ Whiskys gegeneinander, Mitglieder stimmen ab
+--     (eine Stimme pro User pro Battle, jederzeit änderbar solange offen).
+-- =====================================================================
+create table public.battles (
+  id          uuid primary key default gen_random_uuid(),
+  group_id    uuid not null references public.groups(id) on delete cascade,
+  title       text not null,
+  created_by  uuid references public.profiles(id) on delete set null,
+  status      text not null default 'open',   -- 'open' | 'closed'
+  created_at  timestamptz not null default now()
+);
+alter table public.battles enable row level security;
+
+create policy "battles_select_member"
+  on public.battles for select using (public.is_group_member(group_id));
+create policy "battles_insert_member"
+  on public.battles for insert with check (
+    public.is_group_member(group_id) and created_by = (select auth.uid())
+  );
+create policy "battles_update_creator"
+  on public.battles for update using (created_by = (select auth.uid()));
+create policy "battles_delete_creator"
+  on public.battles for delete using (created_by = (select auth.uid()));
+
+-- Teilnehmende Whiskys (Reihenfolge per position)
+create table public.battle_drinks (
+  battle_id uuid not null references public.battles(id) on delete cascade,
+  drink_id  uuid not null references public.drinks(id) on delete cascade,
+  position  int not null default 0,
+  primary key (battle_id, drink_id)
+);
+alter table public.battle_drinks enable row level security;
+
+create policy "bd_select_member"
+  on public.battle_drinks for select using (
+    exists(select 1 from public.battles b where b.id = battle_id and public.is_group_member(b.group_id))
+  );
+create policy "bd_modify_creator"
+  on public.battle_drinks for all using (
+    exists(select 1 from public.battles b where b.id = battle_id and b.created_by = (select auth.uid()))
+  ) with check (
+    exists(select 1 from public.battles b where b.id = battle_id and b.created_by = (select auth.uid()))
+  );
+
+-- Stimmen: genau eine pro User pro Battle (Primary Key), Whisky änderbar.
+create table public.battle_votes (
+  battle_id  uuid not null references public.battles(id) on delete cascade,
+  drink_id   uuid not null references public.drinks(id) on delete cascade,
+  user_id    uuid not null references public.profiles(id) on delete cascade default auth.uid(),
+  created_at timestamptz not null default now(),
+  primary key (battle_id, user_id)
+);
+alter table public.battle_votes enable row level security;
+
+create policy "bv_select_member"
+  on public.battle_votes for select using (
+    exists(select 1 from public.battles b where b.id = battle_id and public.is_group_member(b.group_id))
+  );
+-- Abstimmen nur in offenen Battles der eigenen Gruppe, nur für sich selbst.
+create policy "bv_insert_own_member"
+  on public.battle_votes for insert with check (
+    user_id = (select auth.uid())
+    and exists(
+      select 1 from public.battles b
+      where b.id = battle_id and b.status = 'open' and public.is_group_member(b.group_id)
+    )
+  );
+create policy "bv_update_own"
+  on public.battle_votes for update using (user_id = (select auth.uid()))
+  with check (user_id = (select auth.uid()));
+create policy "bv_delete_own"
+  on public.battle_votes for delete using (user_id = (select auth.uid()));
+
+create index on public.battle_drinks (battle_id);
+create index on public.battle_votes (battle_id);
+alter publication supabase_realtime add table public.battle_votes;
+
+-- =====================================================================
 -- 9. VIEW: globale Getränke-Bestenliste (Landing Page)
 -- =====================================================================
 create or replace view public.global_drink_scores as

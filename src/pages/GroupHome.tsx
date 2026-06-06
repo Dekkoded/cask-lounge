@@ -60,7 +60,13 @@ interface Tasting {
   hosted_by: string
 }
 
-type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'mitglieder'
+interface BattleListItem {
+  id: string
+  title: string
+  status: string
+}
+
+type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'battles' | 'mitglieder'
 
 export default function GroupHome() {
   const { t } = useTranslation()
@@ -72,6 +78,7 @@ export default function GroupHome() {
   const [members, setMembers] = useState<Member[]>([])
   const [archive, setArchive] = useState<ArchiveDrink[]>([])
   const [tastings, setTastings] = useState<Tasting[]>([])
+  const [battles, setBattles] = useState<BattleListItem[]>([])
   const [sessions, setSessions] = useState<GroupSession[]>([])
   const [ratingShares, setRatingShares] = useState<RatingShare[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
@@ -82,6 +89,12 @@ export default function GroupHome() {
   const [tastingTitle, setTastingTitle] = useState('')
   const [tastingDate, setTastingDate] = useState('')
   const [creatingTasting, setCreatingTasting] = useState(false)
+  const [showNewBattle, setShowNewBattle] = useState(false)
+  const [battleTitle, setBattleTitle] = useState('')
+  const [battleDrinkIds, setBattleDrinkIds] = useState<string[]>([])
+  const [battleSearch, setBattleSearch] = useState('')
+  const [creatingBattle, setCreatingBattle] = useState(false)
+  const [battleError, setBattleError] = useState<string | null>(null)
 
   // "Ich trinke gerade" posting
   const [allDrinks, setAllDrinks] = useState<{ id: string; name: string }[]>([])
@@ -106,6 +119,9 @@ export default function GroupHome() {
 
     supabase.from('tastings').select('*').eq('group_id', id).order('created_at', { ascending: false })
       .then(({ data }) => { setTastings(data ?? []) })
+
+    supabase.from('battles').select('id, title, status').eq('group_id', id).order('created_at', { ascending: false })
+      .then(({ data }) => { setBattles((data as BattleListItem[]) ?? []) })
 
     supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
       .then(({ data }) => setAllDrinks(data ?? []))
@@ -272,6 +288,32 @@ export default function GroupHome() {
     if (!error && data) navigate(`/groups/${id}/tasting/${data.id}`)
   }
 
+  const toggleBattleDrink = (drinkId: string) =>
+    setBattleDrinkIds(prev => prev.includes(drinkId) ? prev.filter(x => x !== drinkId) : [...prev, drinkId])
+
+  const handleCreateBattle = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!user || !id) return
+    if (battleDrinkIds.length < 2) { setBattleError(t('battle.selectAtLeastTwo')); return }
+    setCreatingBattle(true)
+    setBattleError(null)
+    const { data, error } = await supabase.from('battles').insert({
+      group_id: id,
+      title: battleTitle.trim(),
+      created_by: user.id,
+      status: 'open',
+    }).select('id').single()
+    if (error || !data) {
+      setCreatingBattle(false)
+      setBattleError(t('battle.createError', { message: error?.message ?? '' }))
+      return
+    }
+    const rows = battleDrinkIds.map((drink_id, position) => ({ battle_id: data.id, drink_id, position }))
+    await supabase.from('battle_drinks').insert(rows)
+    setCreatingBattle(false)
+    navigate(`/groups/${id}/battle/${data.id}`)
+  }
+
   const handleRemoveMember = async (userId: string) => {
     if (!id) return
     await supabase.from('group_members').delete().eq('group_id', id).eq('user_id', userId)
@@ -363,12 +405,12 @@ export default function GroupHome() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['aktivitaet', 'archiv', 'tastings', 'mitglieder'] as Tab[]).map(tabKey => (
+        {(['aktivitaet', 'archiv', 'tastings', 'battles', 'mitglieder'] as Tab[]).map(tabKey => (
           <button key={tabKey} onClick={() => setTab(tabKey)}
             className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors ${
               tab === tabKey ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'
             }`}>
-            {tabKey === 'aktivitaet' ? t('groups.tabs.activity') : tabKey === 'archiv' ? t('groups.tabs.archive') : tabKey === 'tastings' ? t('groups.tabs.tastings') : t('groups.tabs.members')}
+            {tabKey === 'aktivitaet' ? t('groups.tabs.activity') : tabKey === 'archiv' ? t('groups.tabs.archive') : tabKey === 'tastings' ? t('groups.tabs.tastings') : tabKey === 'battles' ? t('battle.tab') : t('groups.tabs.members')}
           </button>
         ))}
       </div>
@@ -594,6 +636,92 @@ export default function GroupHome() {
                   className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5"
                 >
                   {creatingTasting ? t('groups.creatingTasting') : t('groups.createTasting')}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Battles */}
+      {tab === 'battles' && (
+        <div className="flex flex-col gap-3">
+          {battles.length === 0 && (
+            <p className="text-stone-500 text-center py-8">
+              {t('battle.noBattles')}
+              <br />
+              <span className="text-sm">{t('battle.noBattlesSub')}</span>
+            </p>
+          )}
+          {battles.map(b => (
+            <Link
+              key={b.id}
+              to={`/groups/${id}/battle/${b.id}`}
+              className="flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
+            >
+              <p className="font-semibold text-stone-100 flex items-center gap-2"><span>⚔️</span>{b.title}</p>
+              <span className={`text-xs rounded-full px-3 py-1 ${b.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                {b.status === 'closed' ? t('battle.closed') : t('battle.open')}
+              </span>
+            </Link>
+          ))}
+
+          {/* Neues Battle erstellen */}
+          <div className="bg-stone-900 rounded-2xl p-5 mt-2">
+            <button
+              onClick={() => setShowNewBattle(v => !v)}
+              className="w-full text-left font-semibold text-stone-200 flex justify-between items-center"
+            >
+              <span>{t('battle.newBattle')}</span>
+              <span className="text-stone-500">{showNewBattle ? '▲' : '▼'}</span>
+            </button>
+            {showNewBattle && (
+              <form onSubmit={handleCreateBattle} className="flex flex-col gap-3 mt-4">
+                <input
+                  required
+                  value={battleTitle}
+                  onChange={e => setBattleTitle(e.target.value)}
+                  placeholder={t('battle.titlePlaceholder')}
+                  className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
+                />
+                <p className="text-sm text-stone-400">
+                  {t('battle.pickDrinks')}
+                  {battleDrinkIds.length > 0 && <span className="text-amber-400"> · {t('battle.selected')}: {battleDrinkIds.length}</span>}
+                </p>
+                <input
+                  type="search"
+                  value={battleSearch}
+                  onChange={e => setBattleSearch(e.target.value)}
+                  placeholder={t('battle.searchPlaceholder')}
+                  className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
+                />
+                <div className="max-h-56 overflow-y-auto flex flex-col gap-1 -mt-1">
+                  {allDrinks
+                    .filter(d => d.name.toLowerCase().includes(battleSearch.toLowerCase()))
+                    .map(d => {
+                      const sel = battleDrinkIds.includes(d.id)
+                      return (
+                        <button
+                          type="button"
+                          key={d.id}
+                          onClick={() => toggleBattleDrink(d.id)}
+                          className={`flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                            sel ? 'bg-amber-500/15 text-amber-300' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
+                          }`}
+                        >
+                          <span className="truncate">{d.name}</span>
+                          <span className="flex-shrink-0 ml-2">{sel ? '✓' : '+'}</span>
+                        </button>
+                      )
+                    })}
+                </div>
+                {battleError && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{battleError}</p>}
+                <button
+                  type="submit"
+                  disabled={creatingBattle || battleDrinkIds.length < 2 || !battleTitle.trim()}
+                  className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5"
+                >
+                  {creatingBattle ? t('battle.creating') : t('battle.create')}
                 </button>
               </form>
             )}

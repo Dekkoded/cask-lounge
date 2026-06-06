@@ -23,6 +23,7 @@ const Tasting = lazy(() => import('./pages/Tasting'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Legal = lazy(() => import('./pages/Legal'))
 const Compare = lazy(() => import('./pages/Compare'))
+const Battle = lazy(() => import('./pages/Battle'))
 
 function AppShell() {
   const { user } = useAuth()
@@ -54,6 +55,7 @@ function AppShell() {
             <Route path="/groups" element={<RequireAuth><Groups /></RequireAuth>} />
             <Route path="/groups/:id" element={<RequireAuth><GroupHome /></RequireAuth>} />
             <Route path="/groups/:id/tasting/:tid" element={<RequireAuth><Tasting /></RequireAuth>} />
+            <Route path="/groups/:id/battle/:bid" element={<RequireAuth><Battle /></RequireAuth>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
             {/* Fallback */}

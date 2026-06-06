@@ -15,6 +15,7 @@ import deTasting from './locales/de/tasting.json'
 import deProfile from './locales/de/profile.json'
 import deMember from './locales/de/member.json'
 import deCompare from './locales/de/compare.json'
+import deBattle from './locales/de/battle.json'
 
 import enCommon from './locales/en/common.json'
 import enAuth from './locales/en/auth.json'
@@ -25,6 +26,7 @@ import enTasting from './locales/en/tasting.json'
 import enProfile from './locales/en/profile.json'
 import enMember from './locales/en/member.json'
 import enCompare from './locales/en/compare.json'
+import enBattle from './locales/en/battle.json'
 
 export const LANGUAGES = [
   { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
@@ -33,8 +35,8 @@ export const LANGUAGES = [
 
 export type LangCode = (typeof LANGUAGES)[number]['code']
 
-const de = { ...deCommon, ...deAuth, ...deLanding, ...deWhisky, ...deGroups, ...deTasting, ...deProfile, ...deMember, ...deCompare }
-const en = { ...enCommon, ...enAuth, ...enLanding, ...enWhisky, ...enGroups, ...enTasting, ...enProfile, ...enMember, ...enCompare }
+const de = { ...deCommon, ...deAuth, ...deLanding, ...deWhisky, ...deGroups, ...deTasting, ...deProfile, ...deMember, ...deCompare, ...deBattle }
+const en = { ...enCommon, ...enAuth, ...enLanding, ...enWhisky, ...enGroups, ...enTasting, ...enProfile, ...enMember, ...enCompare, ...enBattle }
 
 i18n
   .use(LanguageDetector)
