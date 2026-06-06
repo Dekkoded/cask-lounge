@@ -1,5 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { lookupDistillery } from '../lib/distilleries'
 import type { MapPin } from '../components/DistilleryMap'
@@ -24,6 +25,7 @@ interface RatedDrink {
 export default function MemberProfile() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [member, setMember] = useState<MemberInfo | null>(null)
   const [topRegion, setTopRegion] = useState<string | null>(null)
@@ -75,8 +77,8 @@ export default function MemberProfile() {
   if (notFound || !member) {
     return (
       <div className="max-w-lg mx-auto p-6">
-        <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← Zurück</button>
-        <p className="text-stone-400">Dieses Profil wurde nicht gefunden.</p>
+        <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← {t('common.back')}</button>
+        <p className="text-stone-400">{t('member.notFound')}</p>
       </div>
     )
   }
@@ -96,7 +98,7 @@ export default function MemberProfile() {
 
   return (
     <div className="max-w-lg mx-auto p-6 pb-24">
-      <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← Zurück</button>
+      <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← {t('common.back')}</button>
 
       <div className="flex flex-col items-center mb-8">
         {member.avatar_url ? (
@@ -111,26 +113,26 @@ export default function MemberProfile() {
       <div className="grid grid-cols-2 gap-2 mb-6">
         <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
           <p className="text-2xl font-bold text-amber-400">{whiskies.length}</p>
-          <p className="text-stone-500 text-xs mt-1">Bewertet</p>
+          <p className="text-stone-500 text-xs mt-1">{t('profile.stats.rated')}</p>
         </div>
         <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
           <p className="text-base font-bold text-amber-400 truncate">{topRegion ?? '—'}</p>
-          <p className="text-stone-500 text-xs mt-1">Top-Region</p>
+          <p className="text-stone-500 text-xs mt-1">{t('profile.stats.topRegion')}</p>
         </div>
       </div>
 
       {pins.length > 0 && (
         <div className="mb-6">
-          <p className="text-sm font-medium text-stone-300 mb-2">Brennereien</p>
+          <p className="text-sm font-medium text-stone-300 mb-2">{t('member.distilleries')}</p>
           <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl animate-pulse" />}>
             <DistilleryMap pins={pins} heightClass="h-72" />
           </Suspense>
         </div>
       )}
 
-      <p className="text-sm font-medium text-stone-300 mb-2">Bewertete Whiskys</p>
+      <p className="text-sm font-medium text-stone-300 mb-2">{t('member.ratedWhiskies')}</p>
       {whiskies.length === 0 ? (
-        <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">Noch keine öffentliche Bewertung.</div>
+        <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">{t('member.noPublicRating')}</div>
       ) : (
         <div className="flex flex-col gap-2">
           {whiskies.map((w, i) => (
@@ -145,7 +147,7 @@ export default function MemberProfile() {
                 <div className="flex items-center gap-2 text-sm text-stone-400">
                   {w.region && <span className="truncate">{w.region}</span>}
                   {i === 0 && w.overall != null && (
-                    <span className="text-amber-400 text-xs font-medium whitespace-nowrap">★ Favourite</span>
+                    <span className="text-amber-400 text-xs font-medium whitespace-nowrap">{t('member.favourite')}</span>
                   )}
                 </div>
               </div>

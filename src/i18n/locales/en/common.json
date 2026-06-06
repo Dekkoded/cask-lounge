@@ -1,0 +1,53 @@
+{
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "✓ Saved!",
+    "loading": "Loading…",
+    "skip": "Skip",
+    "next": "Next",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "nav": {
+    "appName": "Cask Lounge",
+    "login": "Sign in",
+    "register": "Sign up",
+    "profile": "Profile",
+    "global": "Global",
+    "collection": "Collection",
+    "tastings": "Tastings",
+    "groups": "Groups",
+    "add": "Add",
+    "sheet": {
+      "livePost": { "title": "Post live", "sub": "Share what you're drinking with your group" },
+      "addWhisky": { "title": "Add whisky", "sub": "New whisky to the catalogue" },
+      "createGroup": { "title": "Create group", "sub": "Start a new group" },
+      "createTasting": { "title": "Create tasting", "sub": "In one of your groups" }
+    }
+  },
+  "intro": {
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Let's go",
+    "steps": [
+      { "icon": "👋", "title": "Welcome to Cask Lounge", "body": "Discover, rate and share your favourite whiskies – on your own or with your groups." },
+      { "icon": "🥃", "title": "Rate & collect", "body": "Rate by nose, taste and finish. Every rating lands in your personal collection." },
+      { "icon": "🗺️", "title": "Your whisky map", "body": "See the distilleries in your collection on a world map – from Islay to Japan." },
+      { "icon": "👥", "title": "Groups & live sessions", "body": "Join groups, share what you're drinking and react with emojis and comments." }
+    ]
+  },
+  "install": {
+    "title": "Install Cask Lounge",
+    "subtitle": "Add to home screen",
+    "action": "Install"
+  },
+  "legal": {
+    "impressum": "Imprint",
+    "datenschutz": "Privacy",
+    "agb": "Terms"
+  }
+}

@@ -1,5 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import type { Drink, Rating } from '../lib/types'
@@ -23,6 +24,7 @@ export default function WhiskyDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user, isAdmin } = useAuth()
+  const { t } = useTranslation()
 
   const [drink, setDrink] = useState<Drink | null>(null)
   const [myRating, setMyRating] = useState<Rating | null>(null)
@@ -106,16 +108,16 @@ export default function WhiskyDetail() {
       await supabase.from('group_ratings')
         .delete().eq('group_id', groupId).eq('rating_id', myRating.id)
       setSharedGroups(s => { const n = new Set(s); n.delete(groupId); return n })
-      setShareMsg('Aus Gruppe entfernt.')
+      setShareMsg(t('whisky.removedFromGroup'))
     } else {
       const { error } = await supabase.from('group_ratings').insert({
         group_id: groupId,
         rating_id: myRating.id,
         shared_by: user.id,
       })
-      if (error) { setShareMsg('Fehler: ' + error.message); return }
+      if (error) { setShareMsg(t('whisky.shareError', { message: error.message })); return }
       setSharedGroups(s => new Set(s).add(groupId))
-      setShareMsg('In Gruppe geteilt!')
+      setShareMsg(t('whisky.sharedToGroup'))
     }
     setTimeout(() => setShareMsg(null), 2000)
   }
@@ -183,7 +185,7 @@ export default function WhiskyDetail() {
     setAddingCollection(false)
     if (error) { setError(error.message); return }
     if (data) setMyRating(data)
-    setCollectionMsg('✓ Zu deiner Sammlung hinzugefügt')
+    setCollectionMsg(t('whisky.addedToCollection'))
     setTimeout(() => setCollectionMsg(null), 2500)
   }
 
@@ -194,7 +196,7 @@ export default function WhiskyDetail() {
     await supabase.from('group_ratings').delete().eq('rating_id', myRating.id)
     const { error } = await supabase.from('ratings').delete().eq('id', myRating.id)
     setDeletingRating(false)
-    if (error) { setError('Löschen fehlgeschlagen: ' + error.message); return }
+    if (error) { setError(t('whisky.deleteRatingFailed', { message: error.message })); return }
     setMyRating(null)
     setNose(5); setTaste(5); setFinish(5); setColorIdx(null)
     setWheels(EMPTY_WHEELS); setNote(''); setIsPublic(true)
@@ -216,7 +218,7 @@ export default function WhiskyDetail() {
     }
     const { error } = await supabase.from('drinks').delete().eq('id', drink.id)
     setDeletingDrink(false)
-    if (error) { setError('Whisky konnte nicht gelöscht werden: ' + error.message); return }
+    if (error) { setError(t('whisky.deleteDrinkFailed', { message: error.message })); return }
     navigate('/')
   }
 
@@ -253,7 +255,7 @@ export default function WhiskyDetail() {
   return (
     <div className="max-w-2xl mx-auto p-6 pb-24">
       <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">
-        ← Zurück
+        ← {t('common.back')}
       </button>
 
       {/* Whisky-Header */}
@@ -268,13 +270,13 @@ export default function WhiskyDetail() {
           {drink.producer && <p className="text-stone-400">{drink.producer}</p>}
           <div className="flex gap-3 mt-1 text-sm text-stone-500 flex-wrap">
             {drink.region && <span>{drink.region}</span>}
-            {drink.age_years && <span>{drink.age_years} Jahre</span>}
+            {drink.age_years && <span>{drink.age_years} {t('whisky.years')}</span>}
             {drink.abv && <span>{drink.abv}%</span>}
           </div>
           {avgOverall != null && (
             <div className="mt-2 flex items-baseline gap-1">
               <span className="text-2xl font-bold text-amber-400">{avgOverall}</span>
-              <span className="text-stone-500 text-sm">/10 · {publicRatings.length} Bewertung{publicRatings.length !== 1 ? 'en' : ''}</span>
+              <span className="text-stone-500 text-sm">/10 · {t('whisky.ratingCount', { count: publicRatings.length })}</span>
             </div>
           )}
         </div>
@@ -287,20 +289,20 @@ export default function WhiskyDetail() {
         rel="noopener noreferrer sponsored"
         className="flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors mb-6"
       >
-        🛒 Auf Amazon suchen
+        {t('whisky.searchAmazon')}
       </a>
 
       {/* Zur Sammlung hinzufügen (ohne Bewertung) */}
       {user && (
         myRating ? (
-          <p className="text-center text-sm text-stone-500 mb-6 -mt-2">✓ In deiner Sammlung</p>
+          <p className="text-center text-sm text-stone-500 mb-6 -mt-2">{t('whisky.inYourCollection')}</p>
         ) : (
           <button
             onClick={addToCollection}
             disabled={addingCollection}
             className="flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors mb-6 disabled:opacity-50"
           >
-            {addingCollection ? 'Wird hinzugefügt…' : collectionMsg ?? '➕ Zur Sammlung hinzufügen'}
+            {addingCollection ? t('whisky.addingToCollection') : collectionMsg ?? t('whisky.addToCollectionIcon')}
           </button>
         )
       )}
@@ -309,12 +311,12 @@ export default function WhiskyDetail() {
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
         <button onClick={() => setTab('uebersicht')}
           className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'uebersicht' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-          Übersicht
+          {t('whisky.tabs.overview')}
         </button>
         {user && (
           <button onClick={() => setTab('bewertung')}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'bewertung' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-            {myRating?.overall != null ? 'Meine Bewertung' : '+ Bewerten'}
+            {myRating?.overall != null ? t('whisky.tabs.myRating') : t('whisky.tabs.rate')}
           </button>
         )}
       </div>
@@ -324,15 +326,15 @@ export default function WhiskyDetail() {
         <div className="flex flex-col gap-3">
           {publicRatings.length === 0 ? (
             <div className="text-center py-10">
-              <p className="text-stone-500 mb-3">Noch keine öffentlichen Bewertungen.</p>
+              <p className="text-stone-500 mb-3">{t('whisky.noPublicRatings')}</p>
               {user ? (
                 <button onClick={() => setTab('bewertung')}
                   className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm">
-                  Als Erster bewerten
+                  {t('whisky.beFirstToRate')}
                 </button>
               ) : (
                 <a href="/login" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm inline-block">
-                  Anmelden zum Bewerten
+                  {t('whisky.loginToRate')}
                 </a>
               )}
             </div>
@@ -342,7 +344,7 @@ export default function WhiskyDetail() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <Link to={`/user/${r.user_id}`} className="font-semibold text-stone-200 hover:text-amber-400 transition-colors">
-                      {r.profiles?.display_name ?? r.profiles?.username ?? 'Anonym'}
+                      {r.profiles?.display_name ?? r.profiles?.username ?? t('whisky.anonymous')}
                     </Link>
                     <p className="text-xs text-stone-500">
                       {new Date(r.updated_at).toLocaleDateString('de-DE')}
@@ -351,9 +353,9 @@ export default function WhiskyDetail() {
                   <span className="text-2xl font-bold text-amber-400">{r.overall}</span>
                 </div>
                 <div className="flex gap-4 text-sm text-stone-400 mb-2">
-                  {r.nose != null && <span>Nase <strong className="text-stone-300">{r.nose}</strong></span>}
-                  {r.taste != null && <span>Geschmack <strong className="text-stone-300">{r.taste}</strong></span>}
-                  {r.finish != null && <span>Abgang <strong className="text-stone-300">{r.finish}</strong></span>}
+                  {r.nose != null && <span>{t('whisky.nose')} <strong className="text-stone-300">{r.nose}</strong></span>}
+                  {r.taste != null && <span>{t('whisky.taste')} <strong className="text-stone-300">{r.taste}</strong></span>}
+                  {r.finish != null && <span>{t('whisky.finish')} <strong className="text-stone-300">{r.finish}</strong></span>}
                 </div>
                 {r.note && (
                   <p className="text-stone-400 text-sm italic border-l-2 border-amber-500/40 pl-3">
@@ -367,7 +369,7 @@ export default function WhiskyDetail() {
           {geo && (
             <div className="mt-3">
               <p className="text-sm font-medium text-stone-300 mb-2">
-                Herkunft <span className="text-stone-500 font-normal">· {drink.producer}, {geo.country}</span>
+                {t('whisky.origin')} <span className="text-stone-500 font-normal">· {drink.producer}, {geo.country}</span>
               </p>
               <Suspense fallback={<div className="h-56 bg-stone-900 rounded-xl animate-pulse" />}>
                 <DistilleryMap
@@ -385,7 +387,7 @@ export default function WhiskyDetail() {
       {tab === 'bewertung' && (
         <div className="bg-stone-900 rounded-2xl p-6 flex flex-col gap-6">
           <h2 className="text-lg font-semibold text-stone-200">
-            {myRating ? 'Bewertung bearbeiten' : 'Bewertung abgeben'}
+            {myRating ? t('whisky.editRating') : t('whisky.giveRating')}
           </h2>
 
           {/* Noten */}
@@ -393,7 +395,7 @@ export default function WhiskyDetail() {
             {(['nose', 'taste', 'finish'] as const).map(key => {
               const val = key === 'nose' ? nose : key === 'taste' ? taste : finish
               const setter = key === 'nose' ? setNose : key === 'taste' ? setTaste : setFinish
-              const label = key === 'nose' ? 'Nase' : key === 'taste' ? 'Geschmack' : 'Abgang'
+              const label = key === 'nose' ? t('whisky.nose') : key === 'taste' ? t('whisky.taste') : t('whisky.finish')
               return (
                 <div key={key}>
                   <div className="flex justify-between text-sm mb-1">
@@ -409,7 +411,7 @@ export default function WhiskyDetail() {
               )
             })}
             <div className="text-center text-stone-400 text-sm">
-              Gesamtnote: <span className="text-amber-400 font-bold text-lg">{((nose + taste + finish) / 3).toFixed(1)}</span>
+              {t('whisky.overallScore')} <span className="text-amber-400 font-bold text-lg">{((nose + taste + finish) / 3).toFixed(1)}</span>
             </div>
           </div>
 
@@ -417,18 +419,18 @@ export default function WhiskyDetail() {
           <WheelStepper wheels={wheels} onUpdate={updateWheel} />
 
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Notiz (optional)</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.note')}</label>
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
               rows={3}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"
-              placeholder="Torfig, leicht salzig, langer Abgang…"
+              placeholder={t('whisky.placeholders.note')}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Kaufpreis (€, optional)</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.purchasePrice')}</label>
             <input
               type="number"
               min="0"
@@ -436,9 +438,9 @@ export default function WhiskyDetail() {
               value={purchasePrice}
               onChange={e => setPurchasePrice(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="z. B. 65"
+              placeholder={t('whisky.placeholders.purchasePrice')}
             />
-            <p className="text-stone-600 text-xs mt-1">Nur für dich sichtbar – fließt in deinen Sammlungswert ein.</p>
+            <p className="text-stone-600 text-xs mt-1">{t('whisky.purchasePriceHint')}</p>
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -448,7 +450,7 @@ export default function WhiskyDetail() {
             >
               <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isPublic ? 'left-7' : 'left-1'}`} />
             </div>
-            <span className="text-sm text-stone-300">Öffentlich zeigen</span>
+            <span className="text-sm text-stone-300">{t('whisky.publicShow')}</span>
           </label>
 
           {error && (
@@ -460,13 +462,13 @@ export default function WhiskyDetail() {
             disabled={saving}
             className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-3 transition-colors"
           >
-            {saving ? 'Wird gespeichert…' : saved ? '✓ Gespeichert!' : 'Bewertung speichern'}
+            {saving ? t('common.saving') : saved ? t('common.saved') : t('whisky.saveRating')}
           </button>
 
           {/* In Gruppe teilen */}
           {myRating && groups.length > 0 && (
             <div className="border-t border-stone-800 pt-4">
-              <p className="text-sm font-medium text-stone-300 mb-3">Bewertung in Gruppe teilen</p>
+              <p className="text-sm font-medium text-stone-300 mb-3">{t('whisky.shareRatingInGroup')}</p>
               <div className="flex flex-col gap-2">
                 {groups.map(g => (
                   <button
@@ -480,7 +482,7 @@ export default function WhiskyDetail() {
                     }`}
                   >
                     <span>{g.name}</span>
-                    <span>{sharedGroups.has(g.id) ? '✓ Geteilt' : 'Teilen'}</span>
+                    <span>{sharedGroups.has(g.id) ? t('whisky.shared') : t('whisky.share')}</span>
                   </button>
                 ))}
               </div>
@@ -494,7 +496,7 @@ export default function WhiskyDetail() {
               disabled={deletingRating}
               className="text-red-500 hover:text-red-400 disabled:opacity-50 text-sm text-center py-2 transition-colors"
             >
-              {deletingRating ? 'Wird gelöscht…' : 'Meine Bewertung löschen'}
+              {deletingRating ? t('whisky.deletingRating') : t('whisky.deleteMyRating')}
             </button>
           )}
         </div>
@@ -503,35 +505,35 @@ export default function WhiskyDetail() {
       {/* Whisky verwalten (Ersteller solange ungeteilt, Admin immer) */}
       {user && (isAdmin || drink.created_by === user.id) && (
         <div className="mt-6 flex flex-col gap-3">
-          {isAdmin && <p className="text-amber-500/70 text-xs">Admin-Modus</p>}
+          {isAdmin && <p className="text-amber-500/70 text-xs">{t('whisky.adminMode')}</p>}
 
           {(isAdmin || !othersRated) && (
             <button onClick={() => navigate(`/whisky/${drink.id}/edit`)}
               className="text-stone-400 hover:text-stone-200 text-sm text-left transition-colors">
-              Whisky bearbeiten
+              {t('whisky.editWhisky')}
             </button>
           )}
 
           {othersRated && !isAdmin ? (
             <p className="text-stone-600 text-xs">
-              Dieser Whisky wurde bereits von anderen bewertet und kann daher nicht mehr bearbeitet oder gelöscht werden.
+              {t('whisky.lockedNotice')}
             </p>
           ) : !confirmDeleteDrink ? (
             <button onClick={() => setConfirmDeleteDrink(true)}
               className="text-red-500 hover:text-red-400 text-sm text-left transition-colors">
-              Diesen Whisky löschen
+              {t('whisky.deleteThisWhisky')}
             </button>
           ) : (
             <div className="bg-red-950 border border-red-800 rounded-xl p-4 flex flex-col gap-3">
-              <p className="text-red-300 text-sm font-medium">Whisky samt aller Bewertungen löschen? Das kann nicht rückgängig gemacht werden.</p>
+              <p className="text-red-300 text-sm font-medium">{t('whisky.deleteConfirm')}</p>
               <div className="flex gap-2">
                 <button onClick={handleDeleteDrink} disabled={deletingDrink}
                   className="flex-1 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold rounded-lg px-4 py-2 text-sm">
-                  {deletingDrink ? 'Wird gelöscht…' : 'Ja, löschen'}
+                  {deletingDrink ? t('whisky.deletingDrink') : t('whisky.confirmDelete')}
                 </button>
                 <button onClick={() => setConfirmDeleteDrink(false)} disabled={deletingDrink}
                   className="flex-1 bg-stone-700 hover:bg-stone-600 disabled:opacity-50 text-stone-200 rounded-lg px-4 py-2 text-sm">
-                  Abbrechen
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>

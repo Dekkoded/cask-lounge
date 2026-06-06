@@ -1,0 +1,39 @@
+{
+  "profile": {
+    "title": "My Profile",
+    "tapToChange": "Tap to change",
+    "change": "Change",
+    "stats": {
+      "rated": "Rated",
+      "avg": "Avg score",
+      "topRegion": "Top region"
+    },
+    "displayName": "Display name",
+    "displayNamePlaceholder": "How should your name be shown?",
+    "username": "Username",
+    "usernamePlaceholder": "username",
+    "usernameEmpty": "Username cannot be empty",
+    "usernameTaken": "This username is already taken",
+    "email": "Email",
+    "emailConfirmSent": "Confirmation email sent. Check your inbox.",
+    "photoUploadFailed": "Photo upload failed: ",
+    "appearance": "Appearance",
+    "dark": "Dark",
+    "light": "Light",
+    "language": "Language",
+    "notifications": "Notifications",
+    "emailNotif": "Notification by email",
+    "push": "Push",
+    "pushActive": "Active",
+    "pushInactive": "Notification on this device",
+    "settingSaveFailed": "Setting could not be saved: ",
+    "deleteAccount": "Delete account",
+    "deleteConfirm": "Are you sure? This cannot be undone.",
+    "deleteYes": "Yes, delete account",
+    "deleting": "Deleting…",
+    "deleteFailed": "Account could not be deleted: ",
+    "viewIntro": "View intro tour",
+    "signOut": "Sign out",
+    "error": "Error: "
+  }
+}

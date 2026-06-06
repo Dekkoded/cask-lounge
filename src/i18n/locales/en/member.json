@@ -1,0 +1,9 @@
+{
+  "member": {
+    "notFound": "This profile could not be found.",
+    "distilleries": "Distilleries",
+    "ratedWhiskies": "Rated whiskies",
+    "noPublicRating": "No public rating yet.",
+    "favourite": "★ Favourite"
+  }
+}

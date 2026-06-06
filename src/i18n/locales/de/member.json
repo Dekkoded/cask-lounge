@@ -1,0 +1,9 @@
+{
+  "member": {
+    "notFound": "Dieses Profil wurde nicht gefunden.",
+    "distilleries": "Brennereien",
+    "ratedWhiskies": "Bewertete Whiskys",
+    "noPublicRating": "Noch keine öffentliche Bewertung.",
+    "favourite": "★ Favourite"
+  }
+}

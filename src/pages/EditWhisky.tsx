@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
@@ -9,6 +10,7 @@ export default function EditWhisky() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const { user, isAdmin } = useAuth()
+  const { t } = useTranslation()
 
   const [drink, setDrink] = useState<Drink | null>(null)
   const [allowed, setAllowed] = useState<boolean | null>(null)
@@ -55,7 +57,7 @@ export default function EditWhisky() {
         .from('drink-photos')
         .upload(path, compressed, { contentType: 'image/jpeg' })
       if (uploadError) {
-        setError('Foto-Upload fehlgeschlagen: ' + uploadError.message)
+        setError(t('whisky.photoUploadFailed', { message: uploadError.message }))
         setLoading(false)
         return
       }
@@ -80,8 +82,8 @@ export default function EditWhisky() {
   if (allowed === false) {
     return (
       <div className="max-w-lg mx-auto p-6">
-        <button onClick={() => navigate(`/whisky/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← Zurück</button>
-        <p className="text-stone-400">Dieser Whisky kann nicht mehr bearbeitet werden, da bereits andere ihn bewertet haben.</p>
+        <button onClick={() => navigate(`/whisky/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← {t('common.back')}</button>
+        <p className="text-stone-400">{t('whisky.notEditable')}</p>
       </div>
     )
   }
@@ -100,51 +102,51 @@ export default function EditWhisky() {
   return (
     <div className="max-w-lg mx-auto p-6">
       <button onClick={() => navigate(`/whisky/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm mb-6 flex items-center gap-1">
-        ← Zurück
+        ← {t('common.back')}
       </button>
 
-      <h1 className="text-2xl font-bold text-amber-400 mb-6">Whisky bearbeiten</h1>
+      <h1 className="text-2xl font-bold text-amber-400 mb-6">{t('whisky.editTitle')}</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-sm text-stone-300 mb-1">Name *</label>
+          <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.nameRequired')}</label>
           <input required value={name} onChange={e => setName(e.target.value)}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-            placeholder="z. B. Lagavulin 16" />
+            placeholder={t('whisky.placeholders.name')} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Brennerei</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.producer')}</label>
             <input value={producer} onChange={e => setProducer(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="z. B. Lagavulin" />
+              placeholder={t('whisky.placeholders.producer')} />
           </div>
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Region</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.region')}</label>
             <input value={region} onChange={e => setRegion(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="z. B. Islay" />
+              placeholder={t('whisky.placeholders.region')} />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Alter (Jahre)</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.age')}</label>
             <input type="number" min="0" max="100" value={ageYears} onChange={e => setAgeYears(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="16" />
+              placeholder={t('whisky.placeholders.age')} />
           </div>
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Alkohol (%)</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.abv')}</label>
             <input type="number" min="0" max="100" step="0.1" value={abv} onChange={e => setAbv(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="43.0" />
+              placeholder={t('whisky.placeholders.abv')} />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm text-stone-300 mb-1">Foto ersetzen (optional)</label>
+          <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.photoReplace')}</label>
           <input type="file" accept="image/*" onChange={e => setPhoto(e.target.files?.[0] ?? null)}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-400 text-sm file:mr-3 file:bg-stone-700 file:text-stone-200 file:border-0 file:rounded file:px-2 file:py-1" />
         </div>
@@ -153,7 +155,7 @@ export default function EditWhisky() {
 
         <button type="submit" disabled={loading}
           className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors">
-          {loading ? 'Wird gespeichert…' : 'Änderungen speichern'}
+          {loading ? t('common.saving') : t('whisky.saveChanges')}
         </button>
       </form>
     </div>

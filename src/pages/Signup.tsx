@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import LegalLinks from '../components/LegalLinks'
 
 export default function Signup() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const next = searchParams.get('next')
@@ -25,7 +27,7 @@ export default function Signup() {
     setError(null)
 
     if (username.length < 3) {
-      setError('Benutzername muss mindestens 3 Zeichen lang sein.')
+      setError(t('auth.signup.usernameTooShort'))
       return
     }
 
@@ -79,19 +81,19 @@ export default function Signup() {
   const handleResend = async () => {
     setResendMsg(null)
     const { error } = await supabase.auth.resend({ type: 'signup', email })
-    setResendMsg(error ? 'Fehler: ' + error.message : 'Neuer Code gesendet.')
+    setResendMsg(error ? t('auth.verify.resendError', { message: error.message }) : t('auth.verify.resendSuccess'))
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-sm">
         <h1 className="text-3xl font-bold text-amber-400 mb-2 text-center">Cask Lounge</h1>
-        <p className="text-stone-400 text-center mb-8">{awaitingCode ? 'E-Mail bestätigen' : 'Konto erstellen'}</p>
+        <p className="text-stone-400 text-center mb-8">{awaitingCode ? t('auth.signup.confirmTitle') : t('auth.signup.createTitle')}</p>
 
         {awaitingCode ? (
           <form onSubmit={handleVerify} className="flex flex-col gap-4">
             <p className="text-stone-400 text-sm text-center">
-              Wir haben dir einen 6-stelligen Code an <span className="text-stone-200">{email}</span> geschickt.
+              {t('auth.verify.codeSentBefore')} <span className="text-stone-200">{email}</span> {t('auth.verify.codeSentAfter')}
             </p>
 
             <input
@@ -116,19 +118,19 @@ export default function Signup() {
               disabled={verifying || code.length < 6}
               className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors"
             >
-              {verifying ? 'Wird geprüft…' : 'Bestätigen'}
+              {verifying ? t('auth.verify.submitting') : t('auth.verify.submit')}
             </button>
 
             <button type="button" onClick={handleResend}
               className="text-stone-500 hover:text-stone-300 text-sm text-center transition-colors">
-              Code erneut senden
+              {t('auth.verify.resend')}
             </button>
             {resendMsg && <p className="text-amber-400 text-xs text-center">{resendMsg}</p>}
           </form>
         ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Benutzername</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('auth.signup.usernameLabel')}</label>
             <input
               type="text"
               required
@@ -139,7 +141,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="block text-sm text-stone-300 mb-1">E-Mail</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('auth.signup.emailLabel')}</label>
             <input
               type="email"
               required
@@ -150,7 +152,7 @@ export default function Signup() {
           </div>
 
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Passwort</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('auth.signup.passwordLabel')}</label>
             <input
               type="password"
               required
@@ -158,7 +160,7 @@ export default function Signup() {
               value={password}
               onChange={e => setPassword(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="mind. 6 Zeichen"
+              placeholder={t('auth.signup.passwordPlaceholder')}
             />
           </div>
 
@@ -173,22 +175,22 @@ export default function Signup() {
             disabled={loading}
             className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors"
           >
-            {loading ? 'Konto wird erstellt…' : 'Konto erstellen'}
+            {loading ? t('auth.signup.submitting') : t('auth.signup.submit')}
           </button>
 
           <p className="text-stone-500 text-xs text-center">
-            Mit der Registrierung akzeptierst du unsere{' '}
-            <Link to="/agb" className="text-stone-400 hover:text-stone-200 underline">AGB</Link>{' '}
-            und{' '}
-            <Link to="/datenschutz" className="text-stone-400 hover:text-stone-200 underline">Datenschutzerklärung</Link>.
+            {t('auth.signup.terms')}{' '}
+            <Link to="/agb" className="text-stone-400 hover:text-stone-200 underline">{t('auth.signup.termsLink')}</Link>{' '}
+            {t('auth.signup.and')}{' '}
+            <Link to="/datenschutz" className="text-stone-400 hover:text-stone-200 underline">{t('auth.signup.privacyLink')}</Link>.
           </p>
         </form>
         )}
 
         <p className="text-stone-500 text-sm text-center mt-6">
-          Schon ein Konto?{' '}
+          {t('auth.signup.haveAccount')}{' '}
           <Link to={next ? `/login?next=${encodeURIComponent(next)}` : '/login'} className="text-amber-400 hover:text-amber-300">
-            Anmelden
+            {t('auth.signup.loginLink')}
           </Link>
         </p>
 

@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -19,6 +20,7 @@ interface VitrineEntry {
 }
 
 export default function GlobalLanding() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -88,8 +90,8 @@ export default function GlobalLanding() {
   })()
 
   const headings: Record<View, string> = {
-    ranking: 'Global',
-    vitrine: 'Meine Sammlung',
+    ranking: t('landing.headingRanking'),
+    vitrine: t('landing.headingVitrine'),
   }
 
   return (
@@ -102,7 +104,7 @@ export default function GlobalLanding() {
         name="whisky-suche"
         value={search}
         onChange={e => setSearch(e.target.value)}
-        placeholder="Suchen nach Name, Brennerei, Region…"
+        placeholder={t('landing.searchPlaceholder')}
         autoComplete="off"
         readOnly={searchReadonly}
         onFocus={() => setSearchReadonly(false)}
@@ -114,7 +116,7 @@ export default function GlobalLanding() {
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mt-2 [&::-webkit-scrollbar]:hidden">
           <button onClick={() => setRegionFilter(null)}
             className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === null ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
-            Alle
+            {t('landing.allRegions')}
           </button>
           {regions.map(r => (
             <button key={r} onClick={() => setRegionFilter(r)}
@@ -143,13 +145,13 @@ export default function GlobalLanding() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-stone-500 mb-4">Noch keine Whiskys in der Datenbank.</p>
+            <p className="text-stone-500 mb-4">{t('landing.noWhiskies')}</p>
             {user && (
               <button
                 onClick={() => navigate('/add-whisky')}
                 className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
               >
-                Ersten Whisky hinzufügen
+                {t('landing.addFirstWhisky')}
               </button>
             )}
           </div>
@@ -175,7 +177,7 @@ export default function GlobalLanding() {
                     {[s.producer, s.region].filter(Boolean).join(' · ')}
                   </p>
                   <p className="text-xs text-stone-600 mt-0.5">
-                    {s.num_ratings} {s.num_ratings === 1 ? 'Bewertung' : 'Bewertungen'}
+                    {t('landing.ratings', { count: s.num_ratings })}
                   </p>
                 </div>
                 {s.avg_overall != null ? (
@@ -211,15 +213,15 @@ export default function GlobalLanding() {
           <div className="text-center py-12">
             <p className="text-stone-500 mb-4">
               {vitrine.length === 0
-                ? 'Du hast noch keine Whiskys bewertet.'
-                : 'Keine Treffer in deiner Vitrine.'}
+                ? t('landing.noRatedWhiskies')
+                : t('landing.noVitrineMatches')}
             </p>
             {vitrine.length === 0 && (
               <button
                 onClick={() => setView('ranking')}
                 className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
               >
-                Whiskys entdecken
+                {t('landing.discoverWhiskies')}
               </button>
             )}
           </div>
@@ -227,7 +229,7 @@ export default function GlobalLanding() {
           <div className="flex flex-col gap-3">
             {collectionValue > 0 && (
               <div className="bg-stone-900 rounded-xl px-4 py-3 flex items-baseline justify-between">
-                <span className="text-stone-400 text-sm">Sammlungswert</span>
+                <span className="text-stone-400 text-sm">{t('landing.collectionValue')}</span>
                 <span className="text-amber-400 font-bold">
                   {collectionValue.toLocaleString('de-DE', { maximumFractionDigits: 0 })} €
                   <span className="text-stone-500 text-xs font-normal ml-1">({pricedCount})</span>
@@ -236,7 +238,7 @@ export default function GlobalLanding() {
             )}
             {vitrinePins.length > 0 && (
               <div>
-                <p className="text-sm font-medium text-stone-300 mb-2">Brennereien</p>
+                <p className="text-sm font-medium text-stone-300 mb-2">{t('landing.distilleries')}</p>
                 <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl animate-pulse" />}>
                   <DistilleryMap pins={vitrinePins} heightClass="h-72" />
                 </Suspense>
@@ -259,7 +261,7 @@ export default function GlobalLanding() {
                     {[v.drinks!.producer, v.drinks!.region].filter(Boolean).join(' · ')}
                   </p>
                   <p className="text-xs text-stone-600 mt-0.5">
-                    Bewertet am {new Date(v.updated_at).toLocaleDateString('de-DE')}
+                    {t('landing.ratedOn', { date: new Date(v.updated_at).toLocaleDateString('de-DE') })}
                   </p>
                 </div>
                 {v.overall != null ? (

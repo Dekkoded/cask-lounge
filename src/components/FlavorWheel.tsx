@@ -1,6 +1,8 @@
-const LABELS = [
-  'Fruchtig', 'Floral', 'Würzig', 'Getreidig', 'Torfig', 'Schwefelig',
-  'Hefig', 'Nussig', 'Holzig', 'Weinig', 'Schoko', 'Rauchig',
+import { useTranslation } from 'react-i18next'
+
+const LABEL_KEYS = [
+  'fruity', 'floral', 'spicy', 'grainy', 'peaty', 'sulphury',
+  'yeasty', 'nutty', 'woody', 'winey', 'chocolate', 'smoky',
 ]
 
 // Großzügige ViewBox damit lange Labels (Getreidig, Schwefelig) nicht abgeschnitten werden
@@ -42,6 +44,8 @@ interface Props {
 }
 
 export default function FlavorWheel({ values, onChange, color = '#f59e0b', label }: Props) {
+  const { t } = useTranslation()
+  const LABELS = LABEL_KEYS.map(k => t(`whisky.flavors.${k}`))
   const vals = values.length === 12 ? values : Array(12).fill(0)
 
   const polygon = vals.map((v, i) => {
@@ -158,7 +162,7 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
 
       {/* Tipp-Text wenn editierbar */}
       {onChange && (
-        <p className="text-xs text-stone-600">Auf das Rad tippen zum Bearbeiten</p>
+        <p className="text-xs text-stone-600">{t('whisky.flavorWheelTip')}</p>
       )}
     </div>
   )

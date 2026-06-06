@@ -1,0 +1,22 @@
+{
+  "landing": {
+    "headingRanking": "Global",
+    "headingVitrine": "My Collection",
+    "searchPlaceholder": "Search by name, distillery, region…",
+    "allRegions": "All",
+    "noWhiskies": "No whiskies in the database yet.",
+    "addFirstWhisky": "Add the first whisky",
+    "ratings_one": "{{count}} rating",
+    "ratings_other": "{{count}} ratings",
+    "noRatedWhiskies": "You haven't rated any whiskies yet.",
+    "noVitrineMatches": "No matches in your showcase.",
+    "discoverWhiskies": "Discover whiskies",
+    "collectionValue": "Collection value",
+    "distilleries": "Distilleries",
+    "ratedOn": "Rated on {{date}}",
+    "homeTitle": "🥃 Whisky is Life",
+    "loggedInAs": "Logged in as",
+    "phase1Success": "Phase 1 successful — auth works!",
+    "signOut": "Sign out"
+  }
+}

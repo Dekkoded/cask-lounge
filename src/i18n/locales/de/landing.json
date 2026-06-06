@@ -1,0 +1,22 @@
+{
+  "landing": {
+    "headingRanking": "Global",
+    "headingVitrine": "Meine Sammlung",
+    "searchPlaceholder": "Suchen nach Name, Brennerei, Region…",
+    "allRegions": "Alle",
+    "noWhiskies": "Noch keine Whiskys in der Datenbank.",
+    "addFirstWhisky": "Ersten Whisky hinzufügen",
+    "ratings_one": "{{count}} Bewertung",
+    "ratings_other": "{{count}} Bewertungen",
+    "noRatedWhiskies": "Du hast noch keine Whiskys bewertet.",
+    "noVitrineMatches": "Keine Treffer in deiner Vitrine.",
+    "discoverWhiskies": "Whiskys entdecken",
+    "collectionValue": "Sammlungswert",
+    "distilleries": "Brennereien",
+    "ratedOn": "Bewertet am {{date}}",
+    "homeTitle": "🥃 Whisky is Life",
+    "loggedInAs": "Eingeloggt als",
+    "phase1Success": "Phase 1 erfolgreich — Auth funktioniert!",
+    "signOut": "Abmelden"
+  }
+}

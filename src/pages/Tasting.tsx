@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -43,6 +44,7 @@ interface RankEntry {
 }
 
 export default function Tasting() {
+  const { t } = useTranslation()
   const { id, tid } = useParams<{ id: string; tid: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -256,7 +258,7 @@ export default function Tasting() {
   return (
     <div className="max-w-lg mx-auto p-4 pb-24">
       <button onClick={() => navigate(`/groups/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm mb-4">
-        ← Gruppe
+        ← {t('tasting.backToGroup')}
       </button>
 
       <div className="flex items-start justify-between mb-2">
@@ -265,7 +267,7 @@ export default function Tasting() {
           {tasting.event_date && <p className="text-stone-500 text-sm">{tasting.event_date}</p>}
         </div>
         <span className={`text-xs rounded-full px-3 py-1 ${tasting.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
-          {tasting.status === 'closed' ? 'Abgeschlossen' : 'Offen'}
+          {tasting.status === 'closed' ? t('tasting.statusClosed') : t('tasting.statusOpen')}
         </span>
       </div>
 
@@ -273,10 +275,10 @@ export default function Tasting() {
         <div className="flex gap-3 mb-4 flex-wrap">
           <button onClick={() => setShowAddDrink(v => !v)}
             className="text-sm bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5">
-            + Whisky hinzufügen
+            {t('tasting.addWhisky')}
           </button>
           <button onClick={closeTasting} className="text-sm text-red-400 hover:text-red-300">
-            Tasting abschließen
+            {t('tasting.closeTasting')}
           </button>
         </div>
       )}
@@ -286,32 +288,32 @@ export default function Tasting() {
           <input
             value={drinkSearch}
             onChange={e => setDrinkSearch(e.target.value)}
-            placeholder="Whisky suchen…"
+            placeholder={t('tasting.searchWhisky')}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 mb-2"
           />
           {showNewDrinkForm && (
             <div className="flex flex-col gap-2 mb-3 bg-stone-800 rounded-xl p-4">
-              <p className="text-sm font-medium text-amber-400">Neuer Whisky: „{drinkSearch.trim()}"</p>
+              <p className="text-sm font-medium text-amber-400">{t('tasting.newWhisky', { name: drinkSearch.trim() })}</p>
               <div className="grid grid-cols-2 gap-2">
                 <input value={newProducer} onChange={e => setNewProducer(e.target.value)}
-                  placeholder="Brennerei" className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
+                  placeholder={t('tasting.producer')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
                 <input value={newRegion} onChange={e => setNewRegion(e.target.value)}
-                  placeholder="Region" className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
+                  placeholder={t('tasting.region')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
                 <input type="number" value={newAge} onChange={e => setNewAge(e.target.value)}
-                  placeholder="Alter (Jahre)" className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
+                  placeholder={t('tasting.age')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
                 <input type="number" step="0.1" value={newAbv} onChange={e => setNewAbv(e.target.value)}
-                  placeholder="Alkohol (%)" className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
+                  placeholder={t('tasting.abv')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
               </div>
               <input type="file" accept="image/*" onChange={e => setNewPhoto(e.target.files?.[0] ?? null)}
                 className="w-full bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-400 text-sm file:mr-3 file:bg-stone-600 file:text-stone-200 file:border-0 file:rounded file:px-2 file:py-1" />
               <div className="flex gap-2 mt-1">
                 <button onClick={createAndAddDrink} disabled={creatingDrink}
                   className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-3 py-2 text-sm">
-                  {creatingDrink ? 'Wird angelegt…' : 'Anlegen & hinzufügen'}
+                  {creatingDrink ? t('tasting.creating') : t('tasting.createAndAdd')}
                 </button>
                 <button onClick={() => setShowNewDrinkForm(false)}
                   className="bg-stone-700 hover:bg-stone-600 text-stone-300 rounded-lg px-3 py-2 text-sm">
-                  Abbrechen
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -339,7 +341,7 @@ export default function Tasting() {
                   {drinkSearch.trim() && !exactMatch && !showNewDrinkForm && (
                     <button onClick={() => setShowNewDrinkForm(true)}
                       className="text-left px-3 py-2 rounded-lg hover:bg-amber-500/20 text-amber-400 text-sm border border-dashed border-amber-500/30 mt-1">
-                      + „{drinkSearch.trim()}" neu anlegen…
+                      {t('tasting.createNew', { name: drinkSearch.trim() })}
                     </button>
                   )}
                 </>
@@ -351,10 +353,10 @@ export default function Tasting() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['rangliste', 'bewerten'] as const).map(t => (
-          <button key={t} onClick={() => setActiveTab(t)}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${activeTab === t ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-            {t === 'rangliste' ? '🏆 Rangliste' : '✏️ Bewerten'}
+        {(['rangliste', 'bewerten'] as const).map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)}
+            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${activeTab === tab ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
+            {tab === 'rangliste' ? t('tasting.tabRanking') : t('tasting.tabRate')}
           </button>
         ))}
       </div>
@@ -363,7 +365,7 @@ export default function Tasting() {
       {activeTab === 'rangliste' && (
         <div className="flex flex-col gap-3">
           {ranking.length === 0 ? (
-            <p className="text-stone-500 text-center py-8">Noch keine Bewertungen.</p>
+            <p className="text-stone-500 text-center py-8">{t('tasting.noRatings')}</p>
           ) : ranking.map((entry, i) => (
             <div key={entry.drink_id} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4">
               <span className="text-stone-500 font-mono w-6 text-center">{i + 1}</span>
@@ -375,7 +377,7 @@ export default function Tasting() {
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-stone-100 truncate">{entry.name}</p>
                 {entry.producer && <p className="text-sm text-stone-400 truncate">{entry.producer}</p>}
-                <p className="text-xs text-stone-600">{entry.num_ratings} Bewertung{entry.num_ratings !== 1 ? 'en' : ''}</p>
+                <p className="text-xs text-stone-600">{t('tasting.ratingsCount', { count: entry.num_ratings })}</p>
               </div>
               <div className="text-right flex-shrink-0">
                 {entry.num_ratings > 0 ? (
@@ -387,7 +389,7 @@ export default function Tasting() {
               </div>
             </div>
           ))}
-          <p className="text-xs text-stone-600 text-center mt-2">Aktualisiert sich live</p>
+          <p className="text-xs text-stone-600 text-center mt-2">{t('tasting.updatesLive')}</p>
         </div>
       )}
 
@@ -395,7 +397,7 @@ export default function Tasting() {
       {activeTab === 'bewerten' && (
         <div>
           {/* Whisky auswählen */}
-          <p className="text-sm text-stone-400 mb-3">Whisky wählen:</p>
+          <p className="text-sm text-stone-400 mb-3">{t('tasting.chooseWhisky')}</p>
           <div className="flex flex-col gap-2 mb-6">
             {drinks.map(td => {
               const myRating = allRatings.find(r => r.drink_id === td.drink_id && r.user_id === user?.id)
@@ -423,7 +425,7 @@ export default function Tasting() {
               {(['nose', 'taste', 'finish'] as const).map(key => {
                 const val = key === 'nose' ? nose : key === 'taste' ? taste : finish
                 const setter = key === 'nose' ? setNose : key === 'taste' ? setTaste : setFinish
-                const label = key === 'nose' ? 'Nase' : key === 'taste' ? 'Geschmack' : 'Abgang'
+                const label = key === 'nose' ? t('tasting.nose') : key === 'taste' ? t('tasting.taste') : t('tasting.finish')
                 return (
                   <div key={key}>
                     <div className="flex justify-between text-sm mb-1">
@@ -438,7 +440,7 @@ export default function Tasting() {
               })}
 
               <div className="text-center text-stone-400 text-sm">
-                Gesamt: <span className="text-amber-400 font-bold text-lg">
+                {t('tasting.total')} <span className="text-amber-400 font-bold text-lg">
                   {((nose + taste + finish) / 3).toFixed(1)}
                 </span>
               </div>
@@ -447,20 +449,20 @@ export default function Tasting() {
 
               <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
                 className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"
-                placeholder="Notiz (optional)" />
+                placeholder={t('tasting.note')} />
 
               {saveError && (
                 <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{saveError}</p>
               )}
               <button onClick={handleSave} disabled={saving}
                 className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-3 transition-colors">
-                {saving ? 'Speichern…' : saved ? '✓ Gespeichert!' : 'Bewertung speichern'}
+                {saving ? t('common.saving') : saved ? t('common.saved') : t('tasting.saveRating')}
               </button>
             </div>
           )}
 
           {tasting.status === 'closed' && (
-            <p className="text-stone-500 text-center py-4">Dieses Tasting ist abgeschlossen.</p>
+            <p className="text-stone-500 text-center py-4">{t('tasting.tastingClosed')}</p>
           )}
         </div>
       )}

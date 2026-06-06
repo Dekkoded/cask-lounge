@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { ReactionBar, CommentSection, type SessionReaction, type SessionComment } from '../components/SessionSocial'
@@ -62,6 +63,7 @@ interface Tasting {
 type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'mitglieder'
 
 export default function GroupHome() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -155,7 +157,7 @@ export default function GroupHome() {
     })
     setPosting(false)
     if (error) {
-      setPostError('Konnte nicht geteilt werden: ' + error.message)
+      setPostError(t('groups.shareError', { message: error.message }))
       return
     }
     setShowPost(false)
@@ -287,8 +289,8 @@ export default function GroupHome() {
     if (!group) return
     const url = `${window.location.origin}/join/${group.invite_code}`
     const shareData = {
-      title: `Cask Lounge – ${group.name}`,
-      text: `Tritt meiner Whisky-Gruppe „${group.name}" auf Cask Lounge bei:`,
+      title: t('groups.shareTitle', { name: group.name }),
+      text: t('groups.shareText', { name: group.name }),
       url,
     }
     if (navigator.share) {
@@ -346,13 +348,13 @@ export default function GroupHome() {
     <div className="max-w-lg mx-auto p-4">
       {/* Header */}
       <div className="flex items-center gap-3 py-4 mb-4">
-        <button onClick={() => navigate('/groups')} className="text-stone-400 hover:text-stone-200 text-sm">← Gruppen</button>
+        <button onClick={() => navigate('/groups')} className="text-stone-400 hover:text-stone-200 text-sm">← {t('nav.groups')}</button>
         <div className="flex-1" />
         <button
           onClick={copyInviteCode}
           className="text-xs bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 font-mono"
         >
-          {copied ? '✓ Kopiert!' : `Code: ${group.invite_code}`}
+          {copied ? t('groups.copied') : t('groups.codeShort', { code: group.invite_code })}
         </button>
       </div>
 
@@ -361,12 +363,12 @@ export default function GroupHome() {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['aktivitaet', 'archiv', 'tastings', 'mitglieder'] as Tab[]).map(t => (
-          <button key={t} onClick={() => setTab(t)}
+        {(['aktivitaet', 'archiv', 'tastings', 'mitglieder'] as Tab[]).map(tabKey => (
+          <button key={tabKey} onClick={() => setTab(tabKey)}
             className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors ${
-              tab === t ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'
+              tab === tabKey ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'
             }`}>
-            {t === 'aktivitaet' ? 'Aktivität' : t === 'archiv' ? 'Archiv' : t === 'tastings' ? 'Tastings' : 'Mitglieder'}
+            {tabKey === 'aktivitaet' ? t('groups.tabs.activity') : tabKey === 'archiv' ? t('groups.tabs.archive') : tabKey === 'tastings' ? t('groups.tabs.tastings') : t('groups.tabs.members')}
           </button>
         ))}
       </div>
@@ -376,16 +378,16 @@ export default function GroupHome() {
         <div className="flex flex-col gap-4">
           <button onClick={() => { setPostError(null); setShowPost(true) }}
             className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl py-3 text-lg">
-            🥃 Ich trinke gerade…
+            {t('groups.drinkingNow')}
           </button>
 
           {activityLoading ? (
-            <p className="text-stone-500 text-center py-8 animate-pulse">Lädt…</p>
+            <p className="text-stone-500 text-center py-8 animate-pulse">{t('common.loading')}</p>
           ) : activity.length === 0 ? (
             <p className="text-stone-500 text-center py-8">
-              Noch keine Aktivität.
+              {t('groups.noActivity')}
               <br />
-              <span className="text-sm">Teile, was du gerade trinkst, oder eine Bewertung.</span>
+              <span className="text-sm">{t('groups.noActivitySub')}</span>
             </p>
           ) : (
             activity.map(a => a.kind === 'session' ? (
@@ -396,7 +398,7 @@ export default function GroupHome() {
                     <p className="font-semibold text-stone-100">
                       <Link to={`/user/${a.session.user_id}`} className="hover:text-amber-400 transition-colors">
                         {a.session.profiles?.display_name ?? a.session.profiles?.username ?? '?'}
-                      </Link> trinkt gerade
+                      </Link> {t('groups.isDrinking')}
                     </p>
                     <p className="text-amber-400 font-medium">
                       {a.session.drinks?.name ?? a.session.drink_name ?? '—'}
@@ -429,7 +431,7 @@ export default function GroupHome() {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-stone-100 text-sm">
-                    <span className="font-semibold">{memberName(a.share.shared_by)}</span> teilte eine Bewertung
+                    <span className="font-semibold">{memberName(a.share.shared_by)}</span> {t('groups.sharedRating')}
                   </p>
                   <p className="text-amber-400 font-medium truncate">{a.share.ratings?.drinks?.name ?? '—'}</p>
                   <p className="text-stone-600 text-xs mt-0.5">
@@ -450,30 +452,30 @@ export default function GroupHome() {
           {showPost && (
             <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50 p-4">
               <div className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4">
-                <h3 className="text-lg font-bold text-stone-100">Was trinkst du gerade?</h3>
+                <h3 className="text-lg font-bold text-stone-100">{t('groups.postTitle')}</h3>
 
                 <div>
-                  <label className="text-sm text-stone-400 mb-1 block">Whisky aus Katalog wählen</label>
+                  <label className="text-sm text-stone-400 mb-1 block">{t('groups.selectFromCatalog')}</label>
                   <select value={sessionDrinkId} onChange={e => { setSessionDrinkId(e.target.value); setSessionDrinkName('') }}
                     className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500">
-                    <option value="">— oder frei eingeben ↓</option>
+                    <option value="">{t('groups.orFreeInput')}</option>
                     {allDrinks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
 
                 {!sessionDrinkId && (
                   <div>
-                    <label className="text-sm text-stone-400 mb-1 block">Oder Name frei eingeben</label>
+                    <label className="text-sm text-stone-400 mb-1 block">{t('groups.enterNameLabel')}</label>
                     <input value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
-                      placeholder="z. B. Lagavulin 16"
+                      placeholder={t('groups.drinkNamePlaceholder')}
                       className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
                   </div>
                 )}
 
                 <div>
-                  <label className="text-sm text-stone-400 mb-1 block">Nachricht (optional)</label>
+                  <label className="text-sm text-stone-400 mb-1 block">{t('groups.messageLabel')}</label>
                   <input value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
-                    placeholder="z. B. Endlich geöffnet! 🎉"
+                    placeholder={t('groups.messagePlaceholder')}
                     className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
                 </div>
 
@@ -482,11 +484,11 @@ export default function GroupHome() {
                 <div className="flex gap-3">
                   <button onClick={handlePost} disabled={posting || (!sessionDrinkId && !sessionDrinkName.trim())}
                     className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
-                    {posting ? 'Wird gesendet…' : 'Teilen 🥃'}
+                    {posting ? t('groups.sending') : t('groups.share')}
                   </button>
                   <button onClick={() => { setShowPost(false); setPostError(null) }}
                     className="bg-stone-800 text-stone-300 rounded-xl px-4">
-                    Abbrechen
+                    {t('common.cancel')}
                   </button>
                 </div>
               </div>
@@ -500,9 +502,9 @@ export default function GroupHome() {
         <div className="flex flex-col gap-3">
           {archive.length === 0 ? (
             <p className="text-stone-500 text-center py-8">
-              Noch keine Whiskys im Archiv.
+              {t('groups.noArchive')}
               <br />
-              <span className="text-sm">Bewertungen teilen oder ein Tasting durchführen.</span>
+              <span className="text-sm">{t('groups.noArchiveSub')}</span>
             </p>
           ) : (
             archive.map((drink, i) => {
@@ -525,7 +527,7 @@ export default function GroupHome() {
                     <p className="font-semibold text-stone-100 truncate">{drink.name}</p>
                     {drink.producer && <p className="text-sm text-stone-400 truncate">{drink.producer}</p>}
                     <p className="text-xs text-stone-600 mt-0.5">
-                      {drink.scores.length} Bewertung{drink.scores.length !== 1 ? 'en' : ''}
+                      {t('groups.ratingCount', { count: drink.scores.length })}
                     </p>
                   </div>
                   {avg != null ? (
@@ -546,18 +548,18 @@ export default function GroupHome() {
       {/* Tastings */}
       {tab === 'tastings' && (
         <div className="flex flex-col gap-3">
-          {tastings.map(t => (
+          {tastings.map(ta => (
             <Link
-              key={t.id}
-              to={`/groups/${id}/tasting/${t.id}`}
+              key={ta.id}
+              to={`/groups/${id}/tasting/${ta.id}`}
               className="flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
             >
               <div>
-                <p className="font-semibold text-stone-100">{t.title}</p>
-                {t.event_date && <p className="text-xs text-stone-500 mt-0.5">{t.event_date}</p>}
+                <p className="font-semibold text-stone-100">{ta.title}</p>
+                {ta.event_date && <p className="text-xs text-stone-500 mt-0.5">{ta.event_date}</p>}
               </div>
-              <span className={`text-xs rounded-full px-3 py-1 ${t.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                {t.status === 'closed' ? 'Abgeschlossen' : 'Offen'}
+              <span className={`text-xs rounded-full px-3 py-1 ${ta.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                {ta.status === 'closed' ? t('groups.tastingClosed') : t('groups.tastingOpen')}
               </span>
             </Link>
           ))}
@@ -568,7 +570,7 @@ export default function GroupHome() {
               onClick={() => setShowNewTasting(v => !v)}
               className="w-full text-left font-semibold text-stone-200 flex justify-between items-center"
             >
-              <span>+ Neues Tasting</span>
+              <span>{t('groups.newTasting')}</span>
               <span className="text-stone-500">{showNewTasting ? '▲' : '▼'}</span>
             </button>
             {showNewTasting && (
@@ -577,7 +579,7 @@ export default function GroupHome() {
                   required
                   value={tastingTitle}
                   onChange={e => setTastingTitle(e.target.value)}
-                  placeholder="Titel (z. B. Islay Night)"
+                  placeholder={t('groups.tastingTitlePlaceholder')}
                   className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
                 />
                 <input
@@ -591,7 +593,7 @@ export default function GroupHome() {
                   disabled={creatingTasting}
                   className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5"
                 >
-                  {creatingTasting ? 'Wird erstellt…' : 'Tasting erstellen'}
+                  {creatingTasting ? t('groups.creatingTasting') : t('groups.createTasting')}
                 </button>
               </form>
             )}
@@ -612,17 +614,17 @@ export default function GroupHome() {
               </Link>
               <div className="flex items-center gap-2">
                 {m.user_id === group.owner_id && (
-                  <span className="text-xs bg-amber-500/20 text-amber-400 rounded px-2 py-0.5">Owner</span>
+                  <span className="text-xs bg-amber-500/20 text-amber-400 rounded px-2 py-0.5">{t('groups.owner')}</span>
                 )}
                 {m.role === 'admin' && m.user_id !== group.owner_id && (
-                  <span className="text-xs bg-stone-700 text-stone-300 rounded px-2 py-0.5">Admin</span>
+                  <span className="text-xs bg-stone-700 text-stone-300 rounded px-2 py-0.5">{t('groups.admin')}</span>
                 )}
                 {user?.id === group.owner_id && m.user_id !== group.owner_id && (
                   <button
                     onClick={() => handleRemoveMember(m.user_id)}
                     className="text-xs text-red-400 hover:text-red-300 bg-red-900/20 hover:bg-red-900/40 rounded px-2 py-0.5 transition-colors"
                   >
-                    Entfernen
+                    {t('groups.remove')}
                   </button>
                 )}
               </div>
@@ -631,18 +633,18 @@ export default function GroupHome() {
 
           {/* Einladen */}
           <div className="mt-4 bg-stone-900 rounded-xl p-4 text-center">
-            <p className="text-stone-400 text-sm mb-3">Neue Mitglieder einladen</p>
+            <p className="text-stone-400 text-sm mb-3">{t('groups.inviteNewMembers')}</p>
             <button
               onClick={shareInvite}
               className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors mb-2"
             >
-              {linkCopied ? '✓ Link kopiert!' : 'Einladungslink teilen'}
+              {linkCopied ? t('groups.linkCopied') : t('groups.shareInviteLink')}
             </button>
             <button
               onClick={copyInviteCode}
               className="text-stone-500 hover:text-stone-300 text-xs font-mono"
             >
-              {copied ? '✓ Code kopiert!' : `Oder Code kopieren: ${group.invite_code}`}
+              {copied ? t('groups.codeCopied') : t('groups.orCopyCode', { code: group.invite_code })}
             </button>
           </div>
         </div>

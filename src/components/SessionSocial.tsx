@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 export const REACTIONS = ['🥃', '🔥', '👏', '😍', '🤤']
@@ -66,6 +67,7 @@ export function CommentSection({
   onPost: (body: string) => void | Promise<void>
   onDelete: (commentId: string) => void | Promise<void>
 }) {
+  const { t } = useTranslation()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const sorted = [...(comments ?? [])].sort((a, b) => a.created_at.localeCompare(b.created_at))
@@ -92,7 +94,7 @@ export function CommentSection({
           {c.user_id === myId && (
             <button
               onClick={() => onDelete(c.id)}
-              aria-label="Kommentar löschen"
+              aria-label={t('tasting.deleteComment')}
               className="text-stone-600 hover:text-red-400 text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity"
             >
               ✕
@@ -106,7 +108,7 @@ export function CommentSection({
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') submit() }}
-            placeholder="Kommentieren…"
+            placeholder={t('tasting.commentPlaceholder')}
             className="flex-1 bg-stone-800 border border-stone-700 rounded-lg px-3 py-1.5 text-sm text-stone-100 focus:outline-none focus:border-amber-500"
           />
           <button
@@ -114,7 +116,7 @@ export function CommentSection({
             disabled={sending || !text.trim()}
             className="bg-stone-700 hover:bg-stone-600 disabled:opacity-40 text-stone-200 rounded-lg px-3 text-sm transition-colors"
           >
-            Senden
+            {t('tasting.send')}
           </button>
         </div>
       )}

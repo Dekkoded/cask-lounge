@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import InstallPrompt from './components/InstallPrompt'
@@ -24,13 +25,14 @@ const Legal = lazy(() => import('./pages/Legal'))
 
 function AppShell() {
   const { user } = useAuth()
+  const { t } = useTranslation()
   return (
     <>
       <InstallPrompt />
       <IntroTour />
       <TopBar />
       <main className={user ? 'pb-20' : ''}>
-        <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-stone-500 text-sm">Lädt…</div>}>
+        <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-stone-500 text-sm">{t('common.loading')}</div>}>
           <Routes>
             {/* Öffentlich */}
             <Route path="/" element={<GlobalLanding />} />

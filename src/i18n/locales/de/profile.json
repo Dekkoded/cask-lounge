@@ -1,0 +1,39 @@
+{
+  "profile": {
+    "title": "Mein Profil",
+    "tapToChange": "Tippen zum Ändern",
+    "change": "Ändern",
+    "stats": {
+      "rated": "Bewertet",
+      "avg": "Ø Punkte",
+      "topRegion": "Top-Region"
+    },
+    "displayName": "Anzeigename",
+    "displayNamePlaceholder": "Wie soll dein Name angezeigt werden?",
+    "username": "Benutzername",
+    "usernamePlaceholder": "username",
+    "usernameEmpty": "Benutzername darf nicht leer sein",
+    "usernameTaken": "Dieser Benutzername ist bereits vergeben",
+    "email": "E-Mail",
+    "emailConfirmSent": "Bestätigungs-E-Mail gesendet. Prüfe dein Postfach.",
+    "photoUploadFailed": "Foto-Upload fehlgeschlagen: ",
+    "appearance": "Darstellung",
+    "dark": "Dunkel",
+    "light": "Hell",
+    "language": "Sprache",
+    "notifications": "Benachrichtigungen",
+    "emailNotif": "Benachrichtigung per E-Mail",
+    "push": "Push",
+    "pushActive": "Aktiv",
+    "pushInactive": "Benachrichtigung auf diesem Gerät",
+    "settingSaveFailed": "Einstellung konnte nicht gespeichert werden: ",
+    "deleteAccount": "Account löschen",
+    "deleteConfirm": "Bist du sicher? Dies kann nicht rückgängig gemacht werden.",
+    "deleteYes": "Ja, Account löschen",
+    "deleting": "Wird gelöscht…",
+    "deleteFailed": "Konto konnte nicht gelöscht werden: ",
+    "viewIntro": "Intro-Tour ansehen",
+    "signOut": "Abmelden",
+    "error": "Fehler: "
+  }
+}

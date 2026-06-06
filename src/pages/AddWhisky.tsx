@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
@@ -7,6 +8,7 @@ import { compressImage } from '../lib/image'
 export default function AddWhisky() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   const [name, setName] = useState('')
   const [producer, setProducer] = useState('')
@@ -45,7 +47,7 @@ export default function AddWhisky() {
         .upload(path, compressed, { contentType: 'image/jpeg' })
 
       if (uploadError) {
-        setError('Foto-Upload fehlgeschlagen: ' + uploadError.message)
+        setError(t('whisky.photoUploadFailed', { message: uploadError.message }))
         setLoading(false)
         return
       }
@@ -97,21 +99,21 @@ export default function AddWhisky() {
         <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-sm bg-stone-900 border border-stone-700 rounded-2xl p-6 text-center">
             <div className="text-4xl mb-3">🥃</div>
-            <h2 className="text-lg font-bold text-stone-100 mb-1">„{name.trim()}" angelegt</h2>
-            <p className="text-stone-400 text-sm mb-6">Möchtest du den Whisky zu deiner Sammlung hinzufügen? Bewerten kannst du ihn später jederzeit.</p>
+            <h2 className="text-lg font-bold text-stone-100 mb-1">{t('whisky.createdHeading', { name: name.trim() })}</h2>
+            <p className="text-stone-400 text-sm mb-6">{t('whisky.createdPrompt')}</p>
             <div className="flex flex-col gap-2">
               <button
                 onClick={addToCollection}
                 disabled={addingCollection}
                 className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-2.5 transition-colors"
               >
-                {addingCollection ? 'Wird hinzugefügt…' : 'Zur Sammlung hinzufügen'}
+                {addingCollection ? t('whisky.addingToCollection') : t('whisky.addToCollection')}
               </button>
               <button
                 onClick={() => navigate(`/whisky/${createdId}`)}
                 className="text-stone-400 hover:text-stone-200 text-sm py-2 transition-colors"
               >
-                Überspringen
+                {t('common.skip')}
               </button>
             </div>
           </div>
@@ -119,25 +121,25 @@ export default function AddWhisky() {
       )}
 
       <button onClick={() => navigate('/')} className="text-stone-400 hover:text-stone-200 text-sm mb-6 flex items-center gap-1">
-        ← Zurück
+        ← {t('common.back')}
       </button>
 
-      <h1 className="text-2xl font-bold text-amber-400 mb-6">Whisky hinzufügen</h1>
+      <h1 className="text-2xl font-bold text-amber-400 mb-6">{t('whisky.addTitle')}</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-sm text-stone-300 mb-1">Name *</label>
+          <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.nameRequired')}</label>
           <input
             required
             value={name}
             onChange={e => setName(e.target.value)}
             onBlur={checkDuplicates}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-            placeholder="z. B. Lagavulin 16"
+            placeholder={t('whisky.placeholders.name')}
           />
           {similar.length > 0 && (
             <div className="mt-2 bg-stone-800/60 border border-stone-700 rounded-lg p-3">
-              <p className="text-xs text-stone-400 mb-2">Gibt es evtl. schon:</p>
+              <p className="text-xs text-stone-400 mb-2">{t('whisky.maybeExists')}</p>
               <div className="flex flex-col gap-1">
                 {similar.map(d => (
                   <Link
@@ -155,28 +157,28 @@ export default function AddWhisky() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Brennerei</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.producer')}</label>
             <input
               value={producer}
               onChange={e => setProducer(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="z. B. Lagavulin"
+              placeholder={t('whisky.placeholders.producer')}
             />
           </div>
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Region</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.region')}</label>
             <input
               value={region}
               onChange={e => setRegion(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="z. B. Islay"
+              placeholder={t('whisky.placeholders.region')}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Alter (Jahre)</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.age')}</label>
             <input
               type="number"
               min="0"
@@ -184,11 +186,11 @@ export default function AddWhisky() {
               value={ageYears}
               onChange={e => setAgeYears(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="16"
+              placeholder={t('whisky.placeholders.age')}
             />
           </div>
           <div>
-            <label className="block text-sm text-stone-300 mb-1">Alkohol (%)</label>
+            <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.abv')}</label>
             <input
               type="number"
               min="0"
@@ -197,13 +199,13 @@ export default function AddWhisky() {
               value={abv}
               onChange={e => setAbv(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-              placeholder="43.0"
+              placeholder={t('whisky.placeholders.abv')}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm text-stone-300 mb-1">Foto (optional)</label>
+          <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.photo')}</label>
           <input
             type="file"
             accept="image/*"
@@ -223,7 +225,7 @@ export default function AddWhisky() {
           disabled={loading}
           className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors"
         >
-          {loading ? 'Wird gespeichert…' : 'Whisky anlegen'}
+          {loading ? t('common.saving') : t('whisky.createWhisky')}
         </button>
       </form>
     </div>

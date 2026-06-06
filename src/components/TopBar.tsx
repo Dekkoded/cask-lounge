@@ -1,9 +1,11 @@
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/AuthContext'
 
 export default function TopBar() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   return (
     <div className="sticky top-0 z-40 bg-app/90 backdrop-blur border-b border-stone-800/50">
@@ -19,12 +21,12 @@ export default function TopBar() {
             onClick={() => navigate('/profile')}
             className="text-stone-500 hover:text-stone-300 text-sm transition-colors"
           >
-            Profil
+            {t('nav.profile')}
           </button>
         ) : (
           <div className="flex items-center gap-3">
-            <Link to="/login" className="text-stone-400 hover:text-stone-200 text-sm transition-colors">Anmelden</Link>
-            <Link to="/signup" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-3 py-1.5 text-sm">Registrieren</Link>
+            <Link to="/login" className="text-stone-400 hover:text-stone-200 text-sm transition-colors">{t('nav.login')}</Link>
+            <Link to="/signup" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-3 py-1.5 text-sm">{t('nav.register')}</Link>
           </div>
         )}
       </div>

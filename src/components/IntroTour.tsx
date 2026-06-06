@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const SEEN_KEY = 'cl_intro_seen'
 
@@ -6,14 +7,11 @@ export function openIntro() {
   window.dispatchEvent(new Event('open-intro'))
 }
 
-const STEPS = [
-  { icon: '👋', title: 'Willkommen bei Cask Lounge', body: 'Entdecke, bewerte und teile deine Lieblings-Whiskys – allein oder mit deinen Gruppen.' },
-  { icon: '🥃', title: 'Bewerten & Sammeln', body: 'Bewerte nach Nase, Geschmack und Abgang. Jede Bewertung landet in deiner persönlichen Sammlung.' },
-  { icon: '🗺️', title: 'Deine Whisky-Karte', body: 'Sieh die Brennereien deiner Sammlung auf einer Weltkarte – von Islay bis Japan.' },
-  { icon: '👥', title: 'Gruppen & Live-Sessions', body: 'Tritt Gruppen bei, teile was du gerade trinkst und reagiere mit Emojis und Kommentaren.' },
-]
+interface IntroStep { icon: string; title: string; body: string }
 
 export default function IntroTour() {
+  const { t } = useTranslation()
+  const STEPS = t('intro.steps', { returnObjects: true }) as IntroStep[]
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState(0)
 
@@ -50,14 +48,14 @@ export default function IntroTour() {
         <div className="flex gap-2">
           {!isLast && (
             <button onClick={finish} className="flex-1 text-stone-400 hover:text-stone-200 text-sm py-2.5 transition-colors">
-              Überspringen
+              {t('intro.skip')}
             </button>
           )}
           <button
             onClick={() => (isLast ? finish() : setStep(step + 1))}
             className="flex-1 bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-xl px-4 py-2.5 transition-colors"
           >
-            {isLast ? 'Los geht’s' : 'Weiter'}
+            {isLast ? t('intro.start') : t('intro.next')}
           </button>
         </div>
       </div>

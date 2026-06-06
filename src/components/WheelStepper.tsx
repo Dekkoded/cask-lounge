@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import FlavorWheel from './FlavorWheel'
 
 interface Wheels {
@@ -11,12 +12,13 @@ interface Props {
   onUpdate: (type: 'nose' | 'taste') => (i: number, v: number) => void
 }
 
-const STEPS: { key: 'nose' | 'taste'; label: string; color: string }[] = [
-  { key: 'nose',  label: 'Geschmacksrad — Nase',      color: '#f59e0b' },
-  { key: 'taste', label: 'Geschmacksrad — Geschmack', color: '#60a5fa' },
+const STEPS: { key: 'nose' | 'taste'; labelKey: string; color: string }[] = [
+  { key: 'nose',  labelKey: 'whisky.wheel.nose',  color: '#f59e0b' },
+  { key: 'taste', labelKey: 'whisky.wheel.taste', color: '#60a5fa' },
 ]
 
 export default function WheelStepper({ wheels, onUpdate }: Props) {
+  const { t } = useTranslation()
   const [step, setStep] = useState(0)
   const current = STEPS[step]
 
@@ -42,7 +44,7 @@ export default function WheelStepper({ wheels, onUpdate }: Props) {
         values={wheels[current.key]}
         onChange={onUpdate(current.key)}
         color={current.color}
-        label={current.label}
+        label={t(current.labelKey)}
       />
 
       {/* Navigation */}
@@ -53,7 +55,7 @@ export default function WheelStepper({ wheels, onUpdate }: Props) {
           disabled={step === 0}
           className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm disabled:opacity-30"
         >
-          ← Zurück
+          ← {t('common.back')}
         </button>
         <span className="text-stone-500 text-sm">{step + 1} / {STEPS.length}</span>
         <button
@@ -62,7 +64,7 @@ export default function WheelStepper({ wheels, onUpdate }: Props) {
           disabled={step === STEPS.length - 1}
           className="px-4 py-2 rounded-lg bg-stone-800 text-stone-300 text-sm disabled:opacity-30"
         >
-          Weiter →
+          {t('common.next')} →
         </button>
       </div>
     </div>

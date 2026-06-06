@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 
 interface Member {
@@ -10,6 +11,7 @@ interface Member {
 }
 
 export default function Members() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [members, setMembers] = useState<Member[]>([])
@@ -38,14 +40,14 @@ export default function Members() {
 
   return (
     <div className="max-w-lg mx-auto p-6 pb-24">
-      <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← Zurück</button>
+      <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← {t('common.back')}</button>
 
-      <h1 className="text-2xl font-bold text-amber-400 mb-6">Mitglieder</h1>
+      <h1 className="text-2xl font-bold text-amber-400 mb-6">{t('groups.membersTitle')}</h1>
 
       <input
         value={query}
         onChange={e => setQuery(e.target.value)}
-        placeholder="Nach Name suchen…"
+        placeholder={t('groups.searchByName')}
         className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 mb-4"
       />
 
@@ -56,7 +58,7 @@ export default function Members() {
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">Keine Mitglieder gefunden.</div>
+        <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">{t('groups.noMembersFound')}</div>
       ) : (
         <div className="flex flex-col gap-2">
           {members.map(m => {

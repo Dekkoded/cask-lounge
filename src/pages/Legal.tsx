@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 type Doc = 'datenschutz' | 'agb' | 'impressum'
 
@@ -90,9 +91,10 @@ function AGB() {
 }
 
 export default function Legal({ doc }: { doc: Doc }) {
+  const { t } = useTranslation()
   return (
     <div className="max-w-2xl mx-auto p-6 pb-24">
-      <Link to="/" className="text-stone-400 hover:text-stone-200 text-sm">← Zurück</Link>
+      <Link to="/" className="text-stone-400 hover:text-stone-200 text-sm">← {t('common.back')}</Link>
       <h1 className="text-2xl font-bold text-stone-100 mt-4 mb-2">{TITLES[doc]}</h1>
       <div className="mt-4">
         {doc === 'impressum' && <Impressum />}

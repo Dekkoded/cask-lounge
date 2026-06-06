@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const { t } = useTranslation()
 
   const path = location.pathname
   const view = searchParams.get('view')
@@ -40,30 +42,30 @@ export default function BottomNav() {
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-stone-700 rounded-full mx-auto mb-2" />
-            <SheetItem icon="🥃" title="Live posten" sub="Teile in deiner Gruppe, was du gerade trinkst" onClick={openGroups} />
-            <SheetItem icon="➕" title="Whisky hinzufügen" sub="Neuen Whisky in den Katalog" onClick={() => go('/add-whisky')} />
-            <SheetItem icon="👥" title="Gruppe erstellen" sub="Starte eine neue Gruppe" onClick={() => go('/groups?create=1')} />
-            <SheetItem icon="📋" title="Tasting erstellen" sub="In einer deiner Gruppen" onClick={() => go('/groups')} />
-            <button onClick={() => setSheetOpen(false)} className="mt-2 text-stone-400 text-sm py-2">Abbrechen</button>
+            <SheetItem icon="🥃" title={t('nav.sheet.livePost.title')} sub={t('nav.sheet.livePost.sub')} onClick={openGroups} />
+            <SheetItem icon="➕" title={t('nav.sheet.addWhisky.title')} sub={t('nav.sheet.addWhisky.sub')} onClick={() => go('/add-whisky')} />
+            <SheetItem icon="👥" title={t('nav.sheet.createGroup.title')} sub={t('nav.sheet.createGroup.sub')} onClick={() => go('/groups?create=1')} />
+            <SheetItem icon="📋" title={t('nav.sheet.createTasting.title')} sub={t('nav.sheet.createTasting.sub')} onClick={() => go('/groups')} />
+            <button onClick={() => setSheetOpen(false)} className="mt-2 text-stone-400 text-sm py-2">{t('common.cancel')}</button>
           </div>
         </div>
       )}
 
       <nav className="fixed bottom-0 inset-x-0 z-40 bg-app/95 backdrop-blur border-t border-stone-800/60 pb-[env(safe-area-inset-bottom)]">
         <div className="max-w-2xl mx-auto flex h-16 items-stretch">
-          {tab(isGlobal, '🌍', 'Global', () => go('/'))}
-          {tab(isVitrine, '🥃', 'Sammlung', () => go('/?view=vitrine'))}
+          {tab(isGlobal, '🌍', t('nav.global'), () => go('/'))}
+          {tab(isVitrine, '🥃', t('nav.collection'), () => go('/?view=vitrine'))}
           <div className="flex-1 flex justify-center items-start">
             <button
               onClick={() => setSheetOpen(true)}
-              aria-label="Hinzufügen"
+              aria-label={t('nav.add')}
               className="-mt-5 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-4xl font-light leading-none flex items-center justify-center shadow-lg shadow-black/40 ring-4 ring-app"
             >
               +
             </button>
           </div>
-          {tab(isTastings, '📋', 'Tastings', () => go('/groups'))}
-          {tab(isGruppen, '👥', 'Gruppen', openGroups)}
+          {tab(isTastings, '📋', t('nav.tastings'), () => go('/groups'))}
+          {tab(isGruppen, '👥', t('nav.groups'), openGroups)}
         </div>
       </nav>
     </>

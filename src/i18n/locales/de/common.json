@@ -1,0 +1,53 @@
+{
+  "common": {
+    "back": "Zurück",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
+    "saved": "✓ Gespeichert!",
+    "loading": "Laden…",
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "close": "Schließen"
+  },
+  "nav": {
+    "appName": "Cask Lounge",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "profile": "Profil",
+    "global": "Global",
+    "collection": "Sammlung",
+    "tastings": "Tastings",
+    "groups": "Gruppen",
+    "add": "Hinzufügen",
+    "sheet": {
+      "livePost": { "title": "Live posten", "sub": "Teile in deiner Gruppe, was du gerade trinkst" },
+      "addWhisky": { "title": "Whisky hinzufügen", "sub": "Neuen Whisky in den Katalog" },
+      "createGroup": { "title": "Gruppe erstellen", "sub": "Starte eine neue Gruppe" },
+      "createTasting": { "title": "Tasting erstellen", "sub": "In einer deiner Gruppen" }
+    }
+  },
+  "intro": {
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "start": "Los geht’s",
+    "steps": [
+      { "icon": "👋", "title": "Willkommen bei Cask Lounge", "body": "Entdecke, bewerte und teile deine Lieblings-Whiskys – allein oder mit deinen Gruppen." },
+      { "icon": "🥃", "title": "Bewerten & Sammeln", "body": "Bewerte nach Nase, Geschmack und Abgang. Jede Bewertung landet in deiner persönlichen Sammlung." },
+      { "icon": "🗺️", "title": "Deine Whisky-Karte", "body": "Sieh die Brennereien deiner Sammlung auf einer Weltkarte – von Islay bis Japan." },
+      { "icon": "👥", "title": "Gruppen & Live-Sessions", "body": "Tritt Gruppen bei, teile was du gerade trinkst und reagiere mit Emojis und Kommentaren." }
+    ]
+  },
+  "install": {
+    "title": "Cask Lounge installieren",
+    "subtitle": "Zum Homescreen hinzufügen",
+    "action": "Installieren"
+  },
+  "legal": {
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz",
+    "agb": "AGB"
+  }
+}
