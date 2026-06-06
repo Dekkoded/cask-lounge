@@ -13,7 +13,7 @@ export function applyTheme(theme: Theme) {
   else delete root.dataset.theme
   // Browser-UI (Statusleiste/Adressleiste) farblich angleichen.
   const meta = document.querySelector('meta[name="theme-color"]')
-  if (meta) meta.setAttribute('content', theme === 'light' ? '#fafaf9' : '#1c1917')
+  if (meta) meta.setAttribute('content', theme === 'light' ? '#e8dfc9' : '#1c1917')
 }
 
 export function setTheme(theme: Theme) {

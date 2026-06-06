@@ -13,20 +13,23 @@
 
 /* Light Mode: stone-Skala gespiegelt (hell <-> dunkel), damit alle
    bestehenden bg-/text-/border-stone-* Utilities automatisch umkippen.
-   stone-950 bleibt bewusst dunkel (Text auf Amber). */
+   Warmes Beige/Pergament statt kühlem Weiß – entspannter „Gentleman/
+   Whisky"-Look. Höhere Chroma + warmer Farbton (~82) zieht die ganze
+   Skala ins Bernstein/Tabak-Beige. stone-950 bleibt bewusst dunkel
+   (Text auf Amber-Buttons). */
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-app: oklch(0.985 0.001 106.423);
-  --color-stone-50: oklch(0.147 0.004 49.25);
-  --color-stone-100: oklch(0.216 0.006 56.043);
-  --color-stone-200: oklch(0.268 0.007 34.298);
-  --color-stone-300: oklch(0.374 0.01 67.558);
-  --color-stone-400: oklch(0.444 0.011 73.639);
-  --color-stone-500: oklch(0.553 0.013 58.071);
-  --color-stone-600: oklch(0.709 0.01 56.259);
-  --color-stone-700: oklch(0.869 0.005 56.366);
-  --color-stone-800: oklch(0.923 0.003 48.717);
-  --color-stone-900: oklch(0.97 0.001 106.424);
+  --color-app: oklch(0.912 0.020 83);
+  --color-stone-50: oklch(0.165 0.013 60);
+  --color-stone-100: oklch(0.235 0.015 64);
+  --color-stone-200: oklch(0.300 0.017 68);
+  --color-stone-300: oklch(0.400 0.019 72);
+  --color-stone-400: oklch(0.470 0.021 74);
+  --color-stone-500: oklch(0.560 0.023 76);
+  --color-stone-600: oklch(0.690 0.025 78);
+  --color-stone-700: oklch(0.845 0.023 81);
+  --color-stone-800: oklch(0.936 0.017 83);
+  --color-stone-900: oklch(0.967 0.014 85);
 }
 
 body {
