@@ -31,6 +31,7 @@ export default function Profile() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [emailNotifications, setEmailNotifications] = useState(true)
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +52,7 @@ export default function Profile() {
           setUsername(data.username ?? '')
           setAvatarUrl(data.avatar_url)
           setEmailNotifications(data.email_notifications ?? true)
+          setNotifPrefs((data.notification_prefs as Record<string, boolean>) ?? {})
         }
         setLoading(false)
       })
@@ -114,6 +116,17 @@ export default function Profile() {
     setAvatarFile(null)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const setPref = async (key: string, val: boolean) => {
+    const prev = notifPrefs
+    const next = { ...prev, [key]: val }
+    setNotifPrefs(next)
+    const { error } = await supabase.from('profiles').update({ notification_prefs: next }).eq('id', user!.id)
+    if (error) {
+      setNotifPrefs(prev)
+      setError(t('profile.settingSaveFailed') + error.message)
+    }
   }
 
   const handleEmailChange = async () => {
@@ -306,6 +319,30 @@ export default function Profile() {
               <button onClick={subscribed ? unsubscribe : subscribe} disabled={pushLoading} className="disabled:opacity-50">
                 <Toggle enabled={subscribed} onToggle={() => {}} />
               </button>
+            </div>
+          )}
+
+          {/* Granular: wofür benachrichtigen */}
+          {(emailNotifications || subscribed) && (
+            <div className="bg-stone-900 rounded-xl px-4 py-3 flex flex-col gap-3 mt-1">
+              <div>
+                <p className="text-stone-200 text-sm font-medium">{t('profile.notifWhat')}</p>
+                <p className="text-stone-500 text-xs mt-0.5">{t('profile.notifWhatSub')}</p>
+              </div>
+              {([
+                { key: 'live', label: t('profile.notifLive') },
+                { key: 'comment', label: t('profile.notifComment') },
+                { key: 'rating', label: t('profile.notifRating') },
+                { key: 'battle', label: t('profile.notifBattle') },
+              ]).map(opt => {
+                const on = notifPrefs[opt.key] !== false
+                return (
+                  <div key={opt.key} className="flex items-center justify-between">
+                    <p className="text-stone-300 text-sm">{opt.label}</p>
+                    <Toggle enabled={on} onToggle={() => setPref(opt.key, !on)} />
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>

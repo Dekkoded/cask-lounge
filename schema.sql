@@ -20,6 +20,13 @@ create table public.profiles (
 );
 alter table public.profiles enable row level security;
 
+-- Granulare Benachrichtigungs-Präferenzen (pro Event-Typ an/aus).
+-- Fehlender Schlüssel = an. Gilt für Push UND E-Mail; email_notifications
+-- bleibt der zusätzliche Master-Schalter für den E-Mail-Kanal.
+-- Schlüssel: 'live' | 'comment' | 'rating' | 'battle'
+alter table public.profiles
+  add column if not exists notification_prefs jsonb not null default '{}'::jsonb;
+
 -- Profile sind öffentlich lesbar (für Anzeige "wer hat bewertet"),
 -- aber nur selbst editierbar.
 create policy "profiles_select_all"

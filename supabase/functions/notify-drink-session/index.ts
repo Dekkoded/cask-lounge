@@ -50,6 +50,20 @@ Deno.serve(async (req) => {
 
     if (memberIds.length === 0) return new Response('No members to notify', { status: 200 })
 
+    // Empfänger-Profile laden (granulare Präferenzen + E-Mail-Schalter).
+    // notification_prefs.live === false bedeutet: keine Live-Benachrichtigung.
+    const { data: recipientProfiles } = await supabase
+      .from('profiles')
+      .select('id, email_notifications, notification_prefs')
+      .in('id', memberIds)
+
+    const wantsLive = (p: { notification_prefs: Record<string, boolean> | null }) =>
+      (p.notification_prefs?.live ?? true) !== false
+
+    const liveProfiles = (recipientProfiles ?? []).filter(wantsLive)
+    const pushIds = liveProfiles.map((p: { id: string }) => p.id)
+    if (pushIds.length === 0) return new Response('No recipients opted in', { status: 200 })
+
     const drinkerName = drinker?.display_name ?? drinker?.username ?? 'Jemand'
     const title = `${drinkerName} trinkt gerade 🥃`
     const body = `${drinkName ?? 'einen Whisky'}`
@@ -61,11 +75,11 @@ Deno.serve(async (req) => {
       Deno.env.get('VAPID_PRIVATE_KEY')!
     )
 
-    // Push-Subscriptions der Mitglieder holen & senden
+    // Push-Subscriptions der Mitglieder holen & senden (nur Opt-in)
     const { data: subs } = await supabase
       .from('push_subscriptions')
       .select('subscription')
-      .in('user_id', memberIds)
+      .in('user_id', pushIds)
 
     const pushResults = await Promise.allSettled(
       (subs ?? []).map(row =>
@@ -74,14 +88,9 @@ Deno.serve(async (req) => {
     )
     console.log('Push results:', pushResults.length)
 
-    // E-Mail-Adressen holen — nur wenn email_notifications aktiviert
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, email_notifications')
-      .in('id', memberIds)
-
-    const emailEnabledIds = (profiles ?? [])
-      .filter((p: { id: string; email_notifications: boolean }) => p.email_notifications !== false)
+    // E-Mail-Adressen holen — nur wer Live-Opt-in UND E-Mail aktiviert hat
+    const emailEnabledIds = liveProfiles
+      .filter((p: { email_notifications: boolean }) => p.email_notifications !== false)
       .map((p: { id: string }) => p.id)
 
     const emails: string[] = []
