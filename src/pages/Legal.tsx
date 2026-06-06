@@ -16,21 +16,17 @@ function P({ children, className = 'text-stone-300' }: { children: React.ReactNo
   return <p className={`${className} text-sm leading-relaxed`}>{children}</p>
 }
 
-function Placeholder({ children }: { children: React.ReactNode }) {
-  return <span className="text-amber-400">{children}</span>
-}
-
 function Impressum() {
   return (
     <div className="flex flex-col gap-1">
       <P>Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz):</P>
-      <P><Placeholder>[Name des Betreibers]</Placeholder></P>
-      <P><Placeholder>[Straße und Hausnummer]</Placeholder></P>
-      <P><Placeholder>[PLZ und Ort]</Placeholder></P>
+      <P>Leon Evers</P>
+      <P>Untere Str. 18</P>
+      <P>51688 Wipperfürth</P>
       <H2>Kontakt</H2>
-      <P>E-Mail: <Placeholder>[E-Mail-Adresse]</Placeholder></P>
+      <P>E-Mail: leon.evers235@gmail.com</P>
       <H2>Verantwortlich für den Inhalt</H2>
-      <P><Placeholder>[Name, Anschrift]</Placeholder></P>
+      <P>Leon Evers, Untere Str. 18, 51688 Wipperfürth</P>
     </div>
   )
 }
@@ -39,7 +35,7 @@ function Datenschutz() {
   return (
     <div className="flex flex-col gap-1">
       <H2>1. Verantwortlicher</H2>
-      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist <Placeholder>[Name und Anschrift des Betreibers]</Placeholder>, erreichbar unter <Placeholder>[E-Mail-Adresse]</Placeholder>.</P>
+      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist Leon Evers, Untere Str. 18, 51688 Wipperfürth, erreichbar unter leon.evers235@gmail.com.</P>
 
       <H2>2. Welche Daten wir verarbeiten</H2>
       <P>Bei der Registrierung erheben wir deine E-Mail-Adresse, deinen Benutzernamen und ein verschlüsselt gespeichertes Passwort. Inhalte, die du erstellst (Bewertungen, Notizen, Kommentare, Fotos, Gruppen), werden gespeichert, um den Dienst bereitzustellen.</P>
@@ -54,7 +50,7 @@ function Datenschutz() {
       <P>Deine Daten werden gespeichert, solange dein Konto besteht. Bei Löschung deines Kontos werden die zugehörigen Daten entfernt.</P>
 
       <H2>6. Deine Rechte</H2>
-      <P>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Dein Konto kannst du jederzeit in den Profileinstellungen löschen. Bei Fragen wende dich an <Placeholder>[E-Mail-Adresse]</Placeholder>.</P>
+      <P>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Dein Konto kannst du jederzeit in den Profileinstellungen löschen. Bei Fragen wende dich an leon.evers235@gmail.com.</P>
 
       <H2>7. Widerruf von Einwilligungen</H2>
       <P>Erteilte Einwilligungen (z. B. für Benachrichtigungen) kannst du jederzeit mit Wirkung für die Zukunft in deinem Profil widerrufen.</P>
