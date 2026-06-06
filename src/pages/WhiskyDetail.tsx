@@ -7,12 +7,18 @@ import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
 import Lightbox from '../components/Lightbox'
+import AromaTags, { aromaLabel } from '../components/AromaTags'
 import { amazonSearchUrl } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
-const EMPTY_WHEELS = { nose: Array(12).fill(0), taste: Array(12).fill(0) }
+const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: string[] } = {
+  nose: Array(12).fill(0),
+  taste: Array(12).fill(0),
+  aromas: [],
+  extra: [],
+}
 
 interface Group { id: string; name: string }
 interface PublicRating extends Rating {
@@ -80,7 +86,7 @@ export default function WhiskyDetail() {
             setTaste(data.taste ?? 5)
             setFinish(data.finish ?? 5)
             setColorIdx(data.color_idx)
-            setWheels(data.wheels ?? EMPTY_WHEELS)
+            setWheels({ ...EMPTY_WHEELS, ...(data.wheels ?? {}) })
             setNote(data.note ?? '')
             setPurchasePrice(data.purchase_price != null ? String(data.purchase_price) : '')
             setIsPublic(data.is_public)
@@ -129,6 +135,21 @@ export default function WhiskyDetail() {
       ...w,
       [type]: w[type].map((old, idx) => idx === i ? v : old),
     }))
+  }
+
+  const toggleAroma = (key: string) => {
+    setWheels(w => {
+      const cur = w.aromas ?? []
+      return { ...w, aromas: cur.includes(key) ? cur.filter(k => k !== key) : [...cur, key] }
+    })
+  }
+
+  const addExtraAroma = (label: string) => {
+    setWheels(w => ({ ...w, extra: [...(w.extra ?? []), label] }))
+  }
+
+  const removeExtraAroma = (label: string) => {
+    setWheels(w => ({ ...w, extra: (w.extra ?? []).filter(l => l !== label) }))
   }
 
   const handleSave = async () => {
@@ -369,6 +390,22 @@ export default function WhiskyDetail() {
                     „{r.note}"
                   </p>
                 )}
+                {(() => {
+                  const tags = [
+                    ...(r.wheels?.aromas ?? []).map(k => aromaLabel(k, t)),
+                    ...(r.wheels?.extra ?? []),
+                  ]
+                  if (tags.length === 0) return null
+                  return (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {tags.map(tag => (
+                        <span key={tag} className="px-2 py-0.5 rounded-full text-xs bg-stone-800 text-stone-400">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )
+                })()}
               </div>
             ))
           )}
@@ -424,6 +461,16 @@ export default function WhiskyDetail() {
 
           <ColorPicker value={colorIdx} onChange={setColorIdx} />
           <WheelStepper wheels={wheels} onUpdate={updateWheel} />
+
+          <div className="border-t border-stone-800 pt-5">
+            <AromaTags
+              aromas={wheels.aromas ?? []}
+              extra={wheels.extra ?? []}
+              onToggle={toggleAroma}
+              onAddExtra={addExtraAroma}
+              onRemoveExtra={removeExtraAroma}
+            />
+          </div>
 
           <div>
             <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.note')}</label>

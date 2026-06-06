@@ -4,8 +4,14 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import WheelStepper from '../components/WheelStepper'
+import AromaTags from '../components/AromaTags'
 
-const EMPTY_WHEELS = { nose: Array(12).fill(0), taste: Array(12).fill(0) }
+const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: string[] } = {
+  nose: Array(12).fill(0),
+  taste: Array(12).fill(0),
+  aromas: [],
+  extra: [],
+}
 
 interface Tasting {
   id: string
@@ -30,7 +36,7 @@ interface TastingRating {
   taste: number | null
   finish: number | null
   overall: number | null
-  wheels: { nose: number[]; taste: number[] }
+  wheels: { nose: number[]; taste: number[]; aromas?: string[]; extra?: string[] }
   note: string | null
 }
 
@@ -122,7 +128,7 @@ export default function Tasting() {
       setNose(mine.nose ?? 5)
       setTaste(mine.taste ?? 5)
       setFinish(mine.finish ?? 5)
-      setWheels(mine.wheels ?? EMPTY_WHEELS)
+      setWheels({ ...EMPTY_WHEELS, ...(mine.wheels ?? {}) })
       setNote(mine.note ?? '')
     } else {
       setNose(5); setTaste(5); setFinish(5)
@@ -133,6 +139,15 @@ export default function Tasting() {
   const updateWheel = (type: 'nose' | 'taste') => (i: number, v: number) => {
     setWheels(w => ({ ...w, [type]: w[type].map((old, idx) => idx === i ? v : old) }))
   }
+
+  const toggleAroma = (key: string) => {
+    setWheels(w => {
+      const cur = w.aromas ?? []
+      return { ...w, aromas: cur.includes(key) ? cur.filter(k => k !== key) : [...cur, key] }
+    })
+  }
+  const addExtraAroma = (label: string) => setWheels(w => ({ ...w, extra: [...(w.extra ?? []), label] }))
+  const removeExtraAroma = (label: string) => setWheels(w => ({ ...w, extra: (w.extra ?? []).filter(l => l !== label) }))
 
   const handleSave = async () => {
     if (!user || !selectedDrink || !tid) return
@@ -446,6 +461,16 @@ export default function Tasting() {
               </div>
 
               <WheelStepper wheels={wheels} onUpdate={updateWheel} />
+
+              <div className="border-t border-stone-800 pt-4">
+                <AromaTags
+                  aromas={wheels.aromas ?? []}
+                  extra={wheels.extra ?? []}
+                  onToggle={toggleAroma}
+                  onAddExtra={addExtraAroma}
+                  onRemoveExtra={removeExtraAroma}
+                />
+              </div>
 
               <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
                 className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"

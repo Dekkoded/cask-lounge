@@ -22,7 +22,9 @@ export interface Rating {
   finish: number | null
   overall: number | null
   color_idx: number | null
-  wheels: { nose: number[]; taste: number[] }
+  // aromas: ausgewählte kuratierte Aroma-Schlüssel; extra: frei eingegebene Aromen.
+  // Beide optional und im selben jsonb gespeichert – keine Migration nötig.
+  wheels: { nose: number[]; taste: number[]; aromas?: string[]; extra?: string[] }
   note: string | null
   purchase_price: number | null
   is_public: boolean
