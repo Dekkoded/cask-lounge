@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { lookupDistillery } from '../lib/distilleries'
 import type { MapPin } from '../components/DistilleryMap'
 import type { GlobalDrinkScore, Drink } from '../lib/types'
+import { usePageMeta } from '../lib/pageMeta'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
@@ -21,6 +22,7 @@ interface VitrineEntry {
 
 export default function GlobalLanding() {
   const { t } = useTranslation()
+  usePageMeta()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()

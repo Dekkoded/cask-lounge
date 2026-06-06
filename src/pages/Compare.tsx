@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import type { GlobalDrinkScore } from '../lib/types'
 import CompareWheel from '../components/CompareWheel'
 import { aromaLabel } from '../components/AromaTags'
+import { usePageMeta } from '../lib/pageMeta'
 
 const COLORS = ['#f59e0b', '#60a5fa', '#34d399']
 const MAX = 3
@@ -47,6 +48,7 @@ function avgWheel(rows: RatingRow[], type: 'nose' | 'taste'): number[] {
 
 export default function Compare() {
   const { t } = useTranslation()
+  usePageMeta({ title: t('compare.title'), description: t('compare.subtitle') })
   const [params, setParams] = useSearchParams()
   const ids = (params.get('ids') || '').split(',').filter(Boolean).slice(0, MAX)
 

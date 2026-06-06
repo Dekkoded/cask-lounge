@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { lookupDistillery } from '../lib/distilleries'
 import Lightbox from '../components/Lightbox'
+import { usePageMeta } from '../lib/pageMeta'
 import type { MapPin } from '../components/DistilleryMap'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
@@ -63,6 +64,8 @@ export default function MemberProfile() {
           })
       })
   }, [id])
+
+  usePageMeta({ title: member ? (member.display_name ?? member.username) : undefined })
 
   if (loading) {
     return (

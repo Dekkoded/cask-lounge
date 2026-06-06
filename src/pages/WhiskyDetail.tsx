@@ -8,6 +8,7 @@ import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
 import Lightbox from '../components/Lightbox'
 import AromaTags, { aromaLabel } from '../components/AromaTags'
+import { usePageMeta } from '../lib/pageMeta'
 import { amazonSearchUrl } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'
 
@@ -244,6 +245,14 @@ export default function WhiskyDetail() {
     if (error) { setError(t('whisky.deleteDrinkFailed', { message: error.message })); return }
     navigate('/')
   }
+
+  usePageMeta({
+    title: drink?.name,
+    description: drink
+      ? [drink.producer, drink.region, drink.age_years ? `${drink.age_years} ${t('whisky.years')}` : null]
+          .filter(Boolean).join(' · ') || undefined
+      : undefined,
+  })
 
   if (!drink) {
     return (
