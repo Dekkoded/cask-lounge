@@ -1,0 +1,15 @@
+{
+  "compare": {
+    "title": "Whisky comparison",
+    "subtitle": "Place two or three whiskies side by side and compare ratings and aromas.",
+    "addWhisky": "Add whisky",
+    "searchPlaceholder": "Search whisky…",
+    "noResults": "No matches.",
+    "remove": "Remove",
+    "pickTwo": "Pick at least two whiskies to compare.",
+    "overall": "Overall",
+    "ratings": "Ratings",
+    "topAromas": "Most common aromas",
+    "cta": "Compare with another whisky"
+  }
+}

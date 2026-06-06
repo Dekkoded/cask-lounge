@@ -22,6 +22,7 @@ const GroupHome = lazy(() => import('./pages/GroupHome'))
 const Tasting = lazy(() => import('./pages/Tasting'))
 const Profile = lazy(() => import('./pages/Profile'))
 const Legal = lazy(() => import('./pages/Legal'))
+const Compare = lazy(() => import('./pages/Compare'))
 
 function AppShell() {
   const { user } = useAuth()
@@ -41,6 +42,7 @@ function AppShell() {
             <Route path="/whisky/:id" element={<WhiskyDetail />} />
             <Route path="/user/:id" element={<MemberProfile />} />
             <Route path="/members" element={<Members />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="/join/:code" element={<JoinGroup />} />
             <Route path="/impressum" element={<Legal doc="impressum" />} />
             <Route path="/datenschutz" element={<Legal doc="datenschutz" />} />

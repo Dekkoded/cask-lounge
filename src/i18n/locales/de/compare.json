@@ -1,0 +1,15 @@
+{
+  "compare": {
+    "title": "Whisky-Vergleich",
+    "subtitle": "Stelle zwei oder drei Whiskys nebeneinander und vergleiche Bewertungen und Aromen.",
+    "addWhisky": "Whisky hinzufügen",
+    "searchPlaceholder": "Whisky suchen…",
+    "noResults": "Keine Treffer.",
+    "remove": "Entfernen",
+    "pickTwo": "Wähle mindestens zwei Whiskys zum Vergleichen.",
+    "overall": "Gesamt",
+    "ratings": "Bewertungen",
+    "topAromas": "Häufigste Aromen",
+    "cta": "Mit anderem Whisky vergleichen"
+  }
+}

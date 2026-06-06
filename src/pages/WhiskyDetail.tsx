@@ -320,6 +320,14 @@ export default function WhiskyDetail() {
         {t('whisky.searchAmazon')}
       </a>
 
+      {/* Mit anderem Whisky vergleichen */}
+      <Link
+        to={`/compare?ids=${drink.id}`}
+        className="flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors mb-6 -mt-2"
+      >
+        ⚖️ {t('compare.cta')}
+      </Link>
+
       {/* Zur Sammlung hinzufügen (ohne Bewertung) */}
       {user && (
         myRating ? (
