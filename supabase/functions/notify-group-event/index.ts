@@ -71,6 +71,8 @@ Deno.serve(async (req) => {
       body = drinkName
       url = `/groups/${record.group_id}`
     } else if (table === 'battles') {
+      // Öffentliche Battles (ohne Gruppe) lösen keine Benachrichtigung aus
+      if (!record.group_id) return new Response('Public battle, no notify', { status: 200 })
       actorId = record.created_by
       const { data: members } = await supabase
         .from('group_members').select('user_id')
@@ -78,8 +80,12 @@ Deno.serve(async (req) => {
       recipientIds = (members ?? []).map((m: { user_id: string }) => m.user_id)
       const name = await actorName(actorId)
       title = `${name} hat ein Battle gestartet ⚔️`
-      body = record.title ?? ''
-      url = `/groups/${record.group_id}/battle/${record.id}`
+      const { data: bd } = await supabase
+        .from('battle_drinks').select('position, drinks(name)').eq('battle_id', record.id).order('position')
+      body = (bd ?? [])
+        .map((r: { drinks: { name: string } | null }) => r.drinks?.name)
+        .filter(Boolean).join(' vs ')
+      url = `/battle/${record.id}`
     }
 
     if (recipientIds.length === 0) return new Response('No recipients', { status: 200 })

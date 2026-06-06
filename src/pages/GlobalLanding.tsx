@@ -181,6 +181,21 @@ export default function GlobalLanding() {
         </div>
       )}
 
+      {/* Battles-Einstieg */}
+      {view === 'ranking' && (
+        <Link
+          to="/battles"
+          className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 mb-4 transition-colors"
+        >
+          <span className="text-2xl flex-shrink-0">⚔️</span>
+          <div className="min-w-0">
+            <p className="font-semibold text-stone-100">{t('battle.publicHeading')}</p>
+            <p className="text-xs text-stone-400 truncate">{t('battle.publicSub')}</p>
+          </div>
+          <span className="ml-auto text-stone-500 flex-shrink-0">→</span>
+        </Link>
+      )}
+
       {/* Ranking */}
       {view === 'ranking' && (
         loading ? (

@@ -46,6 +46,7 @@ export default function BottomNav() {
             <SheetItem icon="➕" title={t('nav.sheet.addWhisky.title')} sub={t('nav.sheet.addWhisky.sub')} onClick={() => go('/add-whisky')} />
             <SheetItem icon="👥" title={t('nav.sheet.createGroup.title')} sub={t('nav.sheet.createGroup.sub')} onClick={() => go('/groups?create=1')} />
             <SheetItem icon="📋" title={t('nav.sheet.createTasting.title')} sub={t('nav.sheet.createTasting.sub')} onClick={() => go('/groups')} />
+            <SheetItem icon="⚔️" title={t('nav.sheet.startBattle.title')} sub={t('nav.sheet.startBattle.sub')} onClick={() => go('/battles?create=1')} />
             <button onClick={() => setSheetOpen(false)} className="mt-2 text-stone-400 text-sm py-2">{t('common.cancel')}</button>
           </div>
         </div>

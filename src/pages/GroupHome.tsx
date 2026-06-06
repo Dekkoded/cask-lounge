@@ -62,8 +62,8 @@ interface Tasting {
 
 interface BattleListItem {
   id: string
-  title: string
   status: string
+  battle_drinks: { position: number; drinks: { name: string } | null }[]
 }
 
 type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'battles' | 'mitglieder'
@@ -90,7 +90,6 @@ export default function GroupHome() {
   const [tastingDate, setTastingDate] = useState('')
   const [creatingTasting, setCreatingTasting] = useState(false)
   const [showNewBattle, setShowNewBattle] = useState(false)
-  const [battleTitle, setBattleTitle] = useState('')
   const [battleDrinkIds, setBattleDrinkIds] = useState<string[]>([])
   const [battleSearch, setBattleSearch] = useState('')
   const [creatingBattle, setCreatingBattle] = useState(false)
@@ -120,8 +119,8 @@ export default function GroupHome() {
     supabase.from('tastings').select('*').eq('group_id', id).order('created_at', { ascending: false })
       .then(({ data }) => { setTastings(data ?? []) })
 
-    supabase.from('battles').select('id, title, status').eq('group_id', id).order('created_at', { ascending: false })
-      .then(({ data }) => { setBattles((data as BattleListItem[]) ?? []) })
+    supabase.from('battles').select('id, status, battle_drinks(position, drinks(name))').eq('group_id', id).order('created_at', { ascending: false })
+      .then(({ data }) => { setBattles((data as unknown as BattleListItem[]) ?? []) })
 
     supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
       .then(({ data }) => setAllDrinks(data ?? []))
@@ -289,17 +288,23 @@ export default function GroupHome() {
   }
 
   const toggleBattleDrink = (drinkId: string) =>
-    setBattleDrinkIds(prev => prev.includes(drinkId) ? prev.filter(x => x !== drinkId) : [...prev, drinkId])
+    setBattleDrinkIds(prev => prev.includes(drinkId) ? prev.filter(x => x !== drinkId) : prev.length >= 5 ? prev : [...prev, drinkId])
+
+  const battleMatchup = (b: BattleListItem) =>
+    [...b.battle_drinks]
+      .sort((a, c) => a.position - c.position)
+      .map(d => d.drinks?.name)
+      .filter(Boolean)
+      .join(` ${t('battle.vs')} `) || t('battle.heading')
 
   const handleCreateBattle = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !id) return
-    if (battleDrinkIds.length < 2) { setBattleError(t('battle.selectAtLeastTwo')); return }
+    if (battleDrinkIds.length < 2 || battleDrinkIds.length > 5) { setBattleError(t('battle.selectTwoToFive')); return }
     setCreatingBattle(true)
     setBattleError(null)
     const { data, error } = await supabase.from('battles').insert({
       group_id: id,
-      title: battleTitle.trim(),
       created_by: user.id,
       status: 'open',
     }).select('id').single()
@@ -311,7 +316,7 @@ export default function GroupHome() {
     const rows = battleDrinkIds.map((drink_id, position) => ({ battle_id: data.id, drink_id, position }))
     await supabase.from('battle_drinks').insert(rows)
     setCreatingBattle(false)
-    navigate(`/groups/${id}/battle/${data.id}`)
+    navigate(`/battle/${data.id}`)
   }
 
   const handleRemoveMember = async (userId: string) => {
@@ -656,10 +661,10 @@ export default function GroupHome() {
           {battles.map(b => (
             <Link
               key={b.id}
-              to={`/groups/${id}/battle/${b.id}`}
+              to={`/battle/${b.id}`}
               className="flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
             >
-              <p className="font-semibold text-stone-100 flex items-center gap-2"><span>⚔️</span>{b.title}</p>
+              <p className="font-semibold text-stone-100 flex items-center gap-2 min-w-0"><span className="flex-shrink-0">⚔️</span><span className="truncate">{battleMatchup(b)}</span></p>
               <span className={`text-xs rounded-full px-3 py-1 ${b.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
                 {b.status === 'closed' ? t('battle.closed') : t('battle.open')}
               </span>
@@ -677,16 +682,9 @@ export default function GroupHome() {
             </button>
             {showNewBattle && (
               <form onSubmit={handleCreateBattle} className="flex flex-col gap-3 mt-4">
-                <input
-                  required
-                  value={battleTitle}
-                  onChange={e => setBattleTitle(e.target.value)}
-                  placeholder={t('battle.titlePlaceholder')}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-                />
                 <p className="text-sm text-stone-400">
                   {t('battle.pickDrinks')}
-                  {battleDrinkIds.length > 0 && <span className="text-amber-400"> · {t('battle.selected')}: {battleDrinkIds.length}</span>}
+                  {battleDrinkIds.length > 0 && <span className="text-amber-400"> · {t('battle.selected')}: {battleDrinkIds.length}/5</span>}
                 </p>
                 <input
                   type="search"
@@ -718,7 +716,7 @@ export default function GroupHome() {
                 {battleError && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{battleError}</p>}
                 <button
                   type="submit"
-                  disabled={creatingBattle || battleDrinkIds.length < 2 || !battleTitle.trim()}
+                  disabled={creatingBattle || battleDrinkIds.length < 2 || battleDrinkIds.length > 5}
                   className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5"
                 >
                   {creatingBattle ? t('battle.creating') : t('battle.create')}

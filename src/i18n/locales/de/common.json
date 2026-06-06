@@ -26,7 +26,8 @@
       "livePost": { "title": "Live posten", "sub": "Teile in deiner Gruppe, was du gerade trinkst" },
       "addWhisky": { "title": "Whisky hinzufügen", "sub": "Neuen Whisky in den Katalog" },
       "createGroup": { "title": "Gruppe erstellen", "sub": "Starte eine neue Gruppe" },
-      "createTasting": { "title": "Tasting erstellen", "sub": "In einer deiner Gruppen" }
+      "createTasting": { "title": "Tasting erstellen", "sub": "In einer deiner Gruppen" },
+      "startBattle": { "title": "Battle starten", "sub": "Zwei Whiskys gegeneinander – alle stimmen ab" }
     }
   },
   "intro": {

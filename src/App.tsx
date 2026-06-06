@@ -24,6 +24,7 @@ const Profile = lazy(() => import('./pages/Profile'))
 const Legal = lazy(() => import('./pages/Legal'))
 const Compare = lazy(() => import('./pages/Compare'))
 const Battle = lazy(() => import('./pages/Battle'))
+const Battles = lazy(() => import('./pages/Battles'))
 
 function AppShell() {
   const { user } = useAuth()
@@ -44,6 +45,8 @@ function AppShell() {
             <Route path="/user/:id" element={<MemberProfile />} />
             <Route path="/members" element={<Members />} />
             <Route path="/compare" element={<Compare />} />
+            <Route path="/battles" element={<Battles />} />
+            <Route path="/battle/:bid" element={<Battle />} />
             <Route path="/join/:code" element={<JoinGroup />} />
             <Route path="/impressum" element={<Legal doc="impressum" />} />
             <Route path="/datenschutz" element={<Legal doc="datenschutz" />} />
@@ -55,7 +58,6 @@ function AppShell() {
             <Route path="/groups" element={<RequireAuth><Groups /></RequireAuth>} />
             <Route path="/groups/:id" element={<RequireAuth><GroupHome /></RequireAuth>} />
             <Route path="/groups/:id/tasting/:tid" element={<RequireAuth><Tasting /></RequireAuth>} />
-            <Route path="/groups/:id/battle/:bid" element={<RequireAuth><Battle /></RequireAuth>} />
             <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
 
             {/* Fallback */}

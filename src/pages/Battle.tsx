@@ -7,8 +7,7 @@ import type { Drink } from '../lib/types'
 
 interface BattleRow {
   id: string
-  group_id: string
-  title: string
+  group_id: string | null
   status: string
   created_by: string | null
 }
@@ -25,7 +24,7 @@ interface Contender {
 
 export default function Battle() {
   const { t } = useTranslation()
-  const { id, bid } = useParams<{ id: string; bid: string }>()
+  const { bid } = useParams<{ bid: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
 
@@ -49,7 +48,7 @@ export default function Battle() {
     ;(async () => {
       const { data: b } = await supabase
         .from('battles')
-        .select('id, group_id, title, status, created_by')
+        .select('id, group_id, status, created_by')
         .eq('id', bid)
         .maybeSingle()
       if (!active) return
@@ -87,6 +86,8 @@ export default function Battle() {
   const maxVotes = Math.max(0, ...contenders.map(c => countFor(c.drink.id)))
   const isOpen = battle?.status === 'open'
   const isCreator = !!user && battle?.created_by === user.id
+  const matchup = contenders.map(c => c.drink.name).join(` ${t('battle.vs')} `)
+  const heading = matchup || t('battle.heading')
 
   const castVote = async (drinkId: string) => {
     if (!user || !bid || !isOpen || busy) return
@@ -112,7 +113,7 @@ export default function Battle() {
     if (!battle || !isCreator) return
     if (!confirm(t('battle.confirmDelete'))) return
     await supabase.from('battles').delete().eq('id', battle.id)
-    navigate(`/groups/${id}`)
+    navigate('/battles')
   }
 
   if (loading) {
@@ -132,7 +133,7 @@ export default function Battle() {
   if (!battle) {
     return (
       <div className="max-w-lg mx-auto p-4">
-        <button onClick={() => navigate(`/groups/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm">← {t('battle.back')}</button>
+        <button onClick={() => navigate('/battles')} className="text-stone-400 hover:text-stone-200 text-sm">← {t('battle.back')}</button>
         <p className="text-stone-500 text-center py-12">{t('battle.notFound')}</p>
       </div>
     )
@@ -141,19 +142,24 @@ export default function Battle() {
   return (
     <div className="max-w-lg mx-auto p-4">
       <div className="flex items-center gap-3 py-4 mb-2">
-        <button onClick={() => navigate(`/groups/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm">← {t('battle.back')}</button>
+        <button onClick={() => navigate('/battles')} className="text-stone-400 hover:text-stone-200 text-sm">← {t('battle.back')}</button>
         <div className="flex-1" />
         <span className={`text-xs rounded-full px-3 py-1 ${isOpen ? 'bg-amber-500/20 text-amber-400' : 'bg-stone-700 text-stone-400'}`}>
           {isOpen ? t('battle.open') : t('battle.closed')}
         </span>
       </div>
 
-      <h1 className="text-2xl font-bold text-stone-100 mb-1">{battle.title}</h1>
+      <h1 className="text-2xl font-bold text-stone-100 mb-1">{heading}</h1>
       <p className="text-stone-500 text-sm mb-6">
         {total === 0 ? t('battle.noVotes') : t('battle.totalVotes', { count: total })}
       </p>
 
-      {!isOpen && <p className="text-stone-500 text-sm mb-4">{t('battle.closedHint')}</p>}
+      {!user && (
+        <Link to="/login" className="block text-center bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-xl py-3 mb-4">
+          {t('battle.loginToVote')}
+        </Link>
+      )}
+      {user && !isOpen && <p className="text-stone-500 text-sm mb-4">{t('battle.closedHint')}</p>}
 
       <div className="flex flex-col gap-3">
         {contenders.map(({ drink }) => {
@@ -161,14 +167,15 @@ export default function Battle() {
           const pct = total > 0 ? Math.round((c / total) * 100) : 0
           const mine = myVote === drink.id
           const leading = c > 0 && c === maxVotes
+          const canVote = !!user && isOpen
           return (
             <button
               key={drink.id}
               onClick={() => castVote(drink.id)}
-              disabled={!isOpen || busy}
+              disabled={!canVote || busy}
               className={`relative overflow-hidden text-left rounded-2xl border p-4 transition-colors ${
                 mine ? 'border-amber-500 bg-stone-900' : 'border-stone-800 bg-stone-900'
-              } ${isOpen ? 'hover:border-stone-600 cursor-pointer' : 'cursor-default'}`}
+              } ${canVote ? 'hover:border-stone-600 cursor-pointer' : 'cursor-default'}`}
             >
               {/* Ergebnis-Balken im Hintergrund */}
               <div

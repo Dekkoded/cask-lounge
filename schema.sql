@@ -371,26 +371,26 @@ create index on public.tasting_ratings (tasting_id, drink_id);
 create index on public.drink_sessions (group_id, started_at desc);
 
 -- =====================================================================
--- 8b. BATTLES  (Head-to-Head Abstimmung innerhalb einer Gruppe)
---     Ersteller stellt 2+ Whiskys gegeneinander, Mitglieder stimmen ab
---     (eine Stimme pro User pro Battle, jederzeit änderbar solange offen).
+-- 8b. BATTLES  (Öffentliche Head-to-Head Abstimmung)
+--     Jeder eingeloggte User stellt 2–5 Whiskys gegeneinander; ALLE
+--     dürfen abstimmen (eine Stimme pro User pro Battle, jederzeit
+--     änderbar solange offen). Optional kann ein Battle einer Gruppe
+--     zugeordnet werden (group_id) – dann werden deren Mitglieder
+--     benachrichtigt; ansonsten ist es rein öffentlich (keine Notify).
 -- =====================================================================
 create table public.battles (
   id          uuid primary key default gen_random_uuid(),
-  group_id    uuid not null references public.groups(id) on delete cascade,
-  title       text not null,
+  group_id    uuid references public.groups(id) on delete cascade,   -- optional
   created_by  uuid references public.profiles(id) on delete set null,
   status      text not null default 'open',   -- 'open' | 'closed'
   created_at  timestamptz not null default now()
 );
 alter table public.battles enable row level security;
 
-create policy "battles_select_member"
-  on public.battles for select using (public.is_group_member(group_id));
-create policy "battles_insert_member"
-  on public.battles for insert with check (
-    public.is_group_member(group_id) and created_by = (select auth.uid())
-  );
+create policy "battles_select_all"
+  on public.battles for select using (true);
+create policy "battles_insert_auth"
+  on public.battles for insert with check (created_by = (select auth.uid()));
 create policy "battles_update_creator"
   on public.battles for update using (created_by = (select auth.uid()));
 create policy "battles_delete_creator"
@@ -405,10 +405,8 @@ create table public.battle_drinks (
 );
 alter table public.battle_drinks enable row level security;
 
-create policy "bd_select_member"
-  on public.battle_drinks for select using (
-    exists(select 1 from public.battles b where b.id = battle_id and public.is_group_member(b.group_id))
-  );
+create policy "bd_select_all"
+  on public.battle_drinks for select using (true);
 create policy "bd_modify_creator"
   on public.battle_drinks for all using (
     exists(select 1 from public.battles b where b.id = battle_id and b.created_by = (select auth.uid()))
@@ -426,17 +424,15 @@ create table public.battle_votes (
 );
 alter table public.battle_votes enable row level security;
 
-create policy "bv_select_member"
-  on public.battle_votes for select using (
-    exists(select 1 from public.battles b where b.id = battle_id and public.is_group_member(b.group_id))
-  );
--- Abstimmen nur in offenen Battles der eigenen Gruppe, nur für sich selbst.
-create policy "bv_insert_own_member"
+create policy "bv_select_all"
+  on public.battle_votes for select using (true);
+-- Abstimmen nur in offenen Battles, nur für sich selbst.
+create policy "bv_insert_own"
   on public.battle_votes for insert with check (
     user_id = (select auth.uid())
     and exists(
       select 1 from public.battles b
-      where b.id = battle_id and b.status = 'open' and public.is_group_member(b.group_id)
+      where b.id = battle_id and b.status = 'open'
     )
   );
 create policy "bv_update_own"
