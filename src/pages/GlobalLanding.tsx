@@ -10,13 +10,19 @@ import { usePageMeta } from '../lib/pageMeta'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
-type View = 'ranking' | 'vitrine'
+type View = 'ranking' | 'vitrine' | 'wishlist'
 
 interface VitrineEntry {
   id: string
   overall: number | null
   updated_at: string
   purchase_price: number | null
+  drinks: Drink | null
+}
+
+interface WishlistEntry {
+  id: string
+  created_at: string
   drinks: Drink | null
 }
 
@@ -31,6 +37,8 @@ export default function GlobalLanding() {
     setSearchParams(v === 'ranking' ? {} : { view: v }, { replace: true })
   const [scores, setScores] = useState<GlobalDrinkScore[]>([])
   const [vitrine, setVitrine] = useState<VitrineEntry[]>([])
+  const [wishlist, setWishlist] = useState<WishlistEntry[]>([])
+  const [wishlistLoading, setWishlistLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [regionFilter, setRegionFilter] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -61,6 +69,24 @@ export default function GlobalLanding() {
       })
   }, [user])
 
+  useEffect(() => {
+    if (!user) { setWishlistLoading(false); return }
+    supabase
+      .from('wishlist')
+      .select('id, created_at, drinks(*)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        setWishlist((data as unknown as WishlistEntry[]) ?? [])
+        setWishlistLoading(false)
+      })
+  }, [user])
+
+  const removeFromWishlist = async (entryId: string) => {
+    setWishlist(prev => prev.filter(w => w.id !== entryId))
+    await supabase.from('wishlist').delete().eq('id', entryId)
+  }
+
   const q = search.toLowerCase()
   const regions = [...new Set(scores.map(s => s.region).filter((r): r is string => !!r))].sort()
   const filtered = scores.filter(s =>
@@ -74,6 +100,13 @@ export default function GlobalLanding() {
     ((v.drinks?.name ?? '').toLowerCase().includes(q) ||
       (v.drinks?.producer ?? '').toLowerCase().includes(q) ||
       (v.drinks?.region ?? '').toLowerCase().includes(q))
+  )
+
+  const filteredWishlist = wishlist.filter(w =>
+    (!regionFilter || w.drinks?.region === regionFilter) &&
+    ((w.drinks?.name ?? '').toLowerCase().includes(q) ||
+      (w.drinks?.producer ?? '').toLowerCase().includes(q) ||
+      (w.drinks?.region ?? '').toLowerCase().includes(q))
   )
 
   const collectionValue = filteredVitrine.reduce((s, v) => s + (v.purchase_price ?? 0), 0)
@@ -94,6 +127,7 @@ export default function GlobalLanding() {
   const headings: Record<View, string> = {
     ranking: t('landing.headingRanking'),
     vitrine: t('landing.headingVitrine'),
+    wishlist: t('landing.headingWishlist'),
   }
 
   return (
@@ -126,6 +160,24 @@ export default function GlobalLanding() {
               {r}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Untertabs Sammlung / Wunschliste */}
+      {user && (view === 'vitrine' || view === 'wishlist') && (
+        <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-4">
+          <button
+            onClick={() => setView('vitrine')}
+            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
+            {t('landing.tabCollection')}
+          </button>
+          <button
+            onClick={() => setView('wishlist')}
+            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'wishlist' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+          >
+            {t('landing.tabWishlist')}
+          </button>
         </div>
       )}
 
@@ -275,6 +327,72 @@ export default function GlobalLanding() {
                   <span className="text-stone-600 text-sm">—</span>
                 )}
               </Link>
+            ))}
+          </div>
+        )
+      )}
+
+      {/* Wunschliste */}
+      {view === 'wishlist' && (
+        wishlistLoading ? (
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 animate-pulse">
+                <div className="w-14 h-14 bg-stone-800 rounded-lg flex-shrink-0" />
+                <div className="flex-1 flex flex-col gap-2">
+                  <div className="h-4 bg-stone-800 rounded w-3/4" />
+                  <div className="h-3 bg-stone-800 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredWishlist.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-stone-500 mb-4">
+              {wishlist.length === 0
+                ? t('landing.noWishlist')
+                : t('landing.noWishlistMatches')}
+            </p>
+            {wishlist.length === 0 && (
+              <button
+                onClick={() => setView('ranking')}
+                className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
+              >
+                {t('landing.discoverWhiskies')}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filteredWishlist.filter(w => w.drinks).map(w => (
+              <div
+                key={w.id}
+                className="flex items-center gap-4 bg-stone-900 rounded-xl p-4"
+              >
+                <Link to={`/whisky/${w.drinks!.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                  {w.drinks!.photo_url ? (
+                    <img src={w.drinks!.photo_url} alt={w.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-stone-100 truncate">{w.drinks!.name}</p>
+                    <p className="text-sm text-stone-400 truncate">
+                      {[w.drinks!.producer, w.drinks!.region].filter(Boolean).join(' · ')}
+                    </p>
+                    <p className="text-xs text-stone-600 mt-0.5">
+                      {t('landing.savedOn', { date: new Date(w.created_at).toLocaleDateString('de-DE') })}
+                    </p>
+                  </div>
+                </Link>
+                <button
+                  onClick={() => removeFromWishlist(w.id)}
+                  aria-label={t('landing.removeFromWishlist')}
+                  className="text-stone-500 hover:text-red-400 transition-colors flex-shrink-0 p-2 -m-2"
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
         )

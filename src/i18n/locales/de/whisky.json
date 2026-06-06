@@ -165,6 +165,10 @@
       "caramel": "Karamell",
       "toffee": "Toffee",
       "butterscotch": "Karamellbonbon"
-    }
+    },
+    "addToWishlist": "☆ Auf die Wunschliste",
+    "inWishlist": "★ Auf deiner Wunschliste",
+    "removeFromWishlist": "Von Wunschliste entfernen",
+    "wishlistAdded": "Zur Wunschliste hinzugefügt"
   }
 }

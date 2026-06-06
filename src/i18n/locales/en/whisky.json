@@ -165,6 +165,10 @@
       "caramel": "Caramel",
       "toffee": "Toffee",
       "butterscotch": "Butterscotch"
-    }
+    },
+    "addToWishlist": "☆ Add to wishlist",
+    "inWishlist": "★ On your wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "wishlistAdded": "Added to wishlist"
   }
 }

@@ -11,8 +11,8 @@ export default function BottomNav() {
 
   const path = location.pathname
   const view = searchParams.get('view')
-  const isGlobal = path === '/' && view !== 'vitrine' && view !== 'live'
-  const isVitrine = path === '/' && view === 'vitrine'
+  const isGlobal = path === '/' && view !== 'vitrine' && view !== 'wishlist' && view !== 'live'
+  const isVitrine = path === '/' && (view === 'vitrine' || view === 'wishlist')
   const isTastings = path === '/groups'
   const isGruppen = path.startsWith('/groups/')
 

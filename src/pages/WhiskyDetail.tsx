@@ -58,6 +58,8 @@ export default function WhiskyDetail() {
   const [addingCollection, setAddingCollection] = useState(false)
   const [collectionMsg, setCollectionMsg] = useState<string | null>(null)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
+  const [inWishlist, setInWishlist] = useState(false)
+  const [wishlistBusy, setWishlistBusy] = useState(false)
 
   // Teilen-State
   const [groups, setGroups] = useState<Group[]>([])
@@ -100,6 +102,10 @@ export default function WhiskyDetail() {
       supabase.from('ratings').select('id', { count: 'exact', head: true })
         .eq('drink_id', id).neq('user_id', user.id)
         .then(({ count }) => setOthersRated((count ?? 0) > 0))
+
+      supabase.from('wishlist').select('id')
+        .eq('drink_id', id).eq('user_id', user.id).maybeSingle()
+        .then(({ data }) => setInWishlist(!!data))
     }
   }, [id, user])
 
@@ -180,6 +186,7 @@ export default function WhiskyDetail() {
     if (error) { setError(error.message); return }
 
     if (data) setMyRating(data)
+    removeFromWishlistSilently()
     setSaved(true)
 
     // Öffentliche Ratings neu laden
@@ -196,6 +203,28 @@ export default function WhiskyDetail() {
     }, 1200)
   }
 
+  // Wunschliste auf- und abwählen.
+  const toggleWishlist = async () => {
+    if (!user || !id) return
+    setWishlistBusy(true)
+    setError(null)
+    if (inWishlist) {
+      const { error } = await supabase.from('wishlist').delete().eq('drink_id', id).eq('user_id', user.id)
+      if (!error) setInWishlist(false)
+    } else {
+      const { error } = await supabase.from('wishlist').insert({ drink_id: id, user_id: user.id })
+      if (!error) setInWishlist(true)
+    }
+    setWishlistBusy(false)
+  }
+
+  // Whisky aus der Wunschliste nehmen, sobald er in die Sammlung wandert.
+  const removeFromWishlistSilently = async () => {
+    if (!user || !id || !inWishlist) return
+    await supabase.from('wishlist').delete().eq('drink_id', id).eq('user_id', user.id)
+    setInWishlist(false)
+  }
+
   const addToCollection = async () => {
     if (!user || !id) return
     setAddingCollection(true)
@@ -209,6 +238,7 @@ export default function WhiskyDetail() {
     setAddingCollection(false)
     if (error) { setError(error.message); return }
     if (data) setMyRating(data)
+    removeFromWishlistSilently()
     setCollectionMsg(t('whisky.addedToCollection'))
     setTimeout(() => setCollectionMsg(null), 2500)
   }
@@ -336,6 +366,21 @@ export default function WhiskyDetail() {
       >
         ⚖️ {t('compare.cta')}
       </Link>
+
+      {/* Wunschliste (nur wenn noch nicht in der Sammlung) */}
+      {user && !myRating && (
+        <button
+          onClick={toggleWishlist}
+          disabled={wishlistBusy}
+          className={`flex items-center justify-center gap-2 w-full rounded-xl py-2.5 text-sm font-medium transition-colors mb-3 disabled:opacity-50 border ${
+            inWishlist
+              ? 'bg-amber-500/15 border-amber-500/50 text-amber-400 hover:bg-amber-500/25'
+              : 'bg-stone-800 hover:bg-stone-700 border-stone-700 text-stone-200'
+          }`}
+        >
+          {inWishlist ? t('whisky.inWishlist') : t('whisky.addToWishlist')}
+        </button>
+      )}
 
       {/* Zur Sammlung hinzufügen (ohne Bewertung) */}
       {user && (

@@ -17,6 +17,13 @@
     "homeTitle": "🥃 Whisky is Life",
     "loggedInAs": "Logged in as",
     "phase1Success": "Phase 1 successful — auth works!",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "headingWishlist": "My wishlist",
+    "tabCollection": "Collection",
+    "tabWishlist": "Wishlist",
+    "noWishlist": "Your wishlist is empty.",
+    "noWishlistMatches": "No matches in your wishlist.",
+    "savedOn": "Saved on {{date}}",
+    "removeFromWishlist": "Remove"
   }
 }
