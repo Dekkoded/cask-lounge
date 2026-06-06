@@ -30,6 +30,12 @@
   --color-stone-700: oklch(0.825 0.033 80);
   --color-stone-800: oklch(0.912 0.030 82);
   --color-stone-900: oklch(0.953 0.022 84);
+  /* Amber-Akzent abdunkeln: helles Amber hat auf dem Sand-Hintergrund
+     zu wenig Kontrast. Tieferes Bronze-Gold behält den Marken-Look,
+     bleibt aber gut lesbar (Überschriften, Bewertungen, Links).
+     bg-amber-500 (Buttons) bleibt bewusst hell. */
+  --color-amber-400: oklch(0.555 0.150 66);
+  --color-amber-300: oklch(0.620 0.145 70);
 }
 
 body {
