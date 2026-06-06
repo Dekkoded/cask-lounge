@@ -41,7 +41,7 @@ export default function DistilleryMap({
   const points = pins.map(p => [p.geo.lat, p.geo.lng] as [number, number])
 
   return (
-    <div className={`${heightClass} rounded-xl overflow-hidden border border-stone-800`}>
+    <div className={`${heightClass} rounded-xl overflow-hidden border border-stone-800 relative isolate`}>
       <MapContainer center={[56.5, -4]} zoom={5} scrollWheelZoom className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'

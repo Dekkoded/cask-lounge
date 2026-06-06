@@ -45,6 +45,8 @@ export default function WhiskyDetail() {
   const [deletingDrink, setDeletingDrink] = useState(false)
   const [confirmDeleteDrink, setConfirmDeleteDrink] = useState(false)
   const [othersRated, setOthersRated] = useState(false)
+  const [addingCollection, setAddingCollection] = useState(false)
+  const [collectionMsg, setCollectionMsg] = useState<string | null>(null)
 
   // Teilen-State
   const [groups, setGroups] = useState<Group[]>([])
@@ -168,6 +170,23 @@ export default function WhiskyDetail() {
     }, 1200)
   }
 
+  const addToCollection = async () => {
+    if (!user || !id) return
+    setAddingCollection(true)
+    setError(null)
+    // Sammlungs-Eintrag ohne Bewertung: privat, keine Noten.
+    const { data, error } = await supabase.from('ratings').insert({
+      drink_id: id,
+      user_id: user.id,
+      is_public: false,
+    }).select('*').single()
+    setAddingCollection(false)
+    if (error) { setError(error.message); return }
+    if (data) setMyRating(data)
+    setCollectionMsg('✓ Zu deiner Sammlung hinzugefügt')
+    setTimeout(() => setCollectionMsg(null), 2500)
+  }
+
   const handleDeleteRating = async () => {
     if (!myRating) return
     setDeletingRating(true)
@@ -271,6 +290,21 @@ export default function WhiskyDetail() {
         🛒 Auf Amazon suchen
       </a>
 
+      {/* Zur Sammlung hinzufügen (ohne Bewertung) */}
+      {user && (
+        myRating ? (
+          <p className="text-center text-sm text-stone-500 mb-6 -mt-2">✓ In deiner Sammlung</p>
+        ) : (
+          <button
+            onClick={addToCollection}
+            disabled={addingCollection}
+            className="flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors mb-6 disabled:opacity-50"
+          >
+            {addingCollection ? 'Wird hinzugefügt…' : collectionMsg ?? '➕ Zur Sammlung hinzufügen'}
+          </button>
+        )
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
         <button onClick={() => setTab('uebersicht')}
@@ -280,7 +314,7 @@ export default function WhiskyDetail() {
         {user && (
           <button onClick={() => setTab('bewertung')}
             className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'bewertung' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-            {myRating ? 'Meine Bewertung' : '+ Bewerten'}
+            {myRating?.overall != null ? 'Meine Bewertung' : '+ Bewerten'}
           </button>
         )}
       </div>

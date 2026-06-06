@@ -17,6 +17,8 @@ export default function AddWhisky() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [similar, setSimilar] = useState<{ id: string; name: string; producer: string | null }[]>([])
+  const [createdId, setCreatedId] = useState<string | null>(null)
+  const [addingCollection, setAddingCollection] = useState(false)
 
   const checkDuplicates = async () => {
     const q = name.trim()
@@ -73,11 +75,49 @@ export default function AddWhisky() {
       return
     }
 
-    navigate(`/whisky/${data.id}`)
+    setLoading(false)
+    setCreatedId(data.id)
+  }
+
+  const addToCollection = async () => {
+    if (!user || !createdId) return
+    setAddingCollection(true)
+    // Sammlungs-Eintrag ohne Bewertung: privat, keine Noten.
+    await supabase.from('ratings').insert({
+      drink_id: createdId,
+      user_id: user.id,
+      is_public: false,
+    })
+    navigate(`/whisky/${createdId}`)
   }
 
   return (
     <div className="max-w-lg mx-auto p-6">
+      {createdId && (
+        <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-stone-900 border border-stone-700 rounded-2xl p-6 text-center">
+            <div className="text-4xl mb-3">🥃</div>
+            <h2 className="text-lg font-bold text-stone-100 mb-1">„{name.trim()}" angelegt</h2>
+            <p className="text-stone-400 text-sm mb-6">Möchtest du den Whisky zu deiner Sammlung hinzufügen? Bewerten kannst du ihn später jederzeit.</p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={addToCollection}
+                disabled={addingCollection}
+                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-2.5 transition-colors"
+              >
+                {addingCollection ? 'Wird hinzugefügt…' : 'Zur Sammlung hinzufügen'}
+              </button>
+              <button
+                onClick={() => navigate(`/whisky/${createdId}`)}
+                className="text-stone-400 hover:text-stone-200 text-sm py-2 transition-colors"
+              >
+                Überspringen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button onClick={() => navigate('/')} className="text-stone-400 hover:text-stone-200 text-sm mb-6 flex items-center gap-1">
         ← Zurück
       </button>
