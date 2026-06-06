@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { lookupDistillery } from '../lib/distilleries'
+import Lightbox from '../components/Lightbox'
 import type { MapPin } from '../components/DistilleryMap'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
@@ -32,6 +33,7 @@ export default function MemberProfile() {
   const [whiskies, setWhiskies] = useState<RatedDrink[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -102,7 +104,12 @@ export default function MemberProfile() {
 
       <div className="flex flex-col items-center mb-8">
         {member.avatar_url ? (
-          <img src={member.avatar_url} alt={name} className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700" />
+          <img
+            src={member.avatar_url}
+            alt={name}
+            onClick={() => setLightboxSrc(member.avatar_url)}
+            className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700 cursor-zoom-in"
+          />
         ) : (
           <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700">👤</div>
         )}
@@ -161,6 +168,8 @@ export default function MemberProfile() {
           ))}
         </div>
       )}
+
+      <Lightbox src={lightboxSrc} alt={name} onClose={() => setLightboxSrc(null)} />
     </div>
   )
 }

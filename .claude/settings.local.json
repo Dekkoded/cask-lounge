@@ -35,7 +35,17 @@
       "Bash(curl -s https://www.casklounge.com/)",
       "Bash(curl -s https://www.casklounge.com/assets/index-CMv-1RBv.js)",
       "mcp__Claude_Preview__preview_start",
-      "Bash(lsof -i :5173 -sTCP:LISTEN -n -P)"
+      "Bash(lsof -i :5173 -sTCP:LISTEN -n -P)",
+      "Bash(head -n 253 src/pages/GlobalLanding.tsx)",
+      "Bash(printf '    </div>\\\\n  \\)\\\\n}\\\\n')",
+      "Bash(mv /tmp/gl.tsx src/pages/GlobalLanding.tsx)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('react-leaflet',p.dependencies['react-leaflet']\\); console.log\\('leaflet',p.dependencies['leaflet']\\); console.log\\('@types/leaflet',p.devDependencies['@types/leaflet']\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/de/auth.json'\\)\\); JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/en/auth.json'\\)\\); console.log\\('both valid JSON'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/de/tasting.json'\\)\\); JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/en/tasting.json'\\)\\); console.log\\('both valid'\\)\")",
+      "Bash(node -e \"const d=require\\('./src/i18n/locales/de/whisky.json'\\);const e=require\\('./src/i18n/locales/en/whisky.json'\\);const keys=o=>Object.keys\\(o\\).flatMap\\(k=>typeof o[k]==='object'&&o[k]!==null?keys\\(o[k]\\).map\\(s=>k+'.'+s\\):[k]\\).sort\\(\\);const dk=JSON.stringify\\(keys\\(d\\)\\),ek=JSON.stringify\\(keys\\(e\\)\\);console.log\\('de keys:',keys\\(d\\).length\\);console.log\\('en keys:',keys\\(e\\).length\\);console.log\\('identical structure:',dk===ek\\);if\\(dk!==ek\\){const ds=new Set\\(keys\\(d\\)\\),es=new Set\\(keys\\(e\\)\\);console.log\\('in de not en:',keys\\(d\\).filter\\(x=>!es.has\\(x\\)\\)\\);console.log\\('in en not de:',keys\\(e\\).filter\\(x=>!ds.has\\(x\\)\\)\\);}\")",
+      "Bash(node -e \"const d=require\\('./src/i18n/locales/de/groups.json'\\); const e=require\\('./src/i18n/locales/en/groups.json'\\); const keys=o=>Object.keys\\(o\\).flatMap\\(k=>typeof o[k]==='object'?Object.keys\\(o[k]\\).map\\(x=>k+'.'+x\\):[k]\\).sort\\(\\); const dk=keys\\(d.groups\\),ek=keys\\(e.groups\\); console.log\\('de keys:',dk.length,'en keys:',ek.length\\); console.log\\('identical:', JSON.stringify\\(dk\\)===JSON.stringify\\(ek\\)\\); const onlyDe=dk.filter\\(k=>!ek.includes\\(k\\)\\),onlyEn=ek.filter\\(k=>!dk.includes\\(k\\)\\); if\\(onlyDe.length\\)console.log\\('only de:',onlyDe\\); if\\(onlyEn.length\\)console.log\\('only en:',onlyEn\\);\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Read(//tmp/**)"
     ]
   }
 }

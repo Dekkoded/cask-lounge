@@ -33,3 +33,9 @@ body {
   @apply bg-app text-stone-100 min-h-screen;
   font-family: system-ui, -apple-system, sans-serif;
 }
+
+/* Sanftes Einblenden, u.a. für die Foto-Lightbox. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

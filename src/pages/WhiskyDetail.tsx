@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
+import Lightbox from '../components/Lightbox'
 import { amazonSearchUrl } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'
 
@@ -49,6 +50,7 @@ export default function WhiskyDetail() {
   const [othersRated, setOthersRated] = useState(false)
   const [addingCollection, setAddingCollection] = useState(false)
   const [collectionMsg, setCollectionMsg] = useState<string | null>(null)
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
 
   // Teilen-State
   const [groups, setGroups] = useState<Group[]>([])
@@ -261,7 +263,12 @@ export default function WhiskyDetail() {
       {/* Whisky-Header */}
       <div className="flex gap-4 mb-6">
         {drink.photo_url ? (
-          <img src={drink.photo_url} alt={drink.name} className="w-24 h-24 object-cover rounded-xl flex-shrink-0" />
+          <img
+            src={drink.photo_url}
+            alt={drink.name}
+            onClick={() => setLightboxSrc(drink.photo_url)}
+            className="w-24 h-24 object-cover rounded-xl flex-shrink-0 cursor-zoom-in"
+          />
         ) : (
           <div className="w-24 h-24 bg-stone-800 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">🥃</div>
         )}
@@ -540,6 +547,8 @@ export default function WhiskyDetail() {
           )}
         </div>
       )}
+
+      <Lightbox src={lightboxSrc} alt={drink.name} onClose={() => setLightboxSrc(null)} />
     </div>
   )
 }
