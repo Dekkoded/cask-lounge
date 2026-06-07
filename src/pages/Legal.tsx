@@ -45,7 +45,7 @@ function Datenschutz() {
       <P>Die Verarbeitung erfolgt zur Erfüllung des Nutzungsvertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie auf Basis deiner Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), etwa für Push- und E-Mail-Benachrichtigungen.</P>
 
       <H2>4. Hosting und Auftragsverarbeiter</H2>
-      <P>Die Anwendung wird über Vercel bereitgestellt; Daten werden bei Supabase (Postgres-Datenbank, Authentifizierung, Datei-Speicher) verarbeitet. Mit diesen Anbietern bestehen Verträge zur Auftragsverarbeitung.</P>
+      <P>Die Anwendung wird über Vercel bereitgestellt; Daten werden bei Supabase (Postgres-Datenbank, Authentifizierung, Datei-Speicher) verarbeitet. Mit diesen Anbietern bestehen Verträge zur Auftragsverarbeitung. Beim Aufruf der Anwendung verarbeiten diese Anbieter technisch notwendige Server-Protokolldaten (z. B. IP-Adresse, Zeitpunkt des Zugriffs) zum sicheren und stabilen Betrieb; Rechtsgrundlage hierfür ist unser berechtigtes Interesse (Art. 6 Abs. 1 lit. f DSGVO).</P>
 
       <H2>5. Speicherdauer</H2>
       <P>Deine Daten werden gespeichert, solange dein Konto besteht. Bei Löschung deines Kontos werden die zugehörigen Daten entfernt.</P>
@@ -56,7 +56,10 @@ function Datenschutz() {
       <H2>7. Widerruf von Einwilligungen</H2>
       <P>Erteilte Einwilligungen (z. B. für Benachrichtigungen) kannst du jederzeit mit Wirkung für die Zukunft in deinem Profil widerrufen.</P>
 
-      <P className="text-stone-500">Dieser Text ist eine Vorlage und ersetzt keine Rechtsberatung. Bitte vor Veröffentlichung prüfen und die markierten Felder ausfüllen.</P>
+      <H2>8. Beschwerderecht</H2>
+      <P>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde über die Verarbeitung deiner personenbezogenen Daten zu beschweren. Für unseren Sitz zuständig ist die Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen.</P>
+
+      <P className="text-stone-500 mt-6">Stand: Juni 2026</P>
     </div>
   )
 }
@@ -85,7 +88,10 @@ function AGB() {
       <H2>7. Kündigung</H2>
       <P>Du kannst dein Konto jederzeit über die Profileinstellungen löschen.</P>
 
-      <P className="text-stone-500">Dieser Text ist eine Vorlage und ersetzt keine Rechtsberatung. Bitte vor Veröffentlichung prüfen.</P>
+      <H2>8. Schlussbestimmungen</H2>
+      <P>Es gilt das Recht der Bundesrepublik Deutschland. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.</P>
+
+      <P className="text-stone-500 mt-6">Stand: Juni 2026</P>
     </div>
   )
 }
