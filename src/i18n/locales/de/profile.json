@@ -40,6 +40,24 @@
     "deleteFailed": "Konto konnte nicht gelöscht werden: ",
     "viewIntro": "Intro-Tour ansehen",
     "signOut": "Abmelden",
-    "error": "Fehler: "
+    "error": "Fehler: ",
+    "feedback": {
+      "title": "Feedback & Hilfe",
+      "sub": "Teile uns eine Idee oder ein Problem mit",
+      "idea": "Idee",
+      "problem": "Problem",
+      "placeholder": "Beschreibe deine Idee oder dein Problem…",
+      "send": "Senden",
+      "sending": "Wird gesendet…",
+      "sent": "Danke! Angekommen.",
+      "error": "Konnte nicht gesendet werden: ",
+      "yourEntries": "Deine Meldungen",
+      "status": {
+        "open": "Offen",
+        "planned": "Geplant",
+        "done": "Umgesetzt",
+        "declined": "Abgelehnt"
+      }
+    }
   }
 }

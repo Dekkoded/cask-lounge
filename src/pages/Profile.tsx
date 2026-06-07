@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { usePushNotifications } from '../hooks/usePushNotifications'
 import { compressImage } from '../lib/image'
 import { openIntro } from '../components/IntroTour'
+import FeedbackSection from '../components/FeedbackSection'
 import LegalLinks from '../components/LegalLinks'
 import { getTheme, setTheme, type Theme } from '../lib/theme'
 import { LANGUAGES } from '../i18n'
@@ -346,6 +347,9 @@ export default function Profile() {
             </div>
           )}
         </div>
+
+        {/* Feedback & Hilfe */}
+        <FeedbackSection />
 
         {/* Account löschen */}
         <div className="border-t border-stone-800 pt-4">

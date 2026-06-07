@@ -40,6 +40,24 @@
     "deleteFailed": "Account could not be deleted: ",
     "viewIntro": "View intro tour",
     "signOut": "Sign out",
-    "error": "Error: "
+    "error": "Error: ",
+    "feedback": {
+      "title": "Feedback & help",
+      "sub": "Share an idea or report a problem",
+      "idea": "Idea",
+      "problem": "Problem",
+      "placeholder": "Describe your idea or problem…",
+      "send": "Send",
+      "sending": "Sending…",
+      "sent": "Thanks! Received.",
+      "error": "Could not send: ",
+      "yourEntries": "Your reports",
+      "status": {
+        "open": "Open",
+        "planned": "Planned",
+        "done": "Done",
+        "declined": "Declined"
+      }
+    }
   }
 }

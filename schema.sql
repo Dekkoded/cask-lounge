@@ -458,3 +458,26 @@ create or replace view public.global_drink_scores as
   group by d.id;
 -- Views erben RLS der Basistabellen (security_invoker).
 alter view public.global_drink_scores set (security_invoker = true);
+
+-- =====================================================================
+-- 10. FEEDBACK  (Wünsche & Problemmeldungen aus dem Profil)
+--     Nutzer melden Wünsche/Probleme; Status wird vom Admin im
+--     Supabase-Dashboard gepflegt (service_role umgeht RLS).
+-- =====================================================================
+create table public.feedback (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references public.profiles(id) on delete set null,
+  type        text not null default 'idea',   -- 'idea' | 'problem'
+  message     text not null,
+  status      text not null default 'open',    -- 'open' | 'planned' | 'done' | 'declined'
+  created_at  timestamptz not null default now()
+);
+alter table public.feedback enable row level security;
+
+-- Nutzer dürfen eigenes Feedback anlegen und ihre eigenen Meldungen sehen.
+create policy "feedback_insert_own"
+  on public.feedback for insert with check (user_id = (select auth.uid()));
+create policy "feedback_select_own"
+  on public.feedback for select using (user_id = (select auth.uid()));
+
+create index on public.feedback (user_id, created_at desc);
