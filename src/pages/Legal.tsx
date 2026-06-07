@@ -25,7 +25,7 @@ function Impressum() {
       <P>Untere Str. 18</P>
       <P>51688 Wipperfürth</P>
       <H2>Kontakt</H2>
-      <P>E-Mail: leon.evers235@gmail.com</P>
+      <P>E-Mail: info@casklounge.com</P>
       <H2>Verantwortlich für den Inhalt</H2>
       <P>Leon Evers, Untere Str. 18, 51688 Wipperfürth</P>
     </div>
@@ -36,7 +36,7 @@ function Datenschutz() {
   return (
     <div className="flex flex-col gap-1">
       <H2>1. Verantwortlicher</H2>
-      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist Leon Evers, Untere Str. 18, 51688 Wipperfürth, erreichbar unter leon.evers235@gmail.com.</P>
+      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist Leon Evers, Untere Str. 18, 51688 Wipperfürth, erreichbar unter info@casklounge.com.</P>
 
       <H2>2. Welche Daten wir verarbeiten</H2>
       <P>Bei der Registrierung erheben wir deine E-Mail-Adresse, deinen Benutzernamen und ein verschlüsselt gespeichertes Passwort. Inhalte, die du erstellst (Bewertungen, Notizen, Kommentare, Fotos, Gruppen), werden gespeichert, um den Dienst bereitzustellen.</P>
@@ -51,7 +51,7 @@ function Datenschutz() {
       <P>Deine Daten werden gespeichert, solange dein Konto besteht. Bei Löschung deines Kontos werden die zugehörigen Daten entfernt.</P>
 
       <H2>6. Deine Rechte</H2>
-      <P>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Dein Konto kannst du jederzeit in den Profileinstellungen löschen. Bei Fragen wende dich an leon.evers235@gmail.com.</P>
+      <P>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Dein Konto kannst du jederzeit in den Profileinstellungen löschen. Bei Fragen wende dich an info@casklounge.com.</P>
 
       <H2>7. Widerruf von Einwilligungen</H2>
       <P>Erteilte Einwilligungen (z. B. für Benachrichtigungen) kannst du jederzeit mit Wirkung für die Zukunft in deinem Profil widerrufen.</P>
