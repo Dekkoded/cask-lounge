@@ -63,9 +63,11 @@ export default function BottomNav() {
             <button
               onClick={() => setSheetOpen(true)}
               aria-label={t('nav.add')}
-              className="-mt-5 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-4xl font-light leading-none flex items-center justify-center shadow-lg shadow-black/40 ring-4 ring-app"
+              className="-mt-6 w-14 h-14 rounded-full bg-amber-500 hover:bg-amber-400 active:scale-95 text-stone-950 flex items-center justify-center shadow-lg shadow-amber-500/30 ring-4 ring-app transition-transform"
             >
-              +
+              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
             </button>
           </div>
           {tab(isGruppen, '👥', t('nav.groups'), openGroups)}
