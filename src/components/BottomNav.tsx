@@ -13,8 +13,8 @@ export default function BottomNav() {
   const view = searchParams.get('view')
   const isGlobal = path === '/' && view !== 'vitrine' && view !== 'wishlist' && view !== 'live'
   const isVitrine = path === '/' && (view === 'vitrine' || view === 'wishlist')
-  const isTastings = path === '/groups'
-  const isGruppen = path.startsWith('/groups/')
+  const isBattles = path === '/battles' || path.startsWith('/battle/')
+  const isGruppen = path === '/groups' || path.startsWith('/groups/')
 
   const go = (to: string) => { setSheetOpen(false); navigate(to) }
 
@@ -65,7 +65,7 @@ export default function BottomNav() {
               +
             </button>
           </div>
-          {tab(isTastings, '📋', t('nav.tastings'), () => go('/groups'))}
+          {tab(isBattles, '⚔️', t('nav.battles'), () => go('/battles'))}
           {tab(isGruppen, '👥', t('nav.groups'), openGroups)}
         </div>
       </nav>
