@@ -53,5 +53,10 @@
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",
     "agb": "AGB"
+  },
+  "map": {
+    "touch": "Zum Bewegen zwei Finger benutzen",
+    "scroll": "Zum Zoomen Strg + Scrollen",
+    "scrollMac": "Zum Zoomen ⌘ + Scrollen"
   }
 }

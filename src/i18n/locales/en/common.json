@@ -53,5 +53,10 @@
     "impressum": "Imprint",
     "datenschutz": "Privacy",
     "agb": "Terms"
+  },
+  "map": {
+    "touch": "Use two fingers to move the map",
+    "scroll": "Use ctrl + scroll to zoom the map",
+    "scrollMac": "Use ⌘ + scroll to zoom the map"
   }
 }

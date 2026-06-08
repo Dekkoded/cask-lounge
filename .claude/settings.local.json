@@ -67,7 +67,19 @@
       "Bash(python3 -c \"import json;d=json.load\\(open\\('/Users/leon/whisky-app/src/i18n/locales/de/groups.json'\\)\\);print\\(json.dumps\\(d,ensure_ascii=False,indent=1\\)\\)\")",
       "Bash(node -e 'const o=require\\('\\\\''./__TRACKED_VAR__'\\\\''\\);console.log\\(JSON.stringify\\(o.intro,null,2\\)\\)')",
       "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('de/common.json'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('en/common.json'\\)\\);console.log\\('JSON valid'\\)\")",
-      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/de/common.json'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/en/common.json'\\)\\);console.log\\('JSON valid'\\)\")"
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/de/common.json'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/en/common.json'\\)\\);console.log\\('JSON valid'\\)\")",
+      "Bash(node -e \"console.log\\('leaflet', require\\('leaflet/package.json'\\).version\\)\")",
+      "Bash(npm i *)",
+      "Bash(grep -aoE \"touch:[^;]{0,80}|scroll:[^;]{0,80}|scrollMac:[^;]{0,80}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \"de:\\\\{[^}]{0,200}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \"mergeOptions\\\\\\([^\\)]{0,120}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \".{20}options\\\\.locale.{60}|\\\\.locale[^a-zA-Z].{0,60}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \"gestureHandlingText|data-gesture-handling-[a-z-]+|_touchWarning|_scrollWarning|setAttribute\\\\\\([^\\)]{0,60}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \"gestureHandlingText[^;]{0,140}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \".{0,160}languageContent =.{0,200}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \"lang = [^;]{0,140}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \".{0,40}gestureHandlingOptions.{0,200}\" dist/leaflet-gesture-handling.js)",
+      "Bash(grep -aoE \"addInitHook\\\\\\([^\\)]{0,80}|L\\\\.Map\\\\.mergeOptions|export|module.exports\" dist/leaflet-gesture-handling.js)"
     ]
   }
 }

@@ -1,8 +1,11 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet-gesture-handling'
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css'
 import type { DistilleryGeo } from '../lib/distilleries'
 
 export interface MapPin {
@@ -29,6 +32,25 @@ function FitBounds({ points, singleZoom }: { points: [number, number][]; singleZ
   return null
 }
 
+// Ein Finger / Scrollrad scrollt die Seite; zwei Finger bzw. Strg+Scroll bewegen die Karte.
+function GestureHandling() {
+  const map = useMap()
+  const { t } = useTranslation()
+  useEffect(() => {
+    const m = map as unknown as {
+      options: { gestureHandlingOptions?: { text?: Record<string, string>; duration?: number } }
+      gestureHandling?: { enable: () => void; disable: () => void }
+    }
+    m.options.gestureHandlingOptions = {
+      text: { touch: t('map.touch'), scroll: t('map.scroll'), scrollMac: t('map.scrollMac') },
+      duration: 1500,
+    }
+    m.gestureHandling?.enable()
+    return () => m.gestureHandling?.disable()
+  }, [map, t])
+  return null
+}
+
 export default function DistilleryMap({
   pins,
   heightClass = 'h-[70vh]',
@@ -42,11 +64,12 @@ export default function DistilleryMap({
 
   return (
     <div className={`${heightClass} rounded-xl overflow-hidden border border-stone-800 relative isolate`}>
-      <MapContainer center={[56.5, -4]} zoom={5} scrollWheelZoom className="h-full w-full">
+      <MapContainer center={[56.5, -4]} zoom={5} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <GestureHandling />
         <FitBounds points={points} singleZoom={singleZoom} />
         {pins.map(p => (
           <Marker key={p.name} position={[p.geo.lat, p.geo.lng]} icon={pinIcon}>
