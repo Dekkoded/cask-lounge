@@ -41,6 +41,7 @@
     "ratingCount_one": "{{count}} rating",
     "ratingCount_other": "{{count}} ratings",
     "searchAmazon": "🛒 Search on Amazon",
+    "affiliateNote": "* Affiliate link. As an Amazon Associate we earn from qualifying purchases – at no extra cost to you.",
     "inYourCollection": "✓ In your collection",
     "addedToCollection": "✓ Added to your collection",
     "tabs": {

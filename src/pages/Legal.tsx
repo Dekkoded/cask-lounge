@@ -59,6 +59,9 @@ function Datenschutz() {
       <H2>8. Beschwerderecht</H2>
       <P>Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde über die Verarbeitung deiner personenbezogenen Daten zu beschweren. Für unseren Sitz zuständig ist die Landesbeauftragte für Datenschutz und Informationsfreiheit Nordrhein-Westfalen.</P>
 
+      <H2>9. Amazon-Partnerprogramm</H2>
+      <P>Wir nehmen am Partnerprogramm von Amazon (Amazon EU S.à r.l.) teil. Auf Produktseiten findest du mit „*“ gekennzeichnete Links zu amazon.de. Kaufst du nach dem Klick auf einen solchen Link ein Produkt, erhalten wir eine Werbekostenerstattung (Provision). Für dich entstehen dadurch keine zusätzlichen Kosten. Beim Klick auf einen Amazon-Link verlässt du unsere Anwendung; es gelten dann die Datenschutzbestimmungen von Amazon. Amazon und das Amazon-Logo sind Warenzeichen von Amazon.com, Inc. oder seiner verbundenen Unternehmen.</P>
+
       <P className="text-stone-500 mt-6">Stand: Juni 2026</P>
     </div>
   )

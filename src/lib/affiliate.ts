@@ -1,6 +1,13 @@
-// Amazon Associates Tag – sobald du ein Konto hast, hier eintragen (z. B. 'casklounge-21').
-// Solange leer, funktionieren die Suchlinks ohne Provision.
-export const AMAZON_TAG = ''
+// Amazon Associates Partner-Tag.
+// Am einfachsten als Umgebungsvariable in Vercel setzen: VITE_AMAZON_TAG=casklounge-21
+// (Project → Settings → Environment Variables, danach neu deployen).
+// Alternativ direkt als Fallback hier eintragen. Solange leer, sind es
+// normale Such-Links ohne Provision und die Affiliate-Hinweise bleiben aus.
+const ENV_TAG = (import.meta.env.VITE_AMAZON_TAG as string | undefined)?.trim()
+const FALLBACK_TAG = ''
+
+export const AMAZON_TAG = ENV_TAG || FALLBACK_TAG
+export const AMAZON_ENABLED = AMAZON_TAG.length > 0
 
 export function amazonSearchUrl(query: string): string {
   const params = new URLSearchParams({ k: query })

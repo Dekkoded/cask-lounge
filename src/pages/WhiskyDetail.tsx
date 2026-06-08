@@ -9,7 +9,7 @@ import ColorPicker from '../components/ColorPicker'
 import Lightbox from '../components/Lightbox'
 import AromaTags, { aromaLabel } from '../components/AromaTags'
 import { usePageMeta } from '../lib/pageMeta'
-import { amazonSearchUrl } from '../lib/affiliate'
+import { amazonSearchUrl, AMAZON_ENABLED } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
@@ -361,10 +361,13 @@ export default function WhiskyDetail() {
         href={amazonSearchUrl(`${drink.name} ${drink.producer ?? ''} Whisky`)}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        className="flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors mb-6"
+        className={`flex items-center justify-center gap-2 w-full bg-stone-800 hover:bg-stone-700 border border-stone-700 text-stone-200 rounded-xl py-2.5 text-sm font-medium transition-colors ${AMAZON_ENABLED ? 'mb-1' : 'mb-6'}`}
       >
-        {t('whisky.searchAmazon')}
+        {t('whisky.searchAmazon')}{AMAZON_ENABLED && ' *'}
       </a>
+      {AMAZON_ENABLED && (
+        <p className="text-stone-600 text-[11px] leading-snug text-center mb-6">{t('whisky.affiliateNote')}</p>
+      )}
 
       {/* Mit anderem Whisky vergleichen */}
       <Link
