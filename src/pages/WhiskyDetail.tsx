@@ -496,8 +496,21 @@ export default function WhiskyDetail() {
             {myRating ? t('whisky.editRating') : t('whisky.giveRating')}
           </h2>
 
-          {/* Noten */}
-          <div className="flex flex-col gap-4">
+          <ColorPicker value={colorIdx} onChange={setColorIdx} />
+          <WheelStepper wheels={wheels} onUpdate={updateWheel} />
+
+          <div className="border-t border-stone-800 pt-5">
+            <AromaTags
+              aromas={wheels.aromas ?? []}
+              extra={wheels.extra ?? []}
+              onToggle={toggleAroma}
+              onAddExtra={addExtraAroma}
+              onRemoveExtra={removeExtraAroma}
+            />
+          </div>
+
+          {/* Noten – nach den Aromen */}
+          <div className="flex flex-col gap-4 border-t border-stone-800 pt-5">
             {(['nose', 'taste', 'finish'] as const).map(key => {
               const val = key === 'nose' ? nose : key === 'taste' ? taste : finish
               const setter = key === 'nose' ? setNose : key === 'taste' ? setTaste : setFinish
@@ -519,19 +532,6 @@ export default function WhiskyDetail() {
             <div className="text-center text-stone-400 text-sm">
               {t('whisky.overallScore')} <span className="text-amber-400 font-bold text-lg">{((nose + taste + finish) / 3).toFixed(1)}</span>
             </div>
-          </div>
-
-          <ColorPicker value={colorIdx} onChange={setColorIdx} />
-          <WheelStepper wheels={wheels} onUpdate={updateWheel} />
-
-          <div className="border-t border-stone-800 pt-5">
-            <AromaTags
-              aromas={wheels.aromas ?? []}
-              extra={wheels.extra ?? []}
-              onToggle={toggleAroma}
-              onAddExtra={addExtraAroma}
-              onRemoveExtra={removeExtraAroma}
-            />
           </div>
 
           <div>

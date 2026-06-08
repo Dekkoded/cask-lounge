@@ -134,52 +134,55 @@ export default function GlobalLanding() {
     <div className="max-w-2xl mx-auto p-4">
       <h1 className="text-2xl font-bold text-amber-400 py-4 mb-2">{headings[view]}</h1>
 
-      {/* Suche */}
-      <input
-        type="search"
-        name="whisky-suche"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        placeholder={t('landing.searchPlaceholder')}
-        autoComplete="off"
-        readOnly={searchReadonly}
-        onFocus={() => setSearchReadonly(false)}
-        className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 mb-6 [&::-webkit-search-cancel-button]:hidden"
-      />
+      {/* Sticky: Suche + Kategorien */}
+      <div className="sticky top-12 z-30 bg-app -mx-4 px-4 pt-1 pb-3 mb-3 flex flex-col gap-3">
+        {/* Suche */}
+        <input
+          type="search"
+          name="whisky-suche"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder={t('landing.searchPlaceholder')}
+          autoComplete="off"
+          readOnly={searchReadonly}
+          onFocus={() => setSearchReadonly(false)}
+          className="w-full bg-stone-800 border border-stone-700 rounded-xl px-4 py-3 text-stone-100 focus:outline-none focus:border-amber-500 [&::-webkit-search-cancel-button]:hidden"
+        />
 
-      {/* Region-Filter */}
-      {regions.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4 -mt-2 [&::-webkit-scrollbar]:hidden">
-          <button onClick={() => setRegionFilter(null)}
-            className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === null ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
-            {t('landing.allRegions')}
-          </button>
-          {regions.map(r => (
-            <button key={r} onClick={() => setRegionFilter(r)}
-              className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === r ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
-              {r}
+        {/* Region-Filter */}
+        {regions.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden">
+            <button onClick={() => setRegionFilter(null)}
+              className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === null ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
+              {t('landing.allRegions')}
             </button>
-          ))}
-        </div>
-      )}
+            {regions.map(r => (
+              <button key={r} onClick={() => setRegionFilter(r)}
+                className={`whitespace-nowrap rounded-full px-3 py-1 text-sm transition-colors ${regionFilter === r ? 'bg-amber-500 text-stone-950 font-medium' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'}`}>
+                {r}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {/* Untertabs Sammlung / Wunschliste */}
-      {user && (view === 'vitrine' || view === 'wishlist') && (
-        <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-4">
-          <button
-            onClick={() => setView('vitrine')}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
-          >
-            {t('landing.tabCollection')}
-          </button>
-          <button
-            onClick={() => setView('wishlist')}
-            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'wishlist' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
-          >
-            {t('landing.tabWishlist')}
-          </button>
-        </div>
-      )}
+        {/* Untertabs Sammlung / Wunschliste */}
+        {user && (view === 'vitrine' || view === 'wishlist') && (
+          <div className="flex gap-1 bg-stone-900 rounded-xl p-1">
+            <button
+              onClick={() => setView('vitrine')}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+            >
+              {t('landing.tabCollection')}
+            </button>
+            <button
+              onClick={() => setView('wishlist')}
+              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'wishlist' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+            >
+              {t('landing.tabWishlist')}
+            </button>
+          </div>
+        )}
+      </div>
 
 
       {/* Ranking */}

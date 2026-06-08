@@ -437,29 +437,6 @@ export default function Tasting() {
             <div className="bg-stone-900 rounded-2xl p-5 flex flex-col gap-5">
               <h3 className="font-semibold text-stone-200">{selectedDrink.drinks.name}</h3>
 
-              {(['nose', 'taste', 'finish'] as const).map(key => {
-                const val = key === 'nose' ? nose : key === 'taste' ? taste : finish
-                const setter = key === 'nose' ? setNose : key === 'taste' ? setTaste : setFinish
-                const label = key === 'nose' ? t('tasting.nose') : key === 'taste' ? t('tasting.taste') : t('tasting.finish')
-                return (
-                  <div key={key}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-stone-300">{label}</span>
-                      <span className="text-amber-400 font-bold">{val}/10</span>
-                    </div>
-                    <input type="range" min="1" max="10" value={val}
-                      onChange={e => setter(Number(e.target.value))}
-                      className="w-full accent-amber-500" />
-                  </div>
-                )
-              })}
-
-              <div className="text-center text-stone-400 text-sm">
-                {t('tasting.total')} <span className="text-amber-400 font-bold text-lg">
-                  {((nose + taste + finish) / 3).toFixed(1)}
-                </span>
-              </div>
-
               <WheelStepper wheels={wheels} onUpdate={updateWheel} />
 
               <div className="border-t border-stone-800 pt-4">
@@ -470,6 +447,32 @@ export default function Tasting() {
                   onAddExtra={addExtraAroma}
                   onRemoveExtra={removeExtraAroma}
                 />
+              </div>
+
+              {/* Noten – nach den Aromen */}
+              <div className="flex flex-col gap-5 border-t border-stone-800 pt-4">
+                {(['nose', 'taste', 'finish'] as const).map(key => {
+                  const val = key === 'nose' ? nose : key === 'taste' ? taste : finish
+                  const setter = key === 'nose' ? setNose : key === 'taste' ? setTaste : setFinish
+                  const label = key === 'nose' ? t('tasting.nose') : key === 'taste' ? t('tasting.taste') : t('tasting.finish')
+                  return (
+                    <div key={key}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-stone-300">{label}</span>
+                        <span className="text-amber-400 font-bold">{val}/10</span>
+                      </div>
+                      <input type="range" min="1" max="10" value={val}
+                        onChange={e => setter(Number(e.target.value))}
+                        className="w-full accent-amber-500" />
+                    </div>
+                  )
+                })}
+
+                <div className="text-center text-stone-400 text-sm">
+                  {t('tasting.total')} <span className="text-amber-400 font-bold text-lg">
+                    {((nose + taste + finish) / 3).toFixed(1)}
+                  </span>
+                </div>
               </div>
 
               <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
