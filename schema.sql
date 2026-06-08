@@ -464,12 +464,15 @@ alter view public.global_drink_scores set (security_invoker = true);
 --     Nutzer melden Wünsche/Probleme; Status wird vom Admin im
 --     Supabase-Dashboard gepflegt (service_role umgeht RLS).
 -- =====================================================================
+-- Status als Enum -> Dropdown im Table Editor + Tippfehler-Schutz.
+create type public.feedback_status as enum ('open', 'planned', 'done', 'declined');
+
 create table public.feedback (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid references public.profiles(id) on delete set null,
   type        text not null default 'idea',   -- 'idea' | 'problem'
   message     text not null,
-  status      text not null default 'open',    -- 'open' | 'planned' | 'done' | 'declined'
+  status      public.feedback_status not null default 'open',
   created_at  timestamptz not null default now()
 );
 alter table public.feedback enable row level security;
