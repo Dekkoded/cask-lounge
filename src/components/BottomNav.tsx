@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import LivePostModal from './LivePostModal'
+import CreateTastingModal from './CreateTastingModal'
 
 export default function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [livePostOpen, setLivePostOpen] = useState(false)
+  const [tastingOpen, setTastingOpen] = useState(false)
   const { t } = useTranslation()
 
   const path = location.pathname
@@ -17,6 +21,7 @@ export default function BottomNav() {
   const isGruppen = path === '/groups' || path.startsWith('/groups/')
 
   const go = (to: string) => { setSheetOpen(false); navigate(to) }
+  const openModal = (setter: (v: boolean) => void) => { setSheetOpen(false); setter(true) }
 
   const openGroups = () => {
     const last = localStorage.getItem('lastGroupId')
@@ -42,10 +47,9 @@ export default function BottomNav() {
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-stone-700 rounded-full mx-auto mb-2" />
-            <SheetItem icon="🥃" title={t('nav.sheet.livePost.title')} sub={t('nav.sheet.livePost.sub')} onClick={openGroups} />
+            <SheetItem icon="🥃" title={t('nav.sheet.livePost.title')} sub={t('nav.sheet.livePost.sub')} onClick={() => openModal(setLivePostOpen)} />
             <SheetItem icon="➕" title={t('nav.sheet.addWhisky.title')} sub={t('nav.sheet.addWhisky.sub')} onClick={() => go('/add-whisky')} />
-            <SheetItem icon="👥" title={t('nav.sheet.createGroup.title')} sub={t('nav.sheet.createGroup.sub')} onClick={() => go('/groups?create=1')} />
-            <SheetItem icon="📋" title={t('nav.sheet.createTasting.title')} sub={t('nav.sheet.createTasting.sub')} onClick={() => go('/groups')} />
+            <SheetItem icon="📋" title={t('nav.sheet.createTasting.title')} sub={t('nav.sheet.createTasting.sub')} onClick={() => openModal(setTastingOpen)} />
             <SheetItem icon="⚔️" title={t('nav.sheet.startBattle.title')} sub={t('nav.sheet.startBattle.sub')} onClick={() => go('/battles?create=1')} />
             <button onClick={() => setSheetOpen(false)} className="mt-2 text-stone-400 text-sm py-2">{t('common.cancel')}</button>
           </div>
@@ -69,6 +73,9 @@ export default function BottomNav() {
           {tab(isGruppen, '👥', t('nav.groups'), openGroups)}
         </div>
       </nav>
+
+      <LivePostModal open={livePostOpen} onClose={() => setLivePostOpen(false)} />
+      <CreateTastingModal open={tastingOpen} onClose={() => setTastingOpen(false)} />
     </>
   )
 }
