@@ -37,6 +37,7 @@ export default function WhiskyDetail() {
   const [drink, setDrink] = useState<Drink | null>(null)
   const [myRating, setMyRating] = useState<Rating | null>(null)
   const [publicRatings, setPublicRatings] = useState<PublicRating[]>([])
+  const [globalScore, setGlobalScore] = useState<{ avg: number | null; count: number }>({ avg: null, count: 0 })
   const [tab, setTab] = useState<Tab>('uebersicht')
 
   // Formular-State
@@ -72,14 +73,19 @@ export default function WhiskyDetail() {
     supabase.from('drinks').select('*').eq('id', id).single()
       .then(({ data }) => { if (data) setDrink(data) })
 
-    supabase.from('ratings')
-      .select('*, profiles(display_name, username)')
-      .eq('drink_id', id)
-      .eq('is_public', true)
-      .order('overall', { ascending: false })
-      .then(({ data }) => { setPublicRatings((data as unknown as PublicRating[]) ?? []) })
+    // Aggregat (Schnitt + Anzahl) aus der öffentlichen View – auch ohne Login sichtbar.
+    supabase.from('global_drink_scores').select('avg_overall, num_ratings').eq('id', id).maybeSingle()
+      .then(({ data }) => { if (data) setGlobalScore({ avg: data.avg_overall, count: data.num_ratings ?? 0 }) })
 
     if (user) {
+      // Einzelne Bewertungen (inkl. Namen) nur für eingeloggte Nutzer laden.
+      supabase.from('ratings')
+        .select('*, profiles(display_name, username)')
+        .eq('drink_id', id)
+        .eq('is_public', true)
+        .order('overall', { ascending: false })
+        .then(({ data }) => { setPublicRatings((data as unknown as PublicRating[]) ?? []) })
+
       supabase.from('ratings').select('*')
         .eq('drink_id', id).eq('user_id', user.id).maybeSingle()
         .then(({ data }) => {
@@ -310,7 +316,8 @@ export default function WhiskyDetail() {
 
   const avgOverall = publicRatings.length
     ? Math.round(publicRatings.reduce((s, r) => s + (r.overall ?? 0), 0) / publicRatings.length * 10) / 10
-    : null
+    : globalScore.avg
+  const ratingCount = publicRatings.length || globalScore.count
 
   const geo = lookupDistillery(drink.producer)
 
@@ -343,7 +350,7 @@ export default function WhiskyDetail() {
           {avgOverall != null && (
             <div className="mt-2 flex items-baseline gap-1">
               <span className="text-2xl font-bold text-amber-400">{avgOverall}</span>
-              <span className="text-stone-500 text-sm">/10 · {t('whisky.ratingCount', { count: publicRatings.length })}</span>
+              <span className="text-stone-500 text-sm">/10 · {t('whisky.ratingCount', { count: ratingCount })}</span>
             </div>
           )}
         </div>
@@ -414,19 +421,22 @@ export default function WhiskyDetail() {
       {/* Übersicht */}
       {tab === 'uebersicht' && (
         <div className="flex flex-col gap-3">
-          {publicRatings.length === 0 ? (
+          {!user ? (
+            <div className="text-center py-10">
+              <p className="text-stone-500 mb-3">
+                {globalScore.count > 0 ? t('whisky.loginToSeeRatings') : t('whisky.noPublicRatings')}
+              </p>
+              <Link to="/login" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm inline-block">
+                {t('whisky.loginToRate')}
+              </Link>
+            </div>
+          ) : publicRatings.length === 0 ? (
             <div className="text-center py-10">
               <p className="text-stone-500 mb-3">{t('whisky.noPublicRatings')}</p>
-              {user ? (
-                <button onClick={() => setTab('bewertung')}
-                  className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm">
-                  {t('whisky.beFirstToRate')}
-                </button>
-              ) : (
-                <a href="/login" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm inline-block">
-                  {t('whisky.loginToRate')}
-                </a>
-              )}
+              <button onClick={() => setTab('bewertung')}
+                className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2 text-sm">
+                {t('whisky.beFirstToRate')}
+              </button>
             </div>
           ) : (
             publicRatings.map(r => (
