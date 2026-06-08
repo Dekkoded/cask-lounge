@@ -45,7 +45,26 @@
       "Bash(node -e \"const d=require\\('./src/i18n/locales/de/whisky.json'\\);const e=require\\('./src/i18n/locales/en/whisky.json'\\);const keys=o=>Object.keys\\(o\\).flatMap\\(k=>typeof o[k]==='object'&&o[k]!==null?keys\\(o[k]\\).map\\(s=>k+'.'+s\\):[k]\\).sort\\(\\);const dk=JSON.stringify\\(keys\\(d\\)\\),ek=JSON.stringify\\(keys\\(e\\)\\);console.log\\('de keys:',keys\\(d\\).length\\);console.log\\('en keys:',keys\\(e\\).length\\);console.log\\('identical structure:',dk===ek\\);if\\(dk!==ek\\){const ds=new Set\\(keys\\(d\\)\\),es=new Set\\(keys\\(e\\)\\);console.log\\('in de not en:',keys\\(d\\).filter\\(x=>!es.has\\(x\\)\\)\\);console.log\\('in en not de:',keys\\(e\\).filter\\(x=>!ds.has\\(x\\)\\)\\);}\")",
       "Bash(node -e \"const d=require\\('./src/i18n/locales/de/groups.json'\\); const e=require\\('./src/i18n/locales/en/groups.json'\\); const keys=o=>Object.keys\\(o\\).flatMap\\(k=>typeof o[k]==='object'?Object.keys\\(o[k]\\).map\\(x=>k+'.'+x\\):[k]\\).sort\\(\\); const dk=keys\\(d.groups\\),ek=keys\\(e.groups\\); console.log\\('de keys:',dk.length,'en keys:',ek.length\\); console.log\\('identical:', JSON.stringify\\(dk\\)===JSON.stringify\\(ek\\)\\); const onlyDe=dk.filter\\(k=>!ek.includes\\(k\\)\\),onlyEn=ek.filter\\(k=>!dk.includes\\(k\\)\\); if\\(onlyDe.length\\)console.log\\('only de:',onlyDe\\); if\\(onlyEn.length\\)console.log\\('only en:',onlyEn\\);\")",
       "Bash(echo \"EXIT: $?\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('src/i18n/locales/de/whisky.json'\\)\\); print\\(json.dumps\\(d.get\\('whisky',{}\\), ensure_ascii=False, indent=1\\)\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('src/i18n/locales/de/whisky.json'\\)\\)['whisky']; print\\(json.dumps\\({'flavors':d.get\\('flavors'\\),'wheel':d.get\\('wheel'\\),'flavorWheelTip':d.get\\('flavorWheelTip'\\)}, ensure_ascii=False, indent=1\\)\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('src/i18n/locales/de/whisky.json'\\)\\)['whisky']; print\\('aromas:', list\\(d['aromas'].keys\\(\\)\\)\\); print\\('aromaList count:', len\\(d['aromaList']\\)\\); print\\('flavors.sweet:', d['flavors']['sweet']\\)\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('src/i18n/locales/en/whisky.json'\\)\\)['whisky']; print\\('EN aromaList count:', len\\(d['aromaList']\\)\\)\")",
+      "Bash(sort -t'│' -k2 -h)",
+      "Bash(echo \"EXIT $?\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('src/i18n/locales/de/landing.json'\\)\\)['landing']; print\\(json.dumps\\(d, ensure_ascii=False, indent=1\\)\\)\")",
+      "Bash(git restore *)",
+      "Bash(node -e ' *)",
+      "Bash(dig +short NS casklounge.com)",
+      "Bash(dig +short MX casklounge.com)",
+      "Bash(dig +short TXT casklounge.com)",
+      "Bash(dig +short MX send.casklounge.com)",
+      "Bash(dig +short TXT send.casklounge.com)",
+      "Bash(dig +short TXT resend._domainkey.casklounge.com)",
+      "Bash(dig +short TXT _dmarc.casklounge.com)",
+      "Bash(python3 -c \"import json;d=json.load\\(open\\('/Users/leon/whisky-app/src/i18n/locales/de/common.json'\\)\\);print\\(json.dumps\\(d.get\\('nav',{}\\),ensure_ascii=False,indent=2\\)\\)\")",
+      "Bash(xargs ls *)",
+      "Bash(python3 -c \"import json;d=json.load\\(open\\('/Users/leon/whisky-app/src/i18n/locales/de/groups.json'\\)\\);print\\(json.dumps\\(d,ensure_ascii=False,indent=1\\)\\)\")"
     ]
   }
 }

@@ -83,6 +83,8 @@ export default function GroupHome() {
   const [ratingShares, setRatingShares] = useState<RatingShare[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
   const [tab, setTab] = useState<Tab>('aktivitaet')
+  const [switcherOpen, setSwitcherOpen] = useState(false)
+  const [myGroups, setMyGroups] = useState<{ id: string; name: string; description: string | null }[]>([])
   const [copied, setCopied] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [showNewTasting, setShowNewTasting] = useState(false)
@@ -107,9 +109,14 @@ export default function GroupHome() {
   useEffect(() => {
     if (!id) return
     localStorage.setItem('lastGroupId', id)
+    setGroup(null)
+    setTab('aktivitaet')
 
     supabase.from('groups').select('*').eq('id', id).single()
       .then(({ data }) => { if (data) setGroup(data) })
+
+    supabase.from('groups').select('id, name, description').order('created_at', { ascending: false })
+      .then(({ data }) => setMyGroups(data ?? []))
 
     supabase.from('group_members')
       .select('user_id, role, joined_at, profiles(username, display_name)')
@@ -394,19 +401,60 @@ export default function GroupHome() {
   return (
     <div className="max-w-lg mx-auto p-4">
       {/* Header */}
-      <div className="flex items-center gap-3 py-4 mb-4">
-        <button onClick={() => navigate('/groups')} className="text-stone-400 hover:text-stone-200 text-sm">← {t('nav.groups')}</button>
+      <div className="flex items-center gap-3 py-4 mb-1">
+        <button onClick={() => setSwitcherOpen(true)} className="group flex items-center gap-2 min-w-0">
+          <h1 className="text-2xl font-bold text-stone-100 truncate">{group.name}</h1>
+          <svg className="w-5 h-5 text-stone-500 group-hover:text-amber-400 flex-shrink-0 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 9l5-5 5 5M7 15l5 5 5-5" />
+          </svg>
+        </button>
         <div className="flex-1" />
         <button
           onClick={copyInviteCode}
-          className="text-xs bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 font-mono"
+          className="text-xs bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 font-mono flex-shrink-0"
         >
           {copied ? t('groups.copied') : t('groups.codeShort', { code: group.invite_code })}
         </button>
       </div>
 
-      <h1 className="text-2xl font-bold text-stone-100 mb-1">{group.name}</h1>
       {group.description && <p className="text-stone-400 text-sm mb-4">{group.description}</p>}
+
+      {/* Gruppen-Wechsler */}
+      {switcherOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-[60] p-4" onClick={() => setSwitcherOpen(false)}>
+          <div
+            className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-3 mb-[env(safe-area-inset-bottom)]"
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-stone-100">{t('groups.switchGroup')}</h3>
+            <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
+              {myGroups.map(g => (
+                <button
+                  key={g.id}
+                  onClick={() => { setSwitcherOpen(false); if (g.id !== id) navigate(`/groups/${g.id}`) }}
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors ${
+                    g.id === id ? 'bg-amber-500/15 border border-amber-500/40' : 'bg-stone-800 hover:bg-stone-700'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-lg bg-stone-700 flex items-center justify-center text-lg flex-shrink-0">👥</div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold truncate ${g.id === id ? 'text-amber-300' : 'text-stone-100'}`}>{g.name}</p>
+                    {g.description && <p className="text-xs text-stone-500 truncate">{g.description}</p>}
+                  </div>
+                  {g.id === id && <span className="text-amber-400 flex-shrink-0">✓</span>}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => { setSwitcherOpen(false); navigate('/groups?create=1') }}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-left bg-stone-800 hover:bg-stone-700 transition-colors"
+            >
+              <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center text-lg text-amber-400 flex-shrink-0">+</div>
+              <p className="font-semibold text-stone-200">{t('groups.createOrJoin')}</p>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">

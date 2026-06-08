@@ -70,6 +70,8 @@
     "haveAccount": "Ich habe schon ein Konto",
     "membersTitle": "Mitglieder",
     "searchByName": "Nach Name suchen…",
-    "noMembersFound": "Keine Mitglieder gefunden."
+    "noMembersFound": "Keine Mitglieder gefunden.",
+    "switchGroup": "Gruppe wechseln",
+    "createOrJoin": "Gruppe erstellen oder beitreten"
   }
 }

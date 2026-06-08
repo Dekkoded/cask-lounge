@@ -70,6 +70,8 @@
     "haveAccount": "I already have an account",
     "membersTitle": "Members",
     "searchByName": "Search by name…",
-    "noMembersFound": "No members found."
+    "noMembersFound": "No members found.",
+    "switchGroup": "Switch group",
+    "createOrJoin": "Create or join a group"
   }
 }

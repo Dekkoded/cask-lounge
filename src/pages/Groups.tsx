@@ -37,7 +37,16 @@ export default function Groups() {
       .from('groups')
       .select('*')
       .order('created_at', { ascending: false })
-    setGroups(data ?? [])
+    const gs = data ?? []
+    // Mitglied in ≥1 Gruppe → direkt ins Aktivitäts-Log der zuletzt verwendeten Gruppe,
+    // außer man will bewusst erstellen/beitreten (?create=1).
+    if (!showCreate && gs.length > 0) {
+      const last = localStorage.getItem('lastGroupId')
+      const target = gs.find(g => g.id === last)?.id ?? gs[0].id
+      navigate(`/groups/${target}`, { replace: true })
+      return
+    }
+    setGroups(gs)
     setLoading(false)
   }
 
