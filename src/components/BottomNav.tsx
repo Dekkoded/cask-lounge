@@ -17,8 +17,8 @@ export default function BottomNav() {
   const view = searchParams.get('view')
   const isGlobal = path === '/' && view !== 'vitrine' && view !== 'wishlist' && view !== 'live'
   const isVitrine = path === '/' && (view === 'vitrine' || view === 'wishlist')
-  const isBattles = path === '/battles' || path.startsWith('/battle/')
   const isGruppen = path === '/groups' || path.startsWith('/groups/')
+  const isProfile = path === '/profile'
 
   const go = (to: string) => { setSheetOpen(false); navigate(to) }
   const openModal = (setter: (v: boolean) => void) => { setSheetOpen(false); setter(true) }
@@ -50,7 +50,6 @@ export default function BottomNav() {
             <SheetItem icon="🥃" title={t('nav.sheet.livePost.title')} sub={t('nav.sheet.livePost.sub')} onClick={() => openModal(setLivePostOpen)} />
             <SheetItem icon="➕" title={t('nav.sheet.addWhisky.title')} sub={t('nav.sheet.addWhisky.sub')} onClick={() => go('/add-whisky')} />
             <SheetItem icon="📋" title={t('nav.sheet.createTasting.title')} sub={t('nav.sheet.createTasting.sub')} onClick={() => openModal(setTastingOpen)} />
-            <SheetItem icon="⚔️" title={t('nav.sheet.startBattle.title')} sub={t('nav.sheet.startBattle.sub')} onClick={() => go('/battles?create=1')} />
             <button onClick={() => setSheetOpen(false)} className="mt-2 text-stone-400 text-sm py-2">{t('common.cancel')}</button>
           </div>
         </div>
@@ -69,8 +68,8 @@ export default function BottomNav() {
               +
             </button>
           </div>
-          {tab(isBattles, '⚔️', t('nav.battles'), () => go('/battles'))}
           {tab(isGruppen, '👥', t('nav.groups'), openGroups)}
+          {tab(isProfile, '👤', t('nav.profile'), () => go('/profile'))}
         </div>
       </nav>
 

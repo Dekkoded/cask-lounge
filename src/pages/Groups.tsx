@@ -119,7 +119,6 @@ export default function Groups() {
             >
               <p className="font-semibold text-stone-100">{g.name}</p>
               {g.description && <p className="text-sm text-stone-400 mt-0.5">{g.description}</p>}
-              <p className="text-xs text-stone-600 mt-1">{t('groups.code', { code: g.invite_code })}</p>
             </Link>
           ))}
         </div>

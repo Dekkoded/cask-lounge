@@ -401,23 +401,15 @@ export default function GroupHome() {
   return (
     <div className="max-w-lg mx-auto p-4">
       {/* Header */}
-      <div className="flex items-center gap-3 py-4 mb-1">
-        <button onClick={() => setSwitcherOpen(true)} className="group flex items-center gap-2 min-w-0">
+      <div className="py-4 mb-1 flex flex-col items-center text-center">
+        <button onClick={() => setSwitcherOpen(true)} className="group flex items-center gap-2 max-w-full">
           <h1 className="text-2xl font-bold text-stone-100 truncate">{group.name}</h1>
           <svg className="w-5 h-5 text-stone-500 group-hover:text-amber-400 flex-shrink-0 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 9l5-5 5 5M7 15l5 5 5-5" />
           </svg>
         </button>
-        <div className="flex-1" />
-        <button
-          onClick={copyInviteCode}
-          className="text-xs bg-stone-800 hover:bg-stone-700 text-stone-300 rounded-lg px-3 py-1.5 font-mono flex-shrink-0"
-        >
-          {copied ? t('groups.copied') : t('groups.codeShort', { code: group.invite_code })}
-        </button>
+        {group.description && <p className="text-stone-400 text-sm mt-1">{group.description}</p>}
       </div>
-
-      {group.description && <p className="text-stone-400 text-sm mb-4">{group.description}</p>}
 
       {/* Gruppen-Wechsler */}
       {switcherOpen && (

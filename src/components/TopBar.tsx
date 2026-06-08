@@ -16,14 +16,7 @@ export default function TopBar() {
         >
           Cask Lounge
         </button>
-        {user ? (
-          <button
-            onClick={() => navigate('/profile')}
-            className="text-stone-500 hover:text-stone-300 text-sm transition-colors"
-          >
-            {t('nav.profile')}
-          </button>
-        ) : (
+        {!user && (
           <div className="flex items-center gap-3">
             <Link to="/login" className="text-stone-400 hover:text-stone-200 text-sm transition-colors">{t('nav.login')}</Link>
             <Link to="/signup" className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-3 py-1.5 text-sm">{t('nav.register')}</Link>
