@@ -118,6 +118,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: 'Cask Lounge <noreply@casklounge.com>',
           to: emails,
+          reply_to: 'info@casklounge.com',
           subject,
           html,
         }),
