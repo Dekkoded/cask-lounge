@@ -36,10 +36,14 @@
     "next": "Weiter",
     "start": "Los geht’s",
     "steps": [
-      { "icon": "👋", "title": "Willkommen bei Cask Lounge", "body": "Entdecke, bewerte und teile deine Lieblings-Whiskys – allein oder mit deinen Gruppen." },
-      { "icon": "🥃", "title": "Bewerten & Sammeln", "body": "Bewerte nach Nase, Geschmack und Abgang. Jede Bewertung landet in deiner persönlichen Sammlung." },
-      { "icon": "🗺️", "title": "Deine Whisky-Karte", "body": "Sieh die Brennereien deiner Sammlung auf einer Weltkarte – von Islay bis Japan." },
-      { "icon": "👥", "title": "Gruppen & Live-Sessions", "body": "Tritt Gruppen bei, teile was du gerade trinkst und reagiere mit Emojis und Kommentaren." }
+      { "icon": "👋", "title": "Willkommen bei Cask Lounge", "body": "Dein digitaler Whisky-Begleiter: entdecken, bewerten, sammeln und mit Freunden teilen. Hier ein kurzer Überblick, was alles möglich ist." },
+      { "icon": "🌍", "title": "Entdecken & Ranking", "body": "Auf der Global-Seite findest du alle Whiskys, durchsuchst sie und filterst nach Region. Jeder Whisky zeigt den Community-Schnitt – tippe ihn an für alle Details." },
+      { "icon": "🥃", "title": "Bewerten wie ein Profi", "body": "Bewerte Farbe, Nase, Geschmack und Abgang, wähle Aromen im Aromenrad und halte Preis & Gedanken fest. Öffentlich teilen oder privat behalten – du entscheidest." },
+      { "icon": "📚", "title": "Sammlung & Wunschliste", "body": "Jede Bewertung landet automatisch in deiner Sammlung. Whiskys, die du noch probieren willst, kommen auf die Wunschliste – damit du nichts vergisst." },
+      { "icon": "🗺️", "title": "Karte & Vergleich", "body": "Sieh die Brennereien deiner Sammlung auf einer Weltkarte – von Islay bis Japan. Und stelle zwei Whiskys im direkten Vergleich (⚖️) gegenüber." },
+      { "icon": "👥", "title": "Gruppen & Live-Sessions", "body": "Tritt per Code oder Link einer Gruppe bei oder gründe eine eigene. Teile live, was du gerade trinkst, reagiere mit Emojis und kommentiere. Oben am Gruppennamen wechselst du jederzeit die Gruppe." },
+      { "icon": "📋", "title": "Tastings & Battles", "body": "In Gruppen veranstaltest du gemeinsame Tastings und lässt Whiskys im Battle (⚔️) gegeneinander antreten – wer holt die meisten Stimmen?" },
+      { "icon": "➕", "title": "Alles startet beim Plus", "body": "Über den ➕-Button postest du live, fügst neue Whiskys hinzu oder erstellst ein Tasting. Unten navigierst du zwischen Global, Sammlung, Gruppen und Profil." }
     ]
   },
   "install": {
