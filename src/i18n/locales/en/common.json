@@ -36,14 +36,12 @@
     "next": "Next",
     "start": "Let's go",
     "steps": [
-      { "icon": "👋", "title": "Welcome to Cask Lounge", "body": "Your digital whisky companion: discover, rate, collect and share with friends. Here's a quick tour of everything you can do." },
-      { "icon": "🌍", "title": "Discover & ranking", "body": "On the Global page you'll find every whisky, search them and filter by region. Each one shows the community average – tap it for the full details." },
-      { "icon": "🥃", "title": "Rate like a pro", "body": "Rate colour, nose, taste and finish, pick aromas on the aroma wheel and jot down price & thoughts. Share publicly or keep it private – your call." },
-      { "icon": "📚", "title": "Collection & wishlist", "body": "Every rating lands in your collection automatically. Whiskies you still want to try go on your wishlist, so you never forget one." },
-      { "icon": "🗺️", "title": "Map & compare", "body": "See the distilleries in your collection on a world map – from Islay to Japan. And put two whiskies head to head in a direct comparison (⚖️)." },
-      { "icon": "👥", "title": "Groups & live sessions", "body": "Join a group by code or link, or start your own. Share live what you're drinking, react with emojis and comment. Switch groups any time via the name at the top." },
-      { "icon": "📋", "title": "Tastings & battles", "body": "Inside groups you can run shared tastings and pit whiskies against each other in a battle (⚔️) – which one gets the most votes?" },
-      { "icon": "➕", "title": "It all starts with the plus", "body": "Use the ➕ button to post live, add new whiskies or create a tasting. Navigate between Global, Collection, Groups and Profile along the bottom." }
+      { "icon": "👋", "title": "Welcome to Cask Lounge", "body": "Discover, rate and share your favourite whiskies – on your own or with friends." },
+      { "icon": "🌍", "title": "Discover & ranking", "body": "Browse every whisky and see how the community rates them." },
+      { "icon": "🥃", "title": "Rate & collect", "body": "Rate to your taste – it all lands in your collection and on your personal whisky world map." },
+      { "icon": "⚖️", "title": "Compare & wishlist", "body": "Put whiskies head to head and save favourites to your wishlist." },
+      { "icon": "👥", "title": "Groups & live sessions", "body": "Join groups, share what you're drinking and swap notes." },
+      { "icon": "📋", "title": "Tastings & battles", "body": "Run shared tastings and let whiskies battle it out." }
     ]
   },
   "install": {

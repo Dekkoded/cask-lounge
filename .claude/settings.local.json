@@ -66,7 +66,8 @@
       "Bash(xargs ls *)",
       "Bash(python3 -c \"import json;d=json.load\\(open\\('/Users/leon/whisky-app/src/i18n/locales/de/groups.json'\\)\\);print\\(json.dumps\\(d,ensure_ascii=False,indent=1\\)\\)\")",
       "Bash(node -e 'const o=require\\('\\\\''./__TRACKED_VAR__'\\\\''\\);console.log\\(JSON.stringify\\(o.intro,null,2\\)\\)')",
-      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('de/common.json'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('en/common.json'\\)\\);console.log\\('JSON valid'\\)\")"
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('de/common.json'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('en/common.json'\\)\\);console.log\\('JSON valid'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/de/common.json'\\)\\);JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/locales/en/common.json'\\)\\);console.log\\('JSON valid'\\)\")"
     ]
   }
 }
