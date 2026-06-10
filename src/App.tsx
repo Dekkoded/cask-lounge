@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
 import InstallPrompt from './components/InstallPrompt'
 import IntroTour from './components/IntroTour'
+import OfflineBanner from './components/OfflineBanner'
 import TopBar from './components/TopBar'
 import BottomNav from './components/BottomNav'
 import GlobalLanding from './pages/GlobalLanding'
@@ -32,6 +33,7 @@ function AppShell() {
     <>
       <InstallPrompt />
       <IntroTour />
+      <OfflineBanner />
       <TopBar />
       <main className="pb-20">
         <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-stone-500 text-sm">{t('common.loading')}</div>}>

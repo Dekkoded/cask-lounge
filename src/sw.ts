@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
+import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
+import { registerRoute, NavigationRoute } from 'workbox-routing'
 import { clientsClaim } from 'workbox-core'
 
 declare const self: ServiceWorkerGlobalScope
@@ -9,6 +10,17 @@ clientsClaim()
 
 precacheAndRoute(self.__WB_MANIFEST)
 cleanupOutdatedCaches()
+
+// SPA-Navigations-Fallback: Da Routing clientseitig passiert, liefern wir für
+// jede Seitennavigation die vorab gecachte index.html aus. Dadurch lädt die
+// App-Shell auch offline bzw. bei Deep-Links – React Router rendert dann die
+// passende Route, und Datenabrufe greifen auf den supabase-Cache zurück.
+// Supabase-/Auth-Endpunkte sind ausgenommen (sollen echtes Netzwerk treffen).
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL('index.html'), {
+    denylist: [/^\/api\//, /supabase/i, /\/auth\//],
+  }),
+)
 
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {}

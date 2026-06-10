@@ -57,6 +57,9 @@
     "subtitle": "Zum Homescreen hinzufügen",
     "action": "Installieren"
   },
+  "offline": {
+    "banner": "Offline – einige Daten sind evtl. nicht aktuell"
+  },
   "legal": {
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",

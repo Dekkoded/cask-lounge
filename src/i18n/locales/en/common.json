@@ -57,6 +57,9 @@
     "subtitle": "Add to home screen",
     "action": "Install"
   },
+  "offline": {
+    "banner": "Offline – some data may be out of date"
+  },
   "legal": {
     "impressum": "Imprint",
     "datenschutz": "Privacy",
