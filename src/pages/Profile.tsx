@@ -209,7 +209,7 @@ export default function Profile() {
         {/* Anzeigename */}
         <div>
           <label className="block text-sm text-stone-300 mb-1">{t('profile.displayName')}</label>
-          <input value={displayName} onChange={e => setDisplayName(e.target.value)}
+          <input maxLength={50} value={displayName} onChange={e => setDisplayName(e.target.value)}
             placeholder={t('profile.displayNamePlaceholder')}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
         </div>
@@ -217,7 +217,7 @@ export default function Profile() {
         {/* Username */}
         <div>
           <label className="block text-sm text-stone-300 mb-1">{t('profile.username')}</label>
-          <input value={username}
+          <input maxLength={30} value={username}
             onChange={e => { setUsername(e.target.value.replace(/\s/g, '')); setUsernameError(null) }}
             onBlur={e => checkUsername(e.target.value)}
             placeholder={t('profile.usernamePlaceholder')}

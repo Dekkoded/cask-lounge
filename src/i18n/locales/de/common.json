@@ -15,7 +15,10 @@
   "errors": {
     "title": "Etwas ist schiefgelaufen",
     "message": "Die Seite konnte nicht geladen werden. Bitte lade sie neu – meist hilft das schon.",
-    "reload": "Neu laden"
+    "reload": "Neu laden",
+    "loadFailed": "Daten konnten nicht geladen werden. Prüfe deine Verbindung.",
+    "retry": "Erneut versuchen",
+    "voteFailed": "Deine Stimme konnte nicht gespeichert werden. Bitte versuche es erneut."
   },
   "nav": {
     "appName": "Cask Lounge",

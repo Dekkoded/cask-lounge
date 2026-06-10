@@ -302,6 +302,7 @@ export default function Tasting() {
       {showAddDrink && (
         <div className="bg-stone-900 rounded-xl p-4 mb-4">
           <input
+            maxLength={120}
             value={drinkSearch}
             onChange={e => setDrinkSearch(e.target.value)}
             placeholder={t('tasting.searchWhisky')}
@@ -311,9 +312,9 @@ export default function Tasting() {
             <div className="flex flex-col gap-2 mb-3 bg-stone-800 rounded-xl p-4">
               <p className="text-sm font-medium text-amber-400">{t('tasting.newWhisky', { name: drinkSearch.trim() })}</p>
               <div className="grid grid-cols-2 gap-2">
-                <input value={newProducer} onChange={e => setNewProducer(e.target.value)}
+                <input maxLength={80} value={newProducer} onChange={e => setNewProducer(e.target.value)}
                   placeholder={t('tasting.producer')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
-                <input value={newRegion} onChange={e => setNewRegion(e.target.value)}
+                <input maxLength={60} value={newRegion} onChange={e => setNewRegion(e.target.value)}
                   placeholder={t('tasting.region')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
                 <input type="number" value={newAge} onChange={e => setNewAge(e.target.value)}
                   placeholder={t('tasting.age')} className="bg-stone-700 border border-stone-600 rounded-lg px-3 py-2 text-stone-100 text-sm focus:outline-none focus:border-amber-500" />
@@ -476,7 +477,7 @@ export default function Tasting() {
                 </div>
               </div>
 
-              <textarea value={note} onChange={e => setNote(e.target.value)} rows={2}
+              <textarea value={note} onChange={e => setNote(e.target.value)} rows={2} maxLength={2000}
                 className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"
                 placeholder={t('tasting.note')} />
 

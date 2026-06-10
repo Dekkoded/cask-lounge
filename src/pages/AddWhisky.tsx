@@ -131,6 +131,7 @@ export default function AddWhisky() {
           <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.nameRequired')}</label>
           <input
             required
+            maxLength={120}
             value={name}
             onChange={e => setName(e.target.value)}
             onBlur={checkDuplicates}
@@ -159,6 +160,7 @@ export default function AddWhisky() {
           <div>
             <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.producer')}</label>
             <input
+              maxLength={80}
               value={producer}
               onChange={e => setProducer(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
@@ -168,6 +170,7 @@ export default function AddWhisky() {
           <div>
             <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.region')}</label>
             <input
+              maxLength={60}
               value={region}
               onChange={e => setRegion(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"

@@ -89,13 +89,13 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
             {!drinkId && (
               <div>
                 <label className="text-sm text-stone-400 mb-1 block">{t('groups.enterNameLabel')}</label>
-                <input value={drinkName} onChange={e => setDrinkName(e.target.value)} placeholder={t('groups.drinkNamePlaceholder')} className={field} />
+                <input maxLength={120} value={drinkName} onChange={e => setDrinkName(e.target.value)} placeholder={t('groups.drinkNamePlaceholder')} className={field} />
               </div>
             )}
 
             <div>
               <label className="text-sm text-stone-400 mb-1 block">{t('groups.messageLabel')}</label>
-              <input value={message} onChange={e => setMessage(e.target.value)} placeholder={t('groups.messagePlaceholder')} className={field} />
+              <input maxLength={280} value={message} onChange={e => setMessage(e.target.value)} placeholder={t('groups.messagePlaceholder')} className={field} />
             </div>
 
             <div>

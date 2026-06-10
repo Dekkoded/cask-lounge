@@ -15,7 +15,10 @@
   "errors": {
     "title": "Something went wrong",
     "message": "This page could not be loaded. Please reload — that usually fixes it.",
-    "reload": "Reload"
+    "reload": "Reload",
+    "loadFailed": "Could not load data. Please check your connection.",
+    "retry": "Try again",
+    "voteFailed": "Your vote could not be saved. Please try again."
   },
   "nav": {
     "appName": "Cask Lounge",

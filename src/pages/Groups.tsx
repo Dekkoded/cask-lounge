@@ -138,12 +138,14 @@ export default function Groups() {
           <form onSubmit={handleCreate} className="flex flex-col gap-3 mt-4">
             <input
               required
+              maxLength={60}
               value={newName}
               onChange={e => setNewName(e.target.value)}
               placeholder={t('groups.groupNamePlaceholder')}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
             />
             <input
+              maxLength={200}
               value={newDesc}
               onChange={e => setNewDesc(e.target.value)}
               placeholder={t('groups.descriptionPlaceholder')}
@@ -167,6 +169,7 @@ export default function Groups() {
         <form onSubmit={handleJoin} className="flex gap-2">
           <input
             required
+            maxLength={20}
             value={joinCode}
             onChange={e => setJoinCode(e.target.value)}
             placeholder={t('groups.inviteCodePlaceholder')}

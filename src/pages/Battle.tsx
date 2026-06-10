@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import type { Drink } from '../lib/types'
 import { thumbUrl } from '../lib/image'
+import LoadError from '../components/LoadError'
 
 interface BattleRow {
   id: string
@@ -33,6 +34,8 @@ export default function Battle() {
   const [contenders, setContenders] = useState<Contender[]>([])
   const [votes, setVotes] = useState<BattleVote[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [voteError, setVoteError] = useState(false)
   const [busy, setBusy] = useState(false)
 
   const loadVotes = async (battleId: string) => {
@@ -43,33 +46,40 @@ export default function Battle() {
     setVotes((data as BattleVote[]) ?? [])
   }
 
+  const load = async (isActive: () => boolean) => {
+    if (!bid) return
+    setLoading(true)
+    setLoadError(false)
+    const { data: b, error: bErr } = await supabase
+      .from('battles')
+      .select('id, group_id, status, created_by')
+      .eq('id', bid)
+      .maybeSingle()
+    if (!isActive()) return
+    if (bErr) { setLoadError(true); setLoading(false); return }
+    setBattle((b as BattleRow) ?? null)
+
+    const { data: bd } = await supabase
+      .from('battle_drinks')
+      .select('position, drinks(*)')
+      .eq('battle_id', bid)
+      .order('position')
+    if (!isActive()) return
+    const list = ((bd as unknown as { position: number; drinks: Drink | null }[]) ?? [])
+      .filter(r => r.drinks)
+      .map(r => ({ drink: r.drinks as Drink, position: r.position }))
+    setContenders(list)
+
+    await loadVotes(bid)
+    if (isActive()) setLoading(false)
+  }
+
   useEffect(() => {
     if (!bid) return
     let active = true
-    ;(async () => {
-      const { data: b } = await supabase
-        .from('battles')
-        .select('id, group_id, status, created_by')
-        .eq('id', bid)
-        .maybeSingle()
-      if (!active) return
-      setBattle((b as BattleRow) ?? null)
-
-      const { data: bd } = await supabase
-        .from('battle_drinks')
-        .select('position, drinks(*)')
-        .eq('battle_id', bid)
-        .order('position')
-      if (!active) return
-      const list = ((bd as unknown as { position: number; drinks: Drink | null }[]) ?? [])
-        .filter(r => r.drinks)
-        .map(r => ({ drink: r.drinks as Drink, position: r.position }))
-      setContenders(list)
-
-      await loadVotes(bid)
-      if (active) setLoading(false)
-    })()
+    load(() => active)
     return () => { active = false }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bid])
 
   useEffect(() => {
@@ -93,12 +103,15 @@ export default function Battle() {
   const castVote = async (drinkId: string) => {
     if (!user || !bid || !isOpen || busy) return
     setBusy(true)
+    setVoteError(false)
     // Optimistisch aktualisieren
     setVotes(prev => [...prev.filter(v => v.user_id !== user.id), { drink_id: drinkId, user_id: user.id }])
-    await supabase.from('battle_votes').upsert(
+    const { error } = await supabase.from('battle_votes').upsert(
       { battle_id: bid, drink_id: drinkId, user_id: user.id },
       { onConflict: 'battle_id,user_id' },
     )
+    if (error) setVoteError(true)
+    // Mit dem Server abgleichen (entfernt die optimistische Stimme bei Fehler).
     await loadVotes(bid)
     setBusy(false)
   }
@@ -131,6 +144,15 @@ export default function Battle() {
     )
   }
 
+  if (loadError) {
+    return (
+      <div className="max-w-lg mx-auto p-4">
+        <button onClick={() => navigate('/battles')} className="text-stone-400 hover:text-stone-200 text-sm">← {t('battle.back')}</button>
+        <LoadError onRetry={() => load(() => true)} />
+      </div>
+    )
+  }
+
   if (!battle) {
     return (
       <div className="max-w-lg mx-auto p-4">
@@ -154,6 +176,10 @@ export default function Battle() {
       <p className="text-stone-500 text-sm mb-6">
         {total === 0 ? t('battle.noVotes') : t('battle.totalVotes', { count: total })}
       </p>
+
+      {voteError && (
+        <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2 mb-4">{t('errors.voteFailed')}</p>
+      )}
 
       {!user && (
         <Link to="/login" className="block text-center bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-xl py-3 mb-4">

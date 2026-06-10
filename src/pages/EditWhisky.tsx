@@ -110,7 +110,7 @@ export default function EditWhisky() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.nameRequired')}</label>
-          <input required value={name} onChange={e => setName(e.target.value)}
+          <input required maxLength={120} value={name} onChange={e => setName(e.target.value)}
             className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
             placeholder={t('whisky.placeholders.name')} />
         </div>
@@ -118,13 +118,13 @@ export default function EditWhisky() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.producer')}</label>
-            <input value={producer} onChange={e => setProducer(e.target.value)}
+            <input maxLength={80} value={producer} onChange={e => setProducer(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
               placeholder={t('whisky.placeholders.producer')} />
           </div>
           <div>
             <label className="block text-sm text-stone-300 mb-1">{t('whisky.fields.region')}</label>
-            <input value={region} onChange={e => setRegion(e.target.value)}
+            <input maxLength={60} value={region} onChange={e => setRegion(e.target.value)}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
               placeholder={t('whisky.placeholders.region')} />
           </div>

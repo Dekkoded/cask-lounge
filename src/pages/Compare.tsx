@@ -7,6 +7,7 @@ import CompareWheel from '../components/CompareWheel'
 import { aromaLabel } from '../components/AromaTags'
 import { usePageMeta } from '../lib/pageMeta'
 import { thumbUrl } from '../lib/image'
+import LoadError from '../components/LoadError'
 
 const COLORS = ['#f59e0b', '#60a5fa', '#34d399']
 const MAX = 3
@@ -54,14 +55,23 @@ export default function Compare() {
   const ids = (params.get('ids') || '').split(',').filter(Boolean).slice(0, MAX)
 
   const [scores, setScores] = useState<GlobalDrinkScore[]>([])
+  const [scoresError, setScoresError] = useState(false)
   const [data, setData] = useState<Record<string, CompareData>>({})
   const [search, setSearch] = useState('')
   const [picking, setPicking] = useState(false)
 
-  useEffect(() => {
+  const loadScores = () => {
+    setScoresError(false)
     supabase.from('global_drink_scores').select('*')
       .order('avg_overall', { ascending: false, nullsFirst: false })
-      .then(({ data }) => setScores(data ?? []))
+      .then(({ data, error }) => {
+        if (error) setScoresError(true)
+        else setScores(data ?? [])
+      })
+  }
+
+  useEffect(() => {
+    loadScores()
   }, [])
 
   useEffect(() => {
@@ -199,7 +209,9 @@ export default function Compare() {
                     </div>
                   </button>
                 ))}
-                {pickList.length === 0 && <p className="text-stone-500 text-sm p-2">{t('compare.noResults')}</p>}
+                {pickList.length === 0 && (
+                  scoresError ? <LoadError onRetry={loadScores} /> : <p className="text-stone-500 text-sm p-2">{t('compare.noResults')}</p>
+                )}
               </div>
               <button onClick={() => { setPicking(false); setSearch('') }} className="text-stone-500 hover:text-stone-300 text-sm mt-2">
                 {t('common.cancel')}

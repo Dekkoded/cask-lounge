@@ -105,6 +105,7 @@ export function CommentSection({
       {myId && (
         <div className="flex gap-2">
           <input
+            maxLength={500}
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') submit() }}

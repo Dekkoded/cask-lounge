@@ -555,6 +555,7 @@ export default function WhiskyDetail() {
               value={note}
               onChange={e => setNote(e.target.value)}
               rows={3}
+              maxLength={2000}
               className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500 resize-none"
               placeholder={t('whisky.placeholders.note')}
             />

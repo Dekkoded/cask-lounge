@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { usePageMeta } from '../lib/pageMeta'
+import LoadError from '../components/LoadError'
 
 interface BattleListItem {
   id: string
@@ -22,6 +23,7 @@ export default function Battles() {
 
   const [battles, setBattles] = useState<BattleListItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
 
   const [allDrinks, setAllDrinks] = useState<{ id: string; name: string }[]>([])
   const [myGroups, setMyGroups] = useState<{ id: string; name: string }[]>([])
@@ -33,12 +35,15 @@ export default function Battles() {
   const [error, setError] = useState<string | null>(null)
 
   const loadBattles = () => {
+    setLoading(true)
+    setLoadError(false)
     supabase
       .from('battles')
       .select('id, status, created_at, group_id, battle_drinks(position, drinks(name))')
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setBattles((data as unknown as BattleListItem[]) ?? [])
+      .then(({ data, error }) => {
+        if (error) setLoadError(true)
+        else setBattles((data as unknown as BattleListItem[]) ?? [])
         setLoading(false)
       })
   }
@@ -174,6 +179,8 @@ export default function Battles() {
             <div key={i} className="h-16 bg-stone-900 rounded-xl animate-pulse" />
           ))}
         </div>
+      ) : loadError ? (
+        <LoadError onRetry={loadBattles} />
       ) : battles.length === 0 ? (
         <p className="text-stone-500 text-center py-12">
           {t('battle.noBattles')}
