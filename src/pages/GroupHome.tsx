@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { ReactionBar, CommentSection, type SessionReaction, type SessionComment } from '../components/SessionSocial'
 import { formatDateTime } from '../lib/format'
 import { thumbUrl } from '../lib/image'
+import LoadError from '../components/LoadError'
 
 interface Group {
   id: string
@@ -84,6 +85,7 @@ export default function GroupHome() {
   const [sessions, setSessions] = useState<GroupSession[]>([])
   const [ratingShares, setRatingShares] = useState<RatingShare[]>([])
   const [activityLoading, setActivityLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [tab, setTab] = useState<Tab>('aktivitaet')
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const [myGroups, setMyGroups] = useState<{ id: string; name: string; description: string | null }[]>([])
@@ -108,34 +110,41 @@ export default function GroupHome() {
   const [posting, setPosting] = useState(false)
   const [postError, setPostError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!id) return
-    localStorage.setItem('lastGroupId', id)
-    setGroup(null)
-    setTab('aktivitaet')
+  const load = async (groupId: string) => {
+    setLoadError(false)
 
-    supabase.from('groups').select('*').eq('id', id).single()
-      .then(({ data }) => { if (data) setGroup(data) })
+    const { data, error } = await supabase.from('groups').select('*').eq('id', groupId).single()
+    if (error) { setLoadError(true); return }
+    if (data) setGroup(data)
 
     supabase.from('groups').select('id, name, description').order('created_at', { ascending: false })
       .then(({ data }) => setMyGroups(data ?? []))
 
     supabase.from('group_members')
       .select('user_id, role, joined_at, profiles(username, display_name)')
-      .eq('group_id', id)
+      .eq('group_id', groupId)
       .then(({ data }) => { setMembers((data as unknown as Member[]) ?? []) })
 
-    supabase.from('tastings').select('*').eq('group_id', id).order('created_at', { ascending: false })
+    supabase.from('tastings').select('*').eq('group_id', groupId).order('created_at', { ascending: false })
       .then(({ data }) => { setTastings(data ?? []) })
 
-    supabase.from('battles').select('id, status, battle_drinks(position, drinks(name))').eq('group_id', id).order('created_at', { ascending: false })
+    supabase.from('battles').select('id, status, battle_drinks(position, drinks(name))').eq('group_id', groupId).order('created_at', { ascending: false })
       .then(({ data }) => { setBattles((data as unknown as BattleListItem[]) ?? []) })
 
     supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
       .then(({ data }) => setAllDrinks(data ?? []))
 
-    loadArchive(id)
-    loadActivity(id)
+    loadArchive(groupId)
+    loadActivity(groupId)
+  }
+
+  useEffect(() => {
+    if (!id) return
+    localStorage.setItem('lastGroupId', id)
+    setGroup(null)
+    setTab('aktivitaet')
+    load(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   useEffect(() => {
@@ -366,6 +375,15 @@ export default function GroupHome() {
     }
   }
 
+  if (loadError) {
+    return (
+      <div className="max-w-lg mx-auto p-4">
+        <button onClick={() => navigate('/groups')} className="text-stone-400 hover:text-stone-200 text-sm">← {t('common.back')}</button>
+        <LoadError onRetry={() => id && load(id)} />
+      </div>
+    )
+  }
+
   if (!group) {
     return (
       <div className="max-w-lg mx-auto p-4">
@@ -563,7 +581,7 @@ export default function GroupHome() {
                 {!sessionDrinkId && (
                   <div>
                     <label className="text-sm text-stone-400 mb-1 block">{t('groups.enterNameLabel')}</label>
-                    <input value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
+                    <input maxLength={120} value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
                       placeholder={t('groups.drinkNamePlaceholder')}
                       className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
                   </div>
@@ -571,7 +589,7 @@ export default function GroupHome() {
 
                 <div>
                   <label className="text-sm text-stone-400 mb-1 block">{t('groups.messageLabel')}</label>
-                  <input value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
+                  <input maxLength={280} value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
                     placeholder={t('groups.messagePlaceholder')}
                     className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
                 </div>
@@ -674,6 +692,7 @@ export default function GroupHome() {
               <form onSubmit={handleCreateTasting} className="flex flex-col gap-3 mt-4">
                 <input
                   required
+                  maxLength={100}
                   value={tastingTitle}
                   onChange={e => setTastingTitle(e.target.value)}
                   placeholder={t('groups.tastingTitlePlaceholder')}

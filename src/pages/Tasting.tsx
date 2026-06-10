@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import WheelStepper from '../components/WheelStepper'
 import AromaTags from '../components/AromaTags'
 import { thumbUrl } from '../lib/image'
+import LoadError from '../components/LoadError'
 
 const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: string[] } = {
   nose: Array(12).fill(0),
@@ -81,6 +82,7 @@ export default function Tasting() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState(false)
 
   const loadRatings = async () => {
     const { data } = await supabase
@@ -90,11 +92,13 @@ export default function Tasting() {
     setAllRatings(data ?? [])
   }
 
-  useEffect(() => {
+  const load = async () => {
     if (!tid) return
+    setLoadError(false)
 
-    supabase.from('tastings').select('*').eq('id', tid).single()
-      .then(({ data }) => { if (data) setTasting(data) })
+    const { data: tastingData, error } = await supabase.from('tastings').select('*').eq('id', tid).single()
+    if (error) { setLoadError(true); return }
+    if (tastingData) setTasting(tastingData)
 
     supabase.from('tasting_drinks')
       .select('drink_id, position, drinks(id, name, producer, photo_url)')
@@ -106,6 +110,12 @@ export default function Tasting() {
 
     supabase.from('drinks').select('id, name, producer').eq('category', 'whisky').order('name')
       .then(({ data }) => setAllDrinks(data ?? []))
+  }
+
+  useEffect(() => {
+    if (!tid) return
+
+    load()
 
     // Realtime: Rangliste live aktualisieren
     const channel = supabase
@@ -119,6 +129,7 @@ export default function Tasting() {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tid])
 
   // Eigene Bewertung laden wenn Whisky gewählt
@@ -240,6 +251,13 @@ export default function Tasting() {
       num_ratings: drinkRatings.length,
     }
   }).sort((a, b) => b.avg_overall - a.avg_overall)
+
+  if (loadError) return (
+    <div className="max-w-lg mx-auto p-4 pb-24">
+      <button onClick={() => navigate(`/groups/${id}`)} className="text-stone-400 hover:text-stone-200 text-sm">← {t('tasting.backToGroup')}</button>
+      <LoadError onRetry={load} />
+    </div>
+  )
 
   if (!tasting) return (
     <div className="max-w-lg mx-auto p-4 pb-24">
