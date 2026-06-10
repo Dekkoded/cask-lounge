@@ -370,6 +370,15 @@ create index on public.group_ratings (group_id);
 create index on public.tasting_ratings (tasting_id, drink_id);
 create index on public.drink_sessions (group_id, started_at desc);
 
+-- rating_id ist NICHT führend im PK (group_id, rating_id): wird aber in der
+-- RLS-Policy "ratings_select_public_or_own" bei jedem ratings-Read gefiltert.
+create index if not exists group_ratings_rating_id_idx on public.group_ratings (rating_id);
+-- group_id-Filter beim Öffnen jeder Gruppe (GroupHome) + Archiv.
+create index if not exists tastings_group_id_idx on public.tastings (group_id);
+-- FK-/Lösch-Kaskaden auf drinks(id).
+create index if not exists tasting_drinks_drink_id_idx on public.tasting_drinks (drink_id);
+create index if not exists tasting_ratings_drink_id_idx on public.tasting_ratings (drink_id);
+
 -- =====================================================================
 -- 8b. BATTLES  (Öffentliche Head-to-Head Abstimmung)
 --     Jeder eingeloggte User stellt 2–5 Whiskys gegeneinander; ALLE
@@ -443,6 +452,10 @@ create policy "bv_delete_own"
 
 create index on public.battle_drinks (battle_id);
 create index on public.battle_votes (battle_id);
+-- group_id-Filter beim Öffnen jeder Gruppe (GroupHome).
+create index if not exists battles_group_id_idx on public.battles (group_id);
+-- FK-/Lösch-Kaskade auf drinks(id).
+create index if not exists battle_votes_drink_id_idx on public.battle_votes (drink_id);
 alter publication supabase_realtime add table public.battle_votes;
 
 -- =====================================================================
