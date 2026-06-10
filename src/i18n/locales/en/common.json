@@ -12,6 +12,11 @@
     "edit": "Edit",
     "close": "Close"
   },
+  "errors": {
+    "title": "Something went wrong",
+    "message": "This page could not be loaded. Please reload — that usually fixes it.",
+    "reload": "Reload"
+  },
   "nav": {
     "appName": "Cask Lounge",
     "login": "Sign in",

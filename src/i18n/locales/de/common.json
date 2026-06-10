@@ -12,6 +12,11 @@
     "edit": "Bearbeiten",
     "close": "Schließen"
   },
+  "errors": {
+    "title": "Etwas ist schiefgelaufen",
+    "message": "Die Seite konnte nicht geladen werden. Bitte lade sie neu – meist hilft das schon.",
+    "reload": "Neu laden"
+  },
   "nav": {
     "appName": "Cask Lounge",
     "login": "Anmelden",
