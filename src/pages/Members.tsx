@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { thumbUrl } from '../lib/image'
 
 interface Member {
   id: string
@@ -70,7 +71,7 @@ export default function Members() {
                 className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors"
               >
                 {m.avatar_url ? (
-                  <img src={m.avatar_url} alt={name} loading="lazy" decoding="async" className="w-12 h-12 rounded-full object-cover flex-shrink-0 ring-1 ring-stone-700" />
+                  <img src={thumbUrl(m.avatar_url, 96)} alt={name} loading="lazy" decoding="async" className="w-12 h-12 rounded-full object-cover flex-shrink-0 ring-1 ring-stone-700" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-stone-800 flex items-center justify-center text-xl flex-shrink-0">👤</div>
                 )}

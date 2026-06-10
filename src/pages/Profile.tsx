@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { usePushNotifications } from '../hooks/usePushNotifications'
-import { compressImage } from '../lib/image'
+import { compressImage, thumbUrl } from '../lib/image'
 import { openIntro } from '../components/IntroTour'
 import FeedbackSection from '../components/FeedbackSection'
 import LegalLinks from '../components/LegalLinks'
@@ -176,7 +176,7 @@ export default function Profile() {
       <div className="flex flex-col items-center mb-8">
         <label className="cursor-pointer group relative">
           {avatar ? (
-            <img src={avatar} alt="Avatar" className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all" />
+            <img src={thumbUrl(avatar, 256)} alt="Avatar" className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all" />
           ) : (
             <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all">👤</div>
           )}

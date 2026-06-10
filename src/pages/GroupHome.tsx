@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { ReactionBar, CommentSection, type SessionReaction, type SessionComment } from '../components/SessionSocial'
+import { formatDateTime } from '../lib/format'
+import { thumbUrl } from '../lib/image'
 
 interface Group {
   id: string
@@ -69,7 +71,7 @@ interface BattleListItem {
 type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'battles' | 'mitglieder'
 
 export default function GroupHome() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -138,14 +140,22 @@ export default function GroupHome() {
 
   useEffect(() => {
     if (!id) return
+    // Realtime-Events kommen in Schüben (z. B. Sessions + ihre Reaktionen/
+    // Kommentare gleichzeitig). Statt pro Event ein volles loadActivity() zu
+    // feuern, bündeln wir die Aufrufe per Debounce zu einem Reload.
+    let timer: ReturnType<typeof setTimeout> | null = null
+    const scheduleReload = () => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => loadActivity(id), 400)
+    }
     const channel = supabase
       .channel(`group-activity-${id}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'drink_sessions', filter: `group_id=eq.${id}` }, () => loadActivity(id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_reactions' }, () => loadActivity(id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_comments' }, () => loadActivity(id))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'group_ratings', filter: `group_id=eq.${id}` }, () => loadActivity(id))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'drink_sessions', filter: `group_id=eq.${id}` }, scheduleReload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_reactions' }, scheduleReload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'session_comments' }, scheduleReload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'group_ratings', filter: `group_id=eq.${id}` }, scheduleReload)
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return () => { if (timer) clearTimeout(timer); supabase.removeChannel(channel) }
   }, [id])
 
   const loadActivity = async (groupId: string) => {
@@ -492,7 +502,7 @@ export default function GroupHome() {
                     </p>
                     {a.session.message && <p className="text-stone-400 text-sm mt-1">„{a.session.message}"</p>}
                     <p className="text-stone-600 text-xs mt-1">
-                      {new Date(a.session.started_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      {formatDateTime(a.session.started_at, i18n.language)}
                     </p>
                     <ReactionBar reactions={a.session.session_reactions} myId={user?.id} onToggle={(emoji, active) => toggleReaction(a.session.id, emoji, active)} />
                     <CommentSection
@@ -512,7 +522,7 @@ export default function GroupHome() {
               >
                 <span className="text-2xl">⭐</span>
                 {a.share.ratings?.drinks?.photo_url ? (
-                  <img src={a.share.ratings.drinks.photo_url} alt={a.share.ratings.drinks.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                  <img src={thumbUrl(a.share.ratings.drinks.photo_url, 96)} alt={a.share.ratings.drinks.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
                 )}
@@ -522,7 +532,7 @@ export default function GroupHome() {
                   </p>
                   <p className="text-amber-400 font-medium truncate">{a.share.ratings?.drinks?.name ?? '—'}</p>
                   <p className="text-stone-600 text-xs mt-0.5">
-                    {new Date(a.share.shared_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                    {formatDateTime(a.share.shared_at, i18n.language)}
                   </p>
                 </div>
                 {a.share.ratings?.overall != null && (
@@ -606,7 +616,7 @@ export default function GroupHome() {
                 >
                   <span className="text-stone-600 font-mono text-sm w-5 text-center">{i + 1}</span>
                   {drink.photo_url ? (
-                    <img src={drink.photo_url} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <img src={thumbUrl(drink.photo_url, 112)} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                   ) : (
                     <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                   )}

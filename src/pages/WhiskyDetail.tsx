@@ -11,6 +11,8 @@ import AromaTags, { aromaLabel } from '../components/AromaTags'
 import { usePageMeta } from '../lib/pageMeta'
 import { amazonSearchUrl, AMAZON_ENABLED } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'
+import { formatDate } from '../lib/format'
+import { thumbUrl } from '../lib/image'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
@@ -32,7 +34,7 @@ export default function WhiskyDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user, isAdmin } = useAuth()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const [drink, setDrink] = useState<Drink | null>(null)
   const [myRating, setMyRating] = useState<Rating | null>(null)
@@ -331,7 +333,7 @@ export default function WhiskyDetail() {
       <div className="flex gap-4 mb-6">
         {drink.photo_url ? (
           <img
-            src={drink.photo_url}
+            src={thumbUrl(drink.photo_url, 256)}
             alt={drink.name}
             onClick={() => setLightboxSrc(drink.photo_url)}
             className="w-24 h-24 object-cover rounded-xl flex-shrink-0 cursor-zoom-in"
@@ -450,7 +452,7 @@ export default function WhiskyDetail() {
                       {r.profiles?.display_name ?? r.profiles?.username ?? t('whisky.anonymous')}
                     </Link>
                     <p className="text-xs text-stone-500">
-                      {new Date(r.updated_at).toLocaleDateString('de-DE')}
+                      {formatDate(r.updated_at, i18n.language)}
                     </p>
                   </div>
                   <span className="text-2xl font-bold text-amber-400">{r.overall}</span>

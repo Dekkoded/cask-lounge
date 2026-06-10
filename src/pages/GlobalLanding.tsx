@@ -7,6 +7,8 @@ import { lookupDistillery } from '../lib/distilleries'
 import type { MapPin } from '../components/DistilleryMap'
 import type { GlobalDrinkScore, Drink } from '../lib/types'
 import { usePageMeta } from '../lib/pageMeta'
+import { formatDate, formatNumber } from '../lib/format'
+import { thumbUrl } from '../lib/image'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
@@ -27,7 +29,7 @@ interface WishlistEntry {
 }
 
 export default function GlobalLanding() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   usePageMeta()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -225,7 +227,7 @@ export default function GlobalLanding() {
                   {rank + 1}
                 </span>
                 {s.photo_url ? (
-                  <img src={s.photo_url} alt={s.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={thumbUrl(s.photo_url, 112)} alt={s.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}
@@ -289,7 +291,7 @@ export default function GlobalLanding() {
               <div className="bg-stone-900 rounded-xl px-4 py-3 flex items-baseline justify-between">
                 <span className="text-stone-400 text-sm">{t('landing.collectionValue')}</span>
                 <span className="text-amber-400 font-bold">
-                  {collectionValue.toLocaleString('de-DE', { maximumFractionDigits: 0 })} €
+                  {formatNumber(collectionValue, i18n.language, { maximumFractionDigits: 0 })} €
                   <span className="text-stone-500 text-xs font-normal ml-1">({pricedCount})</span>
                 </span>
               </div>
@@ -309,7 +311,7 @@ export default function GlobalLanding() {
                 className="flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 {v.drinks!.photo_url ? (
-                  <img src={v.drinks!.photo_url} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={thumbUrl(v.drinks!.photo_url, 112)} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}
@@ -319,7 +321,7 @@ export default function GlobalLanding() {
                     {[v.drinks!.producer, v.drinks!.region].filter(Boolean).join(' · ')}
                   </p>
                   <p className="text-xs text-stone-600 mt-0.5">
-                    {t('landing.ratedOn', { date: new Date(v.updated_at).toLocaleDateString('de-DE') })}
+                    {t('landing.ratedOn', { date: formatDate(v.updated_at, i18n.language) })}
                   </p>
                 </div>
                 {v.overall != null ? (
@@ -375,7 +377,7 @@ export default function GlobalLanding() {
               >
                 <Link to={`/whisky/${w.drinks!.id}`} className="flex items-center gap-4 flex-1 min-w-0">
                   {w.drinks!.photo_url ? (
-                    <img src={w.drinks!.photo_url} alt={w.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <img src={thumbUrl(w.drinks!.photo_url, 112)} alt={w.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                   ) : (
                     <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                   )}
@@ -385,7 +387,7 @@ export default function GlobalLanding() {
                       {[w.drinks!.producer, w.drinks!.region].filter(Boolean).join(' · ')}
                     </p>
                     <p className="text-xs text-stone-600 mt-0.5">
-                      {t('landing.savedOn', { date: new Date(w.created_at).toLocaleDateString('de-DE') })}
+                      {t('landing.savedOn', { date: formatDate(w.created_at, i18n.language) })}
                     </p>
                   </div>
                 </Link>

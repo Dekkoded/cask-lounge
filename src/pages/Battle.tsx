@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import type { Drink } from '../lib/types'
+import { thumbUrl } from '../lib/image'
 
 interface BattleRow {
   id: string
@@ -184,7 +185,7 @@ export default function Battle() {
               />
               <div className="relative flex items-center gap-4">
                 {drink.photo_url ? (
-                  <img src={drink.photo_url} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <img src={thumbUrl(drink.photo_url, 112)} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}

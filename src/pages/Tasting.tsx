@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import WheelStepper from '../components/WheelStepper'
 import AromaTags from '../components/AromaTags'
+import { thumbUrl } from '../lib/image'
 
 const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: string[] } = {
   nose: Array(12).fill(0),
@@ -385,7 +386,7 @@ export default function Tasting() {
             <div key={entry.drink_id} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4">
               <span className="text-stone-500 font-mono w-6 text-center">{i + 1}</span>
               {entry.photo_url ? (
-                <img src={entry.photo_url} alt={entry.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                <img src={thumbUrl(entry.photo_url, 96)} alt={entry.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
               ) : (
                 <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
               )}
