@@ -1,0 +1,32 @@
+name: Supabase Keep-Alive
+
+# Hält das Supabase-Projekt im Free-Tier wach: dieses pausiert nach ~7 Tagen
+# ohne Aktivität. Ein leichter REST-Request alle paar Tage zählt als Aktivität.
+#
+# Voraussetzung: zwei Repository-Variablen (Settings → Secrets and variables →
+# Actions → Variables) – beide sind ohnehin öffentlich (anon key steckt im
+# Frontend):
+#   SUPABASE_URL       z. B. https://<ref>.supabase.co
+#   SUPABASE_ANON_KEY  der öffentliche anon/publishable Key
+#
+# Hinweis: GitHub kann geplante Workflows nach 60 Tagen Repo-Inaktivität
+# deaktivieren. Wer ganz sichergehen will, richtet zusätzlich einen externen
+# Cron (z. B. cron-job.org) auf denselben URL ein.
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *' # alle 3 Tage, 06:17 UTC
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping REST endpoint
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            "${{ vars.SUPABASE_URL }}/rest/v1/drinks?select=id&limit=1")
+          echo "HTTP $code"
+          # 2xx = wach. Alles andere ist ein Fehler -> Job rot.
+          [ "$code" -ge 200 ] && [ "$code" -lt 300 ]

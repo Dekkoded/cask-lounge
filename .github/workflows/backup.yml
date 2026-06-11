@@ -1,0 +1,48 @@
+name: Database Backup
+
+# Täglicher Voll-Backup der Supabase-Datenbank (Rollen, Schema, Daten).
+# Die Dumps werden als GitHub-Artefakt abgelegt (Standard-Aufbewahrung unten),
+# nicht ins Repo committet – so bleibt die History schlank.
+#
+# Voraussetzung: Repository-Secret SUPABASE_DB_URL
+#   Supabase Dashboard → Project Settings → Database → Connection string
+#   "URI" (Session/Direct). Format:
+#   postgresql://postgres.<ref>:<password>@<host>:5432/postgres
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # täglich 03:00 UTC
+  workflow_dispatch: {} # manuell auslösbar
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Dump roles
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" --role-only -f roles.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Dump schema
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Dump data
+        run: supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --use-copy -f data.sql
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: |
+            roles.sql
+            schema.sql
+            data.sql
+          retention-days: 30
