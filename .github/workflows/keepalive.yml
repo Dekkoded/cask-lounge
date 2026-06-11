@@ -3,10 +3,9 @@ name: Supabase Keep-Alive
 # Hält das Supabase-Projekt im Free-Tier wach: dieses pausiert nach ~7 Tagen
 # ohne Aktivität. Ein leichter REST-Request alle paar Tage zählt als Aktivität.
 #
-# Voraussetzung: zwei Repository-Secrets (Settings → Secrets and variables →
-# Actions → Secrets). Inhaltlich sind beide öffentlich (der Key steckt im
-# Frontend) – wir legen sie nur der Einfachheit halber als Secret ab, damit
-# alles im selben Tab liegt:
+# Voraussetzung: zwei Repository-Variablen (Settings → Secrets and variables →
+# Actions → Tab "Variables"). Beide Werte sind öffentlich (der Key steckt im
+# Frontend, Zugriff wird per RLS geschützt) – daher Variable, nicht Secret:
 #   SUPABASE_URL       z. B. https://<ref>.supabase.co  (ohne /rest/v1/)
 #   SUPABASE_ANON_KEY  der öffentliche anon/publishable Key
 #
@@ -26,8 +25,8 @@ jobs:
       - name: Ping REST endpoint
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/drinks?select=id&limit=1")
+            -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            "${{ vars.SUPABASE_URL }}/rest/v1/drinks?select=id&limit=1")
           echo "HTTP $code"
           # 2xx = wach. Alles andere ist ein Fehler -> Job rot.
           [ "$code" -ge 200 ] && [ "$code" -lt 300 ]
