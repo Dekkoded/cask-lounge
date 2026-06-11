@@ -26,6 +26,7 @@ jobs:
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' \
             -H "apikey: ${{ vars.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ vars.SUPABASE_ANON_KEY }}" \
             "${{ vars.SUPABASE_URL }}/rest/v1/drinks?select=id&limit=1")
           echo "HTTP $code"
           # 2xx = wach. Alles andere ist ein Fehler -> Job rot.
