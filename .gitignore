@@ -22,3 +22,6 @@ dist-ssr
 
 # OS
 .DS_Store
+
+# Claude – lokale, persönliche Einstellungen (nicht teilen)
+.claude/settings.local.json
