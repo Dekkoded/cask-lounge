@@ -135,7 +135,7 @@ body {
 /* Einheitlicher Fokus-Ring: warmes Amber, gut sichtbar für Tastatur-
    Nutzer, ohne den Layout-Fluss zu stören. Nur bei :focus-visible, damit
    Maus-/Touch-Klicks keinen Ring hinterlassen. */
-:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
   outline: 2px solid var(--color-amber-400);
   outline-offset: 2px;
   border-radius: 0.5rem;

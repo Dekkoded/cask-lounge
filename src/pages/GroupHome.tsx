@@ -7,6 +7,7 @@ import { ReactionBar, CommentSection, type SessionReaction, type SessionComment 
 import { formatDateTime } from '../lib/format'
 import { thumbUrl } from '../lib/image'
 import LoadError from '../components/LoadError'
+import Modal from '../components/Modal'
 
 interface Group {
   id: string
@@ -440,12 +441,7 @@ export default function GroupHome() {
       </div>
 
       {/* Gruppen-Wechsler */}
-      {switcherOpen && (
-        <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-[60] p-4" onClick={() => setSwitcherOpen(false)}>
-          <div
-            className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-3 mb-[env(safe-area-inset-bottom)]"
-            onClick={e => e.stopPropagation()}
-          >
+      <Modal open={switcherOpen} onClose={() => setSwitcherOpen(false)} ariaLabel={t('groups.switchGroup')} className="w-full max-w-lg p-6 gap-3">
             <h3 className="text-lg font-bold text-stone-100">{t('groups.switchGroup')}</h3>
             <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
               {myGroups.map(g => (
@@ -472,9 +468,7 @@ export default function GroupHome() {
               <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center text-lg text-amber-400 flex-shrink-0">+</div>
               <p className="font-semibold text-stone-200">{t('groups.createOrJoin')}</p>
             </button>
-          </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
@@ -564,9 +558,7 @@ export default function GroupHome() {
           )}
 
           {/* Post-Dialog */}
-          {showPost && (
-            <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50 p-4">
-              <div className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4">
+          <Modal open={showPost} onClose={() => { setShowPost(false); setPostError(null) }} ariaLabel={t('groups.postTitle')} className="w-full max-w-lg p-6 gap-4">
                 <h3 className="text-lg font-bold text-stone-100">{t('groups.postTitle')}</h3>
 
                 <div>
@@ -606,9 +598,7 @@ export default function GroupHome() {
                     {t('common.cancel')}
                   </button>
                 </div>
-              </div>
-            </div>
-          )}
+          </Modal>
         </div>
       )}
 

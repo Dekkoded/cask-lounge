@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
+import Modal from '../components/Modal'
 
 export default function AddWhisky() {
   const navigate = useNavigate()
@@ -95,30 +96,34 @@ export default function AddWhisky() {
 
   return (
     <div className="max-w-lg mx-auto p-6">
-      {createdId && (
-        <div className="fixed inset-0 z-[1000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-stone-900 border border-stone-700 rounded-2xl p-6 text-center">
-            <div className="text-4xl mb-3">🥃</div>
-            <h2 className="text-lg font-bold text-stone-100 mb-1">{t('whisky.createdHeading', { name: name.trim() })}</h2>
-            <p className="text-stone-400 text-sm mb-6">{t('whisky.createdPrompt')}</p>
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={addToCollection}
-                disabled={addingCollection}
-                className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-2.5 transition-colors"
-              >
-                {addingCollection ? t('whisky.addingToCollection') : t('whisky.addToCollection')}
-              </button>
-              <button
-                onClick={() => navigate(`/whisky/${createdId}`)}
-                className="text-stone-400 hover:text-stone-200 text-sm py-2 transition-colors"
-              >
-                {t('common.skip')}
-              </button>
-            </div>
-          </div>
+      <Modal
+        open={!!createdId}
+        onClose={() => createdId && navigate(`/whisky/${createdId}`)}
+        variant="center"
+        blur
+        dismissible={false}
+        ariaLabel={t('whisky.createdHeading', { name: name.trim() })}
+        className="w-full max-w-sm border border-stone-700 p-6 text-center"
+      >
+        <div className="text-4xl mb-3">🥃</div>
+        <h2 className="text-lg font-bold text-stone-100 mb-1">{t('whisky.createdHeading', { name: name.trim() })}</h2>
+        <p className="text-stone-400 text-sm mb-6">{t('whisky.createdPrompt')}</p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={addToCollection}
+            disabled={addingCollection}
+            className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-2.5 transition-colors"
+          >
+            {addingCollection ? t('whisky.addingToCollection') : t('whisky.addToCollection')}
+          </button>
+          <button
+            onClick={() => navigate(`/whisky/${createdId}`)}
+            className="text-stone-400 hover:text-stone-200 text-sm py-2 transition-colors"
+          >
+            {t('common.skip')}
+          </button>
         </div>
-      )}
+      </Modal>
 
       <button onClick={() => navigate('/')} className="text-stone-400 hover:text-stone-200 text-sm mb-6 flex items-center gap-1">
         ← {t('common.back')}

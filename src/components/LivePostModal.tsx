@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import Modal from './Modal'
 
 interface GroupOpt { id: string; name: string }
 
@@ -34,8 +35,6 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
       .then(({ data }) => setDrinks(data ?? []))
   }, [open, user])
 
-  if (!open) return null
-
   const hasGroups = groups.length > 0
   const canSubmit = hasGroups && (!!drinkId || !!drinkName.trim())
 
@@ -62,11 +61,7 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
   const field = 'w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500'
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-[60] p-4 anim-overlay" onClick={onClose}>
-      <div
-        className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4 mb-[env(safe-area-inset-bottom)] anim-sheet"
-        onClick={e => e.stopPropagation()}
-      >
+    <Modal open={open} onClose={onClose} ariaLabel={t('groups.postTitle')} className="w-full max-w-lg p-6 gap-4">
         <h3 className="text-lg font-bold text-stone-100">{t('groups.postTitle')}</h3>
 
         {loading ? (
@@ -117,7 +112,6 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
             </div>
           </>
         )}
-      </div>
-    </div>
+    </Modal>
   )
 }
