@@ -44,12 +44,12 @@
     "next": "Next",
     "start": "Let's go",
     "steps": [
-      { "icon": "👋", "title": "Welcome to Cask Lounge", "body": "Discover, rate and share your favourite whiskies – on your own or with friends." },
-      { "icon": "🌍", "title": "Discover & ranking", "body": "Browse every whisky and see how the community rates them." },
-      { "icon": "🥃", "title": "Rate & collect", "body": "Rate to your taste – it all lands in your collection and on your personal whisky world map." },
-      { "icon": "⚖️", "title": "Compare & wishlist", "body": "Put whiskies head to head and save favourites to your wishlist." },
-      { "icon": "👥", "title": "Groups & live sessions", "body": "Join groups, share what you're drinking and swap notes." },
-      { "icon": "📋", "title": "Tastings & battles", "body": "Run shared tastings and let whiskies battle it out." }
+      { "icon": "🥃", "title": "Welcome to Cask Lounge", "body": "Your whole whisky world in one app – discover, taste, collect and share with friends." },
+      { "icon": "🌍", "title": "Discover & community ranking", "body": "Browse hundreds of whiskies, filter by region and see how the community rates them." },
+      { "icon": "📝", "title": "Taste like a pro", "body": "Rate with an interactive aroma wheel and your own notes – exactly to your taste." },
+      { "icon": "🗺️", "title": "Collection, world map & wishlist", "body": "Every dram lands in your collection, on your whisky world map and – whatever you're still after – on your wishlist." },
+      { "icon": "⚔️", "title": "Compare & battles", "body": "Put two whiskies head to head, or let the community vote on the winner in a battle." },
+      { "icon": "👥", "title": "Groups & live tastings", "body": "Start groups, share what's in your glass live and host shared tastings. Cheers! 🥂" }
     ]
   },
   "install": {
