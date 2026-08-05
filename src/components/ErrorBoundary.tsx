@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import i18n from 'i18next'
+import { captureError } from '../lib/monitoring'
 
 // Erkennt Fehler beim Nachladen von Lazy-Chunks. Nach einem neuen Deploy haben
 // bereits offene Clients veraltete Chunk-Hashes referenziert – der dynamische
@@ -28,7 +29,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error, _info: ErrorInfo) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     const msg = error?.message ?? ''
     if (CHUNK_ERROR_RE.test(msg)) {
       const last = Number(sessionStorage.getItem(RELOAD_KEY) || 0)
@@ -36,7 +37,11 @@ export default class ErrorBoundary extends Component<Props, State> {
         sessionStorage.setItem(RELOAD_KEY, String(Date.now()))
         window.location.reload()
       }
+      // Veraltete Chunks sind ein Deploy-Artefakt, kein echter Bug -> nicht melden.
+      return
     }
+    // Echte Laufzeitfehler ans Monitoring melden (no-op ohne DSN).
+    captureError(error, { componentStack: info.componentStack })
   }
 
   handleReload = () => {

@@ -8,6 +8,10 @@ import './index.css'
 import './i18n'
 import App from './App'
 import ErrorBoundary from './components/ErrorBoundary'
+import { initMonitoring } from './lib/monitoring'
+
+// Fehler-Monitoring so früh wie möglich anstoßen (no-op ohne VITE_SENTRY_DSN).
+initMonitoring()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
