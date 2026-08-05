@@ -62,9 +62,9 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
   const field = 'w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500'
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-[60] p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-[60] p-4 anim-overlay" onClick={onClose}>
       <div
-        className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4 mb-[env(safe-area-inset-bottom)]"
+        className="bg-stone-900 rounded-2xl p-6 w-full max-w-lg flex flex-col gap-4 mb-[env(safe-area-inset-bottom)] anim-sheet"
         onClick={e => e.stopPropagation()}
       >
         <h3 className="text-lg font-bold text-stone-100">{t('groups.postTitle')}</h3>
@@ -110,10 +110,10 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
 
             <div className="flex gap-3">
               <button onClick={submit} disabled={posting || !canSubmit}
-                className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
+                className="press flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
                 {posting ? t('groups.sending') : sent ? '✓' : t('groups.share')}
               </button>
-              <button onClick={onClose} className="bg-stone-800 text-stone-300 rounded-xl px-4">{t('common.cancel')}</button>
+              <button onClick={onClose} className="press bg-stone-800 text-stone-300 rounded-xl px-4">{t('common.cancel')}</button>
             </div>
           </>
         )}

@@ -9,6 +9,13 @@
 
 :root {
   color-scheme: dark;
+
+  /* Motion-Tokens (Emil Kowalski). Gemeinsame Easing-Sprache für die
+     ganze App – ein „fluid" ease-out für Enter/Exit, eine tiefere Kurve
+     für Drawer/Sheets, die sich physisch anfühlt. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* Light Mode: stone-Skala gespiegelt (hell <-> dunkel), damit alle
@@ -47,4 +54,49 @@ body {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* ── Motion-Schicht ─────────────────────────────────────────────────
+   Enter-Animationen für Overlays. Emil: Entering → ease-out; Sheets
+   fühlen sich mit --ease-drawer physisch an. Dauer <300ms für Panels,
+   Sheets etwas länger (Distanz). Nur transform/opacity (GPU). */
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes panelIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Backdrop faded sanft ein statt hart zu poppen. */
+.anim-overlay { animation: overlayIn 200ms var(--ease-out); }
+/* Bottom-Sheet slidet von unten herein. */
+.anim-sheet { animation: sheetIn 320ms var(--ease-drawer); }
+/* Zentrierte Panels: leichtes Scale + Fade (nie von scale(0)). */
+.anim-panel { animation: panelIn 200ms var(--ease-out); }
+
+/* Press-Feedback: jeder Tap bestätigt sich sofort. Nur transform,
+   läuft auf der GPU, interruptibel. */
+.press { transition: transform 160ms var(--ease-out); }
+.press:active { transform: scale(0.97); }
+
+/* Barrierefreiheit: Nutzer mit „Bewegung reduzieren" bekommen keine
+   Positions-/Scale-Animationen mehr – Opacity/Farbe bleiben erhalten,
+   da sie dem Verständnis dienen. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .press:active { transform: none; }
 }

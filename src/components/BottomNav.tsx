@@ -41,9 +41,9 @@ export default function BottomNav() {
   return (
     <>
       {sheetOpen && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end" onClick={() => setSheetOpen(false)}>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-end anim-overlay" onClick={() => setSheetOpen(false)}>
           <div
-            className="bg-stone-900 rounded-t-2xl w-full max-w-2xl mx-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-2"
+            className="bg-stone-900 rounded-t-2xl w-full max-w-2xl mx-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-2 anim-sheet"
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-stone-700 rounded-full mx-auto mb-2" />
@@ -85,7 +85,7 @@ function SheetItem({ icon, title, sub, onClick }: { icon: string; title: string;
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-3 bg-stone-800 hover:bg-stone-700 rounded-xl p-3 text-left transition-colors"
+      className="press flex items-center gap-3 bg-stone-800 hover:bg-stone-700 rounded-xl p-3 text-left transition-colors"
     >
       <span className="text-2xl w-8 text-center flex-shrink-0">{icon}</span>
       <div>
