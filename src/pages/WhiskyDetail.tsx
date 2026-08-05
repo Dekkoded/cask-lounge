@@ -580,7 +580,7 @@ export default function WhiskyDetail() {
               onClick={() => setIsPublic(p => !p)}
               className={`w-12 h-6 rounded-full transition-colors relative ${isPublic ? 'bg-amber-500' : 'bg-stone-700'}`}
             >
-              <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${isPublic ? 'left-7' : 'left-1'}`} />
+              <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${isPublic ? 'translate-x-6' : 'translate-x-0'}`} />
             </div>
             <span className="text-sm text-stone-300">{t('whisky.publicShow')}</span>
           </label>

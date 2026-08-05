@@ -204,10 +204,11 @@ export default function Battle() {
                 mine ? 'border-amber-500 bg-stone-900' : 'border-stone-800 bg-stone-900'
               } ${canVote ? 'hover:border-stone-600 cursor-pointer' : 'cursor-default'}`}
             >
-              {/* Ergebnis-Balken im Hintergrund */}
+              {/* Ergebnis-Balken im Hintergrund. scaleX statt width → GPU
+                  (kein Layout pro Frame), benannte Properties statt all. */}
               <div
-                className={`absolute inset-y-0 left-0 transition-all duration-500 ${mine ? 'bg-amber-500/15' : 'bg-stone-800/60'}`}
-                style={{ width: `${pct}%` }}
+                className={`absolute inset-y-0 left-0 w-full origin-left ${mine ? 'bg-amber-500/15' : 'bg-stone-800/60'}`}
+                style={{ transform: `scaleX(${pct / 100})`, transition: 'transform 500ms var(--ease-out), background-color 300ms var(--ease-out)' }}
               />
               <div className="relative flex items-center gap-4">
                 {drink.photo_url ? (

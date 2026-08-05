@@ -43,7 +43,7 @@ export default function Lightbox({ src, alt, onClose }: Props) {
         src={src}
         alt={alt ?? ''}
         onClick={e => e.stopPropagation()}
-        className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+        className="anim-panel max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
       />
     </div>,
     document.body,

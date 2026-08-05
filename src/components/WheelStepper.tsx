@@ -31,7 +31,7 @@ export default function WheelStepper({ wheels, onUpdate }: Props) {
             key={s.key}
             type="button"
             onClick={() => setStep(i)}
-            className={`h-1.5 rounded-full transition-all ${
+            className={`h-1.5 rounded-full transition-[width,background-color] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
               i === step ? 'w-8 bg-amber-500' : 'w-4 bg-stone-700'
             }`}
           />

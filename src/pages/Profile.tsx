@@ -15,7 +15,7 @@ function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void 
   return (
     <div onClick={onToggle}
       className={`w-12 h-6 rounded-full transition-colors relative cursor-pointer ${enabled ? 'bg-amber-500' : 'bg-stone-700'}`}>
-      <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${enabled ? 'left-7' : 'left-1'}`} />
+      <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${enabled ? 'translate-x-6' : 'translate-x-0'}`} />
     </div>
   )
 }
@@ -176,9 +176,9 @@ export default function Profile() {
       <div className="flex flex-col items-center mb-8">
         <label className="cursor-pointer group relative">
           {avatar ? (
-            <img src={thumbUrl(avatar, 256)} alt="Avatar" className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all" />
+            <img src={thumbUrl(avatar, 256)} alt="Avatar" className="w-24 h-24 rounded-full object-cover ring-2 ring-stone-700 group-hover:ring-amber-500 transition-shadow duration-200" />
           ) : (
-            <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700 group-hover:ring-amber-500 transition-all">👤</div>
+            <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700 group-hover:ring-amber-500 transition-shadow duration-200">👤</div>
           )}
           <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <span className="text-white text-xs font-medium">{t('profile.change')}</span>
