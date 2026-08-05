@@ -4,7 +4,38 @@
    Eigener Token, weil stone-950 als dunkler Text auf Amber-Buttons
    (text-stone-950) erhalten bleiben muss und nicht umkippen darf. */
 @theme {
-  --color-app: oklch(0.147 0.004 49.25);
+  /* ── Dark Mode: „Midnight Distillery" ──────────────────────────────
+     Ein tiefer, warmer Espresso-Schwarz-Grund wie eine Whisky-Bar bei
+     Nacht; die neutrale Skala trägt einen feinen Tabak/Eichen-Unterton
+     (Farbton ~65, sehr niedrige Chroma → wirkt edel-neutral, nicht
+     schlammig). Text in warmem Elfenbein statt kaltem Weiß.
+
+     Die stone-Skala läuft wie gewohnt hell (100) → dunkel (950); im
+     Dark Mode sind niedrige Nummern Text, hohe Nummern Flächen.
+     Bewusst gestufte Helligkeiten: app < 900 (Karten) < 800 (Inputs)
+     < 700 (Borders), damit Material sichtbar „schwebt". */
+  --color-app: oklch(0.155 0.008 66);
+
+  --color-stone-950: oklch(0.130 0.006 60);
+  --color-stone-900: oklch(0.200 0.010 64);
+  --color-stone-800: oklch(0.256 0.012 64);
+  --color-stone-700: oklch(0.352 0.014 66);
+  --color-stone-600: oklch(0.558 0.015 68);
+  --color-stone-500: oklch(0.628 0.014 70);
+  --color-stone-400: oklch(0.702 0.013 72);
+  --color-stone-300: oklch(0.815 0.011 74);
+  --color-stone-200: oklch(0.886 0.009 76);
+  --color-stone-100: oklch(0.945 0.008 78);
+
+  /* Akzent: ruhiges Champagner-/Altgold statt grellem Orange-Amber.
+     Gleiche Gold-Familie (Farbton ~80), aber gedämpfte Chroma – das
+     wirkt teuer und zurückhaltend. amber-400 dient doppelt (Text UND
+     bg mit dunklem Text), bleibt daher hell genug für beides. */
+  --color-amber-700: oklch(0.560 0.125 72);
+  --color-amber-500: oklch(0.765 0.135 80);
+  --color-amber-400: oklch(0.822 0.125 82);
+  --color-amber-300: oklch(0.876 0.100 84);
+  --color-amber-200: oklch(0.920 0.070 86);
 
   /* Schrift-Identität. Inter (variabel) trägt UI + Fließtext ruhig und
      neutral; Fraunces (variabel) ist die edle Display-Serif für Marke,
@@ -25,31 +56,39 @@
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Light Mode: stone-Skala gespiegelt (hell <-> dunkel), damit alle
+/* ── Light Mode: „Aged Parchment" ────────────────────────────────────
+   Die stone-Skala wird gespiegelt (hell <-> dunkel), damit alle
    bestehenden bg-/text-/border-stone-* Utilities automatisch umkippen.
-   Warmes Beige/Pergament statt kühlem Weiß – entspannter „Gentleman/
-   Whisky"-Look. Höhere Chroma + warmer Farbton (~82) zieht die ganze
-   Skala ins Bernstein/Tabak-Beige. stone-950 bleibt bewusst dunkel
-   (Text auf Amber-Buttons). */
+   Grund: warmes Elfenbein/Pergament wie feines Büttenpapier – ruhig,
+   hell, edel (nicht das kühle Weiß üblicher Apps). Text in tiefem
+   Espresso-Braun. Karten (stone-900) sind eine Spur heller als der
+   Grund → sie liegen wie helle Blätter auf dem Pergament.
+   stone-950 bleibt bewusst dunkel (dunkler Text auf Gold-Buttons). */
 :root[data-theme="light"] {
   color-scheme: light;
-  --color-app: oklch(0.884 0.036 82);
-  --color-stone-50: oklch(0.205 0.018 64);
-  --color-stone-100: oklch(0.270 0.021 66);
-  --color-stone-200: oklch(0.335 0.023 69);
-  --color-stone-300: oklch(0.425 0.025 72);
-  --color-stone-400: oklch(0.495 0.027 74);
-  --color-stone-500: oklch(0.580 0.030 76);
-  --color-stone-600: oklch(0.695 0.033 78);
-  --color-stone-700: oklch(0.825 0.033 80);
-  --color-stone-800: oklch(0.912 0.030 82);
-  --color-stone-900: oklch(0.953 0.022 84);
-  /* Amber-Akzent abdunkeln: helles Amber hat auf dem Sand-Hintergrund
-     zu wenig Kontrast. Tieferes Bronze-Gold behält den Marken-Look,
-     bleibt aber gut lesbar (Überschriften, Bewertungen, Links).
-     bg-amber-500 (Buttons) bleibt bewusst hell. */
-  --color-amber-400: oklch(0.555 0.150 66);
-  --color-amber-300: oklch(0.620 0.145 70);
+  --color-app: oklch(0.930 0.016 88);
+
+  --color-stone-950: oklch(0.145 0.006 55);
+  --color-stone-900: oklch(0.968 0.012 90);
+  --color-stone-800: oklch(0.900 0.018 86);
+  --color-stone-700: oklch(0.795 0.020 80);
+  --color-stone-600: oklch(0.558 0.024 70);
+  --color-stone-500: oklch(0.512 0.024 66);
+  --color-stone-400: oklch(0.470 0.022 62);
+  --color-stone-300: oklch(0.410 0.020 58);
+  --color-stone-200: oklch(0.334 0.018 56);
+  --color-stone-100: oklch(0.264 0.016 54);
+  --color-stone-50:  oklch(0.205 0.014 52);
+
+  /* Akzent auf hellem Grund: tiefes Cognac-/Bronze-Gold. amber-400 dient
+     doppelt (Überschriften-Text UND bg-amber-400 mit dunklem Text), also
+     ein Mittelton, der auf Pergament lesbar bleibt und dunklen Text
+     trägt. amber-500 (Buttons) bleibt ein sattes, leuchtendes Gold. */
+  --color-amber-700: oklch(0.470 0.110 58);
+  --color-amber-500: oklch(0.720 0.140 74);
+  --color-amber-400: oklch(0.585 0.140 68);
+  --color-amber-300: oklch(0.648 0.135 70);
+  --color-amber-200: oklch(0.720 0.120 72);
 }
 
 body {
@@ -59,21 +98,23 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  /* Warme Tiefe: zwei sehr dezente Bernstein-Lichthöfe oben, die nach
-     unten ins Dunkle auslaufen – gibt dem flachen Schwarz Material und
-     Atmosphäre, ohne vom Inhalt abzulenken. Nur im Dark Mode. */
+  /* Warme Tiefe: ein goldener Lichthof oben-mittig plus ein zweiter,
+     kühlerer Tabak-Schimmer aus der oberen Ecke – gibt dem tiefen
+     Espresso-Grund Material und Atmosphäre wie warmes Licht in einer
+     Bar, ohne vom Inhalt abzulenken. Nur im Dark Mode. */
   background-image:
-    radial-gradient(120% 60% at 50% -10%, oklch(0.24 0.03 70 / 0.28), transparent 60%),
-    radial-gradient(90% 50% at 100% 0%, oklch(0.22 0.025 55 / 0.18), transparent 55%);
+    radial-gradient(125% 65% at 50% -12%, oklch(0.30 0.045 82 / 0.22), transparent 62%),
+    radial-gradient(90% 55% at 100% 0%, oklch(0.24 0.030 58 / 0.16), transparent 58%);
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
 
 /* Im Light Mode kein dunkler Lichthof – stattdessen ein zartes, warmes
-   Aufhellen oben, damit der Sand-Hintergrund lebendig bleibt. */
+   Gold-Aufhellen oben, damit das Pergament lebendig und edel wirkt. */
 :root[data-theme="light"] body {
   background-image:
-    radial-gradient(120% 55% at 50% -10%, oklch(0.96 0.03 88 / 0.7), transparent 60%);
+    radial-gradient(125% 60% at 50% -12%, oklch(0.965 0.030 88 / 0.85), transparent 62%),
+    radial-gradient(90% 50% at 100% 0%, oklch(0.955 0.028 74 / 0.6), transparent 58%);
 }
 
 /* Display-Serif als eigenständige Utility (aus --font-display generiert
@@ -100,9 +141,9 @@ body {
   border-radius: 0.5rem;
 }
 
-/* Markierter Text im Marken-Bernstein statt Browser-Blau. */
+/* Markierter Text im Marken-Gold statt Browser-Blau. */
 ::selection {
-  background: oklch(0.769 0.15 70 / 0.3);
+  background: oklch(0.80 0.13 82 / 0.28);
   color: inherit;
 }
 
@@ -188,7 +229,7 @@ button:not(:disabled):active {
   background-image: linear-gradient(to bottom, oklch(1 0 0 / 0.1), oklch(1 0 0 / 0) 60%);
   box-shadow:
     0 1px 2px oklch(0 0 0 / 0.2),
-    0 8px 20px -10px oklch(0.769 0.15 70 / 0.5);
+    0 8px 20px -10px oklch(0.80 0.13 82 / 0.45);
 }
 
 /* Eingabefelder: dezent nach innen vertieft (leichter Inset-Schatten),
