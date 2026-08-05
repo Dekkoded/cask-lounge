@@ -258,12 +258,18 @@ button:not(:disabled):active {
 .stagger > *:nth-child(8) { animation-delay: 315ms; }
 .stagger > *:nth-child(n+9) { animation-delay: 360ms; }
 
-/* Seiten-Übergang: neuer Content steigt beim Navigieren sanft ein. */
+/* Seiten-Übergang: neuer Content steigt beim Navigieren sanft ein.
+   Fill-Mode „backwards" (nicht „both"): der from-Zustand gilt vor dem
+   Start (kein Flash), ABER nach dem Lauf bleibt KEIN transform zurück.
+   Wichtig, weil ein zurückbehaltenes transform:translateY(0) diesen
+   Container zum Bezugsrahmen für position:fixed machen würde – dann
+   landen In-Page-Modals/Sheets am Seitenende statt am Viewport. Der
+   End- und Ruhezustand sind visuell identisch, der Übergang bleibt nahtlos. */
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.page-enter { animation: pageIn 300ms var(--ease-out) both; }
+.page-enter { animation: pageIn 300ms var(--ease-out) backwards; }
 
 /* ── Intro-Tour ─────────────────────────────────────────────────────
    Erster Eindruck der App → hier lebt das „Delight-Budget" (Emil:
