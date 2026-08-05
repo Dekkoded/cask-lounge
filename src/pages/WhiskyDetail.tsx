@@ -342,7 +342,7 @@ export default function WhiskyDetail() {
           <div className="w-24 h-24 bg-stone-800 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">🥃</div>
         )}
         <div className="flex-1 min-w-0">
-          <h1 className="text-2xl font-bold text-stone-100">{drink.name}</h1>
+          <h1 className="font-display text-2xl font-semibold text-stone-100">{drink.name}</h1>
           {drink.producer && <p className="text-stone-400">{drink.producer}</p>}
           <div className="flex gap-3 mt-1 text-sm text-stone-500 flex-wrap">
             {drink.region && <span>{drink.region}</span>}
@@ -351,7 +351,7 @@ export default function WhiskyDetail() {
           </div>
           {avgOverall != null && (
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-amber-400">{avgOverall}</span>
+              <span className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{avgOverall}</span>
               <span className="text-stone-500 text-sm">/10 · {t('whisky.ratingCount', { count: ratingCount })}</span>
             </div>
           )}
@@ -455,7 +455,7 @@ export default function WhiskyDetail() {
                       {formatDate(r.updated_at, i18n.language)}
                     </p>
                   </div>
-                  <span className="text-2xl font-bold text-amber-400">{r.overall}</span>
+                  <span className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{r.overall}</span>
                 </div>
                 <div className="flex gap-4 text-sm text-stone-400 mb-2">
                   {r.nose != null && <span>{t('whisky.nose')} <strong className="text-stone-300">{r.nose}</strong></span>}

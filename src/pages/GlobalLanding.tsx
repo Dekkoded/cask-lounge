@@ -134,7 +134,7 @@ export default function GlobalLanding() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold text-amber-400 py-4 mb-2">{headings[view]}</h1>
+      <h1 className="font-display text-2xl font-semibold text-amber-400 py-4 mb-2">{headings[view]}</h1>
 
       {/* Sticky: Suche + Kategorien */}
       <div className="sticky top-12 z-30 bg-app -mx-4 px-4 pt-1 pb-3 mb-3 flex flex-col gap-3">
@@ -242,7 +242,7 @@ export default function GlobalLanding() {
                 </div>
                 {s.avg_overall != null ? (
                   <div className="text-right flex-shrink-0">
-                    <p className="text-2xl font-bold text-amber-400">{s.avg_overall}</p>
+                    <p className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{s.avg_overall}</p>
                     <p className="text-xs text-stone-500">/10</p>
                   </div>
                 ) : (
@@ -326,7 +326,7 @@ export default function GlobalLanding() {
                 </div>
                 {v.overall != null ? (
                   <div className="text-right flex-shrink-0">
-                    <p className="text-2xl font-bold text-amber-400">{v.overall}</p>
+                    <p className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{v.overall}</p>
                     <p className="text-xs text-stone-500">/10</p>
                   </div>
                 ) : (

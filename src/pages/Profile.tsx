@@ -170,7 +170,7 @@ export default function Profile() {
 
   return (
     <div className="max-w-lg mx-auto p-6 pb-24">
-      <h1 className="text-2xl font-bold text-stone-100 mb-8">{t('profile.title')}</h1>
+      <h1 className="font-display text-2xl font-semibold text-stone-100 mb-8">{t('profile.title')}</h1>
 
       {/* Avatar */}
       <div className="flex flex-col items-center mb-8">
@@ -191,11 +191,11 @@ export default function Profile() {
       {stats && stats.count > 0 && (
         <div className="grid grid-cols-3 gap-2 mb-8">
           <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
-            <p className="text-2xl font-bold text-amber-400">{stats.count}</p>
+            <p className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{stats.count}</p>
             <p className="text-stone-500 text-xs mt-1">{t('profile.stats.rated')}</p>
           </div>
           <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
-            <p className="text-2xl font-bold text-amber-400">{stats.avg != null ? stats.avg.toFixed(1) : '—'}</p>
+            <p className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{stats.avg != null ? stats.avg.toFixed(1) : '—'}</p>
             <p className="text-stone-500 text-xs mt-1">{t('profile.stats.avg')}</p>
           </div>
           <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">

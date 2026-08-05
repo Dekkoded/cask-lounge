@@ -124,7 +124,7 @@ export default function AddWhisky() {
         ← {t('common.back')}
       </button>
 
-      <h1 className="text-2xl font-bold text-amber-400 mb-6">{t('whisky.addTitle')}</h1>
+      <h1 className="font-display text-2xl font-semibold text-amber-400 mb-6">{t('whisky.addTitle')}</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>

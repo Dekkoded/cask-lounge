@@ -43,7 +43,7 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-3xl font-bold text-amber-400 mb-2 text-center">Cask Lounge</h1>
+        <h1 className="font-display text-3xl font-semibold text-amber-400 mb-2 text-center tracking-tight">Cask Lounge</h1>
         <p className="text-stone-400 text-center mb-8">{t('auth.login.subtitle')}</p>
 
         {!showReset ? (

@@ -5,6 +5,13 @@
    (text-stone-950) erhalten bleiben muss und nicht umkippen darf. */
 @theme {
   --color-app: oklch(0.147 0.004 49.25);
+
+  /* Schrift-Identität. Inter (variabel) trägt UI + Fließtext ruhig und
+     neutral; Fraunces (variabel) ist die edle Display-Serif für Marke,
+     Titel und große Zahlen – sie gibt der App den „Gentleman/Whisky"-
+     Charakter. Beide selbst-gehostet (DSGVO), mit robusten Fallbacks. */
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
 }
 
 :root {
@@ -47,8 +54,72 @@
 
 body {
   @apply bg-app text-stone-100 min-h-screen;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
+  /* Schärfere, ruhigere Schriftkanten – lässt die App „teurer" wirken. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Warme Tiefe: zwei sehr dezente Bernstein-Lichthöfe oben, die nach
+     unten ins Dunkle auslaufen – gibt dem flachen Schwarz Material und
+     Atmosphäre, ohne vom Inhalt abzulenken. Nur im Dark Mode. */
+  background-image:
+    radial-gradient(120% 60% at 50% -10%, oklch(0.24 0.03 70 / 0.28), transparent 60%),
+    radial-gradient(90% 50% at 100% 0%, oklch(0.22 0.025 55 / 0.18), transparent 55%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
+
+/* Im Light Mode kein dunkler Lichthof – stattdessen ein zartes, warmes
+   Aufhellen oben, damit der Sand-Hintergrund lebendig bleibt. */
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(120% 55% at 50% -10%, oklch(0.96 0.03 88 / 0.7), transparent 60%);
+}
+
+/* Display-Serif als eigenständige Utility (aus --font-display generiert
+   Tailwind zwar font-display, aber wir sichern die Kern-Eigenschaften:
+   optische Größe hoch, etwas engere Laufweite für edle Titel). */
+.font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.01em;
+}
+
+/* Ziffern in Tabellen/Statistiken sollen nicht springen. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Einheitlicher Fokus-Ring: warmes Amber, gut sichtbar für Tastatur-
+   Nutzer, ohne den Layout-Fluss zu stören. Nur bei :focus-visible, damit
+   Maus-/Touch-Klicks keinen Ring hinterlassen. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-amber-400);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* Markierter Text im Marken-Bernstein statt Browser-Blau. */
+::selection {
+  background: oklch(0.769 0.15 70 / 0.3);
+  color: inherit;
+}
+
+/* Dezente, schlanke Scrollbars – passen zum ruhigen, edlen Gesamtbild. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-stone-700) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-stone-700);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--color-stone-600); background-clip: content-box; }
 
 /* Sanftes Einblenden, u.a. für die Foto-Lightbox. */
 @keyframes fadeIn {
@@ -93,6 +164,39 @@ button:not(:disabled) {
 .press:active,
 button:not(:disabled):active {
   transform: scale(0.97);
+}
+
+/* ── Material-Tiefe ─────────────────────────────────────────────────
+   Flächen sollen wie echtes Material wirken, das leicht über dem
+   Hintergrund schwebt – nicht flach aufgemalt. Alle Regeln nutzen
+   :where() (Spezifität 0), damit bestehende, explizite Utilities
+   (eigene Borders/Schatten) immer gewinnen und nichts kaputtgeht. */
+
+/* Karten: stone-900-Fläche mit Radius bekommt eine Haarlinie + einen
+   sehr weichen, tiefen Schatten. Hebt Ranglisten, Feeds, Panels edel ab. */
+:where([class~="bg-stone-900"]):where([class*="rounded-xl"], [class*="rounded-2xl"]) {
+  border: 1px solid var(--color-stone-800);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.15),
+    0 12px 28px -20px oklch(0 0 0 / 0.55);
+}
+
+/* Primäre Bernstein-Buttons: dezenter Licht-Verlauf von oben + weicher,
+   leicht goldener Schatten. Nur exakte bg-amber-500 (nicht die
+   getönten /15, /20 Zustände), damit Badges/Selektionen unberührt bleiben. */
+:where(a, button):where([class~="bg-amber-500"]) {
+  background-image: linear-gradient(to bottom, oklch(1 0 0 / 0.1), oklch(1 0 0 / 0) 60%);
+  box-shadow:
+    0 1px 2px oklch(0 0 0 / 0.2),
+    0 8px 20px -10px oklch(0.769 0.15 70 / 0.5);
+}
+
+/* Eingabefelder: dezent nach innen vertieft (leichter Inset-Schatten),
+   damit sie wie eingelassene Flächen wirken. Weicher Übergang für
+   Border-/Fokuswechsel. :where() → eigene Utilities gewinnen weiterhin. */
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.18);
+  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
 }
 
 /* Listen erscheinen gestaffelt (Emil: 30–80ms Versatz). Jedes Kind

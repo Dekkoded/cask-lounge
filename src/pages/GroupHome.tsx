@@ -431,7 +431,7 @@ export default function GroupHome() {
       {/* Header */}
       <div className="py-4 mb-1 flex flex-col items-center text-center">
         <button onClick={() => setSwitcherOpen(true)} className="group flex items-center gap-2 max-w-full">
-          <h1 className="text-2xl font-bold text-stone-100 truncate">{group.name}</h1>
+          <h1 className="font-display text-2xl font-semibold text-stone-100 truncate">{group.name}</h1>
           <svg className="w-5 h-5 text-stone-500 group-hover:text-amber-400 flex-shrink-0 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7 9l5-5 5 5M7 15l5 5 5-5" />
           </svg>

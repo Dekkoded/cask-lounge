@@ -117,13 +117,13 @@ export default function MemberProfile() {
         ) : (
           <div className="w-24 h-24 rounded-full bg-stone-800 flex items-center justify-center text-3xl ring-2 ring-stone-700">👤</div>
         )}
-        <h1 className="text-2xl font-bold text-stone-100 mt-4">{name}</h1>
+        <h1 className="font-display text-2xl font-semibold text-stone-100 mt-4">{name}</h1>
         {member.display_name && <p className="text-stone-500 text-sm font-mono">@{member.username}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-6">
         <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">
-          <p className="text-2xl font-bold text-amber-400">{whiskies.length}</p>
+          <p className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{whiskies.length}</p>
           <p className="text-stone-500 text-xs mt-1">{t('profile.stats.rated')}</p>
         </div>
         <div className="bg-stone-900 rounded-xl px-3 py-4 text-center">

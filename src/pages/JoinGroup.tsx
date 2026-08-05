@@ -46,7 +46,7 @@ export default function JoinGroup() {
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-sm text-center">
         <div className="text-5xl mb-4">🥃</div>
-        <h1 className="text-2xl font-bold text-amber-400 mb-2">{t('groups.invitedTitle')}</h1>
+        <h1 className="font-display text-2xl font-semibold text-amber-400 mb-2">{t('groups.invitedTitle')}</h1>
         <p className="text-stone-400 mb-8">
           {t('groups.invitedSub')}
         </p>

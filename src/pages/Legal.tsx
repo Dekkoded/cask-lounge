@@ -104,7 +104,7 @@ export default function Legal({ doc }: { doc: Doc }) {
   return (
     <div className="max-w-2xl mx-auto p-6 pb-24">
       <Link to="/" className="text-stone-400 hover:text-stone-200 text-sm">← {t('common.back')}</Link>
-      <h1 className="text-2xl font-bold text-stone-100 mt-4 mb-2">{TITLES[doc]}</h1>
+      <h1 className="font-display text-2xl font-semibold text-stone-100 mt-4 mb-2">{TITLES[doc]}</h1>
       <div className="mt-4">
         {doc === 'impressum' && <Impressum />}
         {doc === 'datenschutz' && <Datenschutz />}

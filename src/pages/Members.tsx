@@ -43,7 +43,7 @@ export default function Members() {
     <div className="max-w-lg mx-auto p-6 pb-24">
       <button onClick={() => navigate(-1)} className="text-stone-400 hover:text-stone-200 text-sm mb-6">← {t('common.back')}</button>
 
-      <h1 className="text-2xl font-bold text-amber-400 mb-6">{t('groups.membersTitle')}</h1>
+      <h1 className="font-display text-2xl font-semibold text-amber-400 mb-6">{t('groups.membersTitle')}</h1>
 
       <input
         value={query}

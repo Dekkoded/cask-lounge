@@ -98,8 +98,8 @@ export default function Battles() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold text-amber-400 py-4">{t('battle.publicHeading')}</h1>
-      <p className="text-stone-400 text-sm mb-6">{t('battle.publicSub')}</p>
+      <h1 className="font-display text-2xl font-semibold text-amber-400 py-4">{t('battle.publicHeading')}</h1>
+      <p className="text-stone-400 text-sm mb-6 leading-relaxed">{t('battle.publicSub')}</p>
 
       {/* Neues Battle */}
       {user && (

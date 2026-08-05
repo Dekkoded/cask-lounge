@@ -12,7 +12,7 @@ export default function TopBar() {
       <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}
-          className="text-amber-400 font-bold text-lg tracking-tight"
+          className="font-display text-amber-400 font-semibold text-xl tracking-tight"
         >
           Cask Lounge
         </button>

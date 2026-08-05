@@ -145,7 +145,7 @@ export default function Compare() {
   return (
     <div className="max-w-2xl mx-auto p-4 pb-24">
       <Link to="/" className="text-stone-400 hover:text-stone-200 text-sm">← {t('common.back')}</Link>
-      <h1 className="text-2xl font-bold text-stone-100 mt-3 mb-1">{t('compare.title')}</h1>
+      <h1 className="font-display text-2xl font-semibold text-stone-100 mt-3 mb-1">{t('compare.title')}</h1>
       <p className="text-stone-500 text-sm mb-5">{t('compare.subtitle')}</p>
 
       {/* Auswahl-Spalten */}

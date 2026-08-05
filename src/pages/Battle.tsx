@@ -172,7 +172,7 @@ export default function Battle() {
         </span>
       </div>
 
-      <h1 className="text-2xl font-bold text-stone-100 mb-1">{heading}</h1>
+      <h1 className="font-display text-2xl font-semibold text-stone-100 mb-1">{heading}</h1>
       <p className="text-stone-500 text-sm mb-6">
         {total === 0 ? t('battle.noVotes') : t('battle.totalVotes', { count: total })}
       </p>
@@ -242,7 +242,7 @@ export default function Battle() {
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className={`text-2xl font-bold ${mine ? 'text-amber-400' : 'text-stone-300'}`}>{pct}%</p>
+                  <p className={`font-display text-2xl font-semibold tabular-nums ${mine ? 'text-amber-400' : 'text-stone-300'}`}>{pct}%</p>
                   <p className="text-xs text-stone-500">{t('battle.votes', { count: c })}</p>
                 </div>
               </div>
