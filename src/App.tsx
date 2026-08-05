@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AuthProvider } from './context/AuthContext'
 import RequireAuth from './components/RequireAuth'
@@ -29,6 +29,9 @@ const Battles = lazy(() => import('./pages/Battles'))
 
 function AppShell() {
   const { t } = useTranslation()
+  // Nur der Pfad keyt den Übergang – so bleibt der Tab-Wechsel per
+  // ?view=… (z.B. Global ↔ Vitrine) ohne Remount/Neuladen.
+  const { pathname } = useLocation()
   return (
     <>
       <InstallPrompt />
@@ -37,6 +40,7 @@ function AppShell() {
       <TopBar />
       <main className="pb-20">
         <Suspense fallback={<div className="max-w-2xl mx-auto p-6 text-stone-500 text-sm">{t('common.loading')}</div>}>
+          <div key={pathname} className="page-enter">
           <Routes>
             {/* Öffentlich */}
             <Route path="/" element={<GlobalLanding />} />
@@ -64,6 +68,7 @@ function AppShell() {
             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </div>
         </Suspense>
       </main>
       <BottomNav />

@@ -536,7 +536,7 @@ export default function GroupHome() {
               <Link
                 key={`r-${a.share.rating_id}`}
                 to={a.share.ratings?.drinks ? `/whisky/${a.share.ratings.drinks.id}` : '#'}
-                className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
+                className="press flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 <span className="text-2xl">⭐</span>
                 {a.share.ratings?.drinks?.photo_url ? (
@@ -630,7 +630,7 @@ export default function GroupHome() {
                 <Link
                   key={drink.id}
                   to={`/whisky/${drink.id}`}
-                  className="flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
+                  className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
                 >
                   <span className="text-stone-600 font-mono text-sm w-5 text-center">{i + 1}</span>
                   {drink.photo_url ? (
@@ -667,7 +667,7 @@ export default function GroupHome() {
             <Link
               key={ta.id}
               to={`/groups/${id}/tasting/${ta.id}`}
-              className="flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
+              className="press flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
             >
               <div>
                 <p className="font-semibold text-stone-100">{ta.title}</p>
@@ -731,7 +731,7 @@ export default function GroupHome() {
             <Link
               key={b.id}
               to={`/battle/${b.id}`}
-              className="flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
+              className="press flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
             >
               <p className="font-semibold text-stone-100 flex items-center gap-2 min-w-0"><span className="flex-shrink-0">⚔️</span><span className="truncate">{battleMatchup(b)}</span></p>
               <span className={`text-xs rounded-full px-3 py-1 ${b.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>

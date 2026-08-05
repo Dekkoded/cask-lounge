@@ -81,10 +81,44 @@ body {
 /* Zentrierte Panels: leichtes Scale + Fade (nie von scale(0)). */
 .anim-panel { animation: panelIn 200ms var(--ease-out); }
 
-/* Press-Feedback: jeder Tap bestätigt sich sofort. Nur transform,
-   läuft auf der GPU, interruptibel. */
-.press { transition: transform 160ms var(--ease-out); }
-.press:active { transform: scale(0.97); }
+/* Press-Feedback: jeder Tap bestätigt sich sofort mit einem kurzen
+   Scale. Nur transform (GPU), interruptibel. Die Transition führt auch
+   Farb-/Border-Wechsel weich mit, damit Hover-States sauber bleiben. */
+.press,
+button:not(:disabled) {
+  transition-property: transform, background-color, border-color, color, opacity, box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-out);
+}
+.press:active,
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* Listen erscheinen gestaffelt (Emil: 30–80ms Versatz). Jedes Kind
+   steigt sanft auf; nach dem 10. Element kein weiterer Delay, damit
+   lange Listen nicht träge wirken. */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger > * { animation: riseIn 380ms var(--ease-out) both; }
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 45ms; }
+.stagger > *:nth-child(3) { animation-delay: 90ms; }
+.stagger > *:nth-child(4) { animation-delay: 135ms; }
+.stagger > *:nth-child(5) { animation-delay: 180ms; }
+.stagger > *:nth-child(6) { animation-delay: 225ms; }
+.stagger > *:nth-child(7) { animation-delay: 270ms; }
+.stagger > *:nth-child(8) { animation-delay: 315ms; }
+.stagger > *:nth-child(n+9) { animation-delay: 360ms; }
+
+/* Seiten-Übergang: neuer Content steigt beim Navigieren sanft ein. */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: pageIn 300ms var(--ease-out) both; }
 
 /* Barrierefreiheit: Nutzer mit „Bewegung reduzieren" bekommen keine
    Positions-/Scale-Animationen mehr – Opacity/Farbe bleiben erhalten,
@@ -98,5 +132,6 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .press:active { transform: none; }
+  .press:active,
+  button:not(:disabled):active { transform: none; }
 }

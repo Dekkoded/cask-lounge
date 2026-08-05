@@ -216,12 +216,12 @@ export default function GlobalLanding() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="stagger flex flex-col gap-3">
             {filtered.map((s, rank) => (
               <Link
                 key={s.id}
                 to={`/whisky/${s.id}`}
-                className="flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
+                className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 <span className="text-stone-500 text-sm w-6 text-center font-mono">
                   {rank + 1}
@@ -286,7 +286,7 @@ export default function GlobalLanding() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="stagger flex flex-col gap-3">
             {collectionValue > 0 && (
               <div className="bg-stone-900 rounded-xl px-4 py-3 flex items-baseline justify-between">
                 <span className="text-stone-400 text-sm">{t('landing.collectionValue')}</span>
@@ -308,7 +308,7 @@ export default function GlobalLanding() {
               <Link
                 key={v.id}
                 to={`/whisky/${v.drinks!.id}`}
-                className="flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
+                className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 {v.drinks!.photo_url ? (
                   <img src={thumbUrl(v.drinks!.photo_url, 112)} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
@@ -369,7 +369,7 @@ export default function GlobalLanding() {
             )}
           </div>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="stagger flex flex-col gap-3">
             {filteredWishlist.filter(w => w.drinks).map(w => (
               <div
                 key={w.id}

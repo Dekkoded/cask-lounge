@@ -188,12 +188,12 @@ export default function Battles() {
           <span className="text-sm">{t('battle.noBattlesSub')}</span>
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="stagger flex flex-col gap-3">
           {battles.map(b => (
             <Link
               key={b.id}
               to={`/battle/${b.id}`}
-              className="flex items-center justify-between gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
+              className="press flex items-center justify-between gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
             >
               <p className="font-semibold text-stone-100 flex items-center gap-2 min-w-0">
                 <span className="flex-shrink-0">⚔️</span>

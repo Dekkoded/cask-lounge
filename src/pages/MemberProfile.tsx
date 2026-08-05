@@ -145,9 +145,9 @@ export default function MemberProfile() {
       {whiskies.length === 0 ? (
         <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">{t('member.noPublicRating')}</div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="stagger flex flex-col gap-2">
           {whiskies.map((w, i) => (
-            <Link key={w.id} to={`/whisky/${w.id}`} className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors">
+            <Link key={w.id} to={`/whisky/${w.id}`} className="press flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors">
               {w.photo_url ? (
                 <img src={thumbUrl(w.photo_url, 96)} alt={w.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
               ) : (

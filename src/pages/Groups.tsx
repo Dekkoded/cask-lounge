@@ -110,12 +110,12 @@ export default function Groups() {
       ) : groups.length === 0 ? (
         <p className="text-stone-500 text-center py-8">{t('groups.noGroups')}</p>
       ) : (
-        <div className="flex flex-col gap-3 mb-6">
+        <div className="stagger flex flex-col gap-3 mb-6">
           {groups.map(g => (
             <Link
               key={g.id}
               to={`/groups/${g.id}`}
-              className="bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
+              className="press bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
             >
               <p className="font-semibold text-stone-100">{g.name}</p>
               {g.description && <p className="text-sm text-stone-400 mt-0.5">{g.description}</p>}

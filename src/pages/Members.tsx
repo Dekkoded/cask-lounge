@@ -61,14 +61,14 @@ export default function Members() {
       ) : members.length === 0 ? (
         <div className="bg-stone-900 rounded-xl p-4 text-stone-500 text-sm">{t('groups.noMembersFound')}</div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="stagger flex flex-col gap-2">
           {members.map(m => {
             const name = m.display_name ?? m.username
             return (
               <Link
                 key={m.id}
                 to={`/user/${m.id}`}
-                className="flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors"
+                className="press flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors"
               >
                 {m.avatar_url ? (
                   <img src={thumbUrl(m.avatar_url, 96)} alt={name} loading="lazy" decoding="async" className="w-12 h-12 rounded-full object-cover flex-shrink-0 ring-1 ring-stone-700" />
