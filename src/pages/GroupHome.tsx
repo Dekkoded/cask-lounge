@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { listWhiskies } from '../lib/queries/drinks'
@@ -17,17 +17,13 @@ import {
 } from '../lib/queries/sessions'
 import { loadGroupArchive, type ArchiveDrink } from '../lib/queries/archive'
 import { useAuth } from '../context/AuthContext'
-import { ReactionBar, CommentSection } from '../components/SessionSocial'
-import { formatDateTime } from '../lib/format'
-import { thumbUrl } from '../lib/image'
 import LoadError from '../components/LoadError'
-import Modal from '../components/Modal'
-
-// View-Modell für den zusammengeführten Aktivitäts-Feed (Sessions + geteilte
-// Bewertungen). Die Daten-Interfaces leben in lib/queries/*.
-type Activity =
-  | { kind: 'session'; ts: string; session: GroupSession }
-  | { kind: 'rating'; ts: string; share: RatingShare }
+import GroupSwitcher from '../components/groups/GroupSwitcher'
+import ActivityTab, { type Activity } from '../components/groups/ActivityTab'
+import ArchiveTab from '../components/groups/ArchiveTab'
+import TastingsTab from '../components/groups/TastingsTab'
+import BattlesTab from '../components/groups/BattlesTab'
+import MembersTab from '../components/groups/MembersTab'
 
 type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'battles' | 'mitglieder'
 
@@ -49,26 +45,7 @@ export default function GroupHome() {
   const [tab, setTab] = useState<Tab>('aktivitaet')
   const [switcherOpen, setSwitcherOpen] = useState(false)
   const [myGroups, setMyGroups] = useState<{ id: string; name: string; description: string | null }[]>([])
-  const [copied, setCopied] = useState(false)
-  const [linkCopied, setLinkCopied] = useState(false)
-  const [showNewTasting, setShowNewTasting] = useState(false)
-  const [tastingTitle, setTastingTitle] = useState('')
-  const [tastingDate, setTastingDate] = useState('')
-  const [creatingTasting, setCreatingTasting] = useState(false)
-  const [showNewBattle, setShowNewBattle] = useState(false)
-  const [battleDrinkIds, setBattleDrinkIds] = useState<string[]>([])
-  const [battleSearch, setBattleSearch] = useState('')
-  const [creatingBattle, setCreatingBattle] = useState(false)
-  const [battleError, setBattleError] = useState<string | null>(null)
-
-  // "Ich trinke gerade" posting
   const [allDrinks, setAllDrinks] = useState<{ id: string; name: string }[]>([])
-  const [showPost, setShowPost] = useState(false)
-  const [sessionDrinkId, setSessionDrinkId] = useState('')
-  const [sessionDrinkName, setSessionDrinkName] = useState('')
-  const [sessionMessage, setSessionMessage] = useState('')
-  const [posting, setPosting] = useState(false)
-  const [postError, setPostError] = useState<string | null>(null)
 
   const load = async (groupId: string) => {
     setLoadError(false)
@@ -127,26 +104,15 @@ export default function GroupHome() {
     setActivityLoading(false)
   }
 
-  const handlePost = async () => {
+  const handlePost = async (drinkId: string, drinkName: string, message: string) => {
     if (!user || !id) return
-    setPosting(true)
-    setPostError(null)
-    try {
-      await postSession({
-        group_id: id,
-        user_id: user.id,
-        drink_id: sessionDrinkId || null,
-        drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
-        message: sessionMessage.trim() || null,
-      })
-    } catch (e) {
-      setPosting(false)
-      setPostError(t('groups.shareError', { message: (e as Error).message }))
-      return
-    }
-    setPosting(false)
-    setShowPost(false)
-    setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
+    await postSession({
+      group_id: id,
+      user_id: user.id,
+      drink_id: drinkId || null,
+      drink_name: drinkId ? null : drinkName.trim() || null,
+      message: message.trim() || null,
+    })
     loadActivity(id)
   }
 
@@ -172,51 +138,20 @@ export default function GroupHome() {
     setArchive(await loadGroupArchive(groupId))
   }
 
-  const handleCreateTasting = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCreateTasting = async (title: string, eventDate: string | null) => {
     if (!user || !id) return
-    setCreatingTasting(true)
-    let newId: string
-    try {
-      newId = await createTasting({
-        group_id: id,
-        title: tastingTitle.trim(),
-        hosted_by: user.id,
-        event_date: tastingDate || null,
-      })
-    } catch {
-      setCreatingTasting(false)
-      return
-    }
-    setCreatingTasting(false)
+    const newId = await createTasting({
+      group_id: id,
+      title,
+      hosted_by: user.id,
+      event_date: eventDate,
+    })
     navigate(`/groups/${id}/tasting/${newId}`)
   }
 
-  const toggleBattleDrink = (drinkId: string) =>
-    setBattleDrinkIds(prev => prev.includes(drinkId) ? prev.filter(x => x !== drinkId) : prev.length >= 5 ? prev : [...prev, drinkId])
-
-  const battleMatchup = (b: BattleListItem) =>
-    [...b.battle_drinks]
-      .sort((a, c) => a.position - c.position)
-      .map(d => d.drinks?.name)
-      .filter(Boolean)
-      .join(` ${t('battle.vs')} `) || t('battle.heading')
-
-  const handleCreateBattle = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleCreateBattle = async (drinkIds: string[]) => {
     if (!user || !id) return
-    if (battleDrinkIds.length < 2 || battleDrinkIds.length > 5) { setBattleError(t('battle.selectTwoToFive')); return }
-    setCreatingBattle(true)
-    setBattleError(null)
-    let newId: string
-    try {
-      newId = await createBattle(id, user.id, battleDrinkIds)
-    } catch (err) {
-      setCreatingBattle(false)
-      setBattleError(t('battle.createError', { message: (err as Error).message ?? '' }))
-      return
-    }
-    setCreatingBattle(false)
+    const newId = await createBattle(id, user.id, drinkIds)
     navigate(`/battle/${newId}`)
   }
 
@@ -228,30 +163,6 @@ export default function GroupHome() {
       return
     }
     setMembers(prev => prev.filter(m => m.user_id !== userId))
-  }
-
-  const copyInviteCode = () => {
-    if (!group) return
-    navigator.clipboard.writeText(group.invite_code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const shareInvite = async () => {
-    if (!group) return
-    const url = `${window.location.origin}/join/${group.invite_code}`
-    const shareData = {
-      title: t('groups.shareTitle', { name: group.name }),
-      text: t('groups.shareText', { name: group.name }),
-      url,
-    }
-    if (navigator.share) {
-      try { await navigator.share(shareData) } catch { /* Abbruch durch Nutzer */ }
-    } else {
-      await navigator.clipboard.writeText(url)
-      setLinkCopied(true)
-      setTimeout(() => setLinkCopied(false), 2000)
-    }
   }
 
   if (loadError) {
@@ -319,34 +230,14 @@ export default function GroupHome() {
       </div>
 
       {/* Gruppen-Wechsler */}
-      <Modal open={switcherOpen} onClose={() => setSwitcherOpen(false)} ariaLabel={t('groups.switchGroup')} className="w-full max-w-lg p-6 gap-3">
-            <h3 className="text-lg font-bold text-stone-100">{t('groups.switchGroup')}</h3>
-            <div className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
-              {myGroups.map(g => (
-                <button
-                  key={g.id}
-                  onClick={() => { setSwitcherOpen(false); if (g.id !== id) navigate(`/groups/${g.id}`) }}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors ${
-                    g.id === id ? 'bg-amber-500/15 border border-amber-500/40' : 'bg-stone-800 hover:bg-stone-700'
-                  }`}
-                >
-                  <div className="w-9 h-9 rounded-lg bg-stone-700 flex items-center justify-center text-lg flex-shrink-0">👥</div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-semibold truncate ${g.id === id ? 'text-amber-300' : 'text-stone-100'}`}>{g.name}</p>
-                    {g.description && <p className="text-xs text-stone-500 truncate">{g.description}</p>}
-                  </div>
-                  {g.id === id && <span className="text-amber-400 flex-shrink-0">✓</span>}
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => { setSwitcherOpen(false); navigate('/groups?create=1') }}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 text-left bg-stone-800 hover:bg-stone-700 transition-colors"
-            >
-              <div className="w-9 h-9 rounded-lg bg-amber-500/20 flex items-center justify-center text-lg text-amber-400 flex-shrink-0">+</div>
-              <p className="font-semibold text-stone-200">{t('groups.createOrJoin')}</p>
-            </button>
-      </Modal>
+      <GroupSwitcher
+        open={switcherOpen}
+        onClose={() => setSwitcherOpen(false)}
+        groups={myGroups}
+        currentId={id}
+        onSelect={groupId => { setSwitcherOpen(false); if (groupId !== id) navigate(`/groups/${groupId}`) }}
+        onCreateNew={() => { setSwitcherOpen(false); navigate('/groups?create=1') }}
+      />
 
       {/* Tabs */}
       <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
@@ -360,357 +251,33 @@ export default function GroupHome() {
         ))}
       </div>
 
-      {/* Aktivität */}
       {tab === 'aktivitaet' && (
-        <div className="flex flex-col gap-4">
-          <button onClick={() => { setPostError(null); setShowPost(true) }}
-            className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl py-3 text-lg">
-            {t('groups.drinkingNow')}
-          </button>
-
-          {activityLoading ? (
-            <p className="text-stone-500 text-center py-8 animate-pulse">{t('common.loading')}</p>
-          ) : activity.length === 0 ? (
-            <p className="text-stone-500 text-center py-8">
-              {t('groups.noActivity')}
-              <br />
-              <span className="text-sm">{t('groups.noActivitySub')}</span>
-            </p>
-          ) : (
-            activity.map(a => a.kind === 'session' ? (
-              <div key={`s-${a.session.id}`} className="bg-stone-900 rounded-xl p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-2xl">🥃</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-stone-100">
-                      <Link to={`/user/${a.session.user_id}`} className="hover:text-amber-400 transition-colors">
-                        {a.session.profiles?.display_name ?? a.session.profiles?.username ?? '?'}
-                      </Link> {t('groups.isDrinking')}
-                    </p>
-                    <p className="text-amber-400 font-medium">
-                      {a.session.drinks?.name ?? a.session.drink_name ?? '—'}
-                    </p>
-                    {a.session.message && <p className="text-stone-400 text-sm mt-1">„{a.session.message}"</p>}
-                    <p className="text-stone-600 text-xs mt-1">
-                      {formatDateTime(a.session.started_at, i18n.language)}
-                    </p>
-                    <ReactionBar reactions={a.session.session_reactions} myId={user?.id} onToggle={(emoji, active) => toggleReaction(a.session.id, emoji, active)} />
-                    <CommentSection
-                      comments={a.session.session_comments}
-                      myId={user?.id}
-                      onPost={body => postComment(a.session.id, body)}
-                      onDelete={deleteComment}
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Link
-                key={`r-${a.share.rating_id}`}
-                to={a.share.ratings?.drinks ? `/whisky/${a.share.ratings.drinks.id}` : '#'}
-                className="press flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
-              >
-                <span className="text-2xl">⭐</span>
-                {a.share.ratings?.drinks?.photo_url ? (
-                  <img src={thumbUrl(a.share.ratings.drinks.photo_url, 96)} alt={a.share.ratings.drinks.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
-                ) : (
-                  <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="text-stone-100 text-sm">
-                    <span className="font-semibold">{memberName(a.share.shared_by)}</span> {t('groups.sharedRating')}
-                  </p>
-                  <p className="text-amber-400 font-medium truncate">{a.share.ratings?.drinks?.name ?? '—'}</p>
-                  <p className="text-stone-600 text-xs mt-0.5">
-                    {formatDateTime(a.share.shared_at, i18n.language)}
-                  </p>
-                </div>
-                {a.share.ratings?.overall != null && (
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-xl font-bold text-amber-400">{a.share.ratings.overall}</p>
-                    <p className="text-xs text-stone-500">/10</p>
-                  </div>
-                )}
-              </Link>
-            ))
-          )}
-
-          {/* Post-Dialog */}
-          <Modal open={showPost} onClose={() => { setShowPost(false); setPostError(null) }} ariaLabel={t('groups.postTitle')} className="w-full max-w-lg p-6 gap-4">
-                <h3 className="text-lg font-bold text-stone-100">{t('groups.postTitle')}</h3>
-
-                <div>
-                  <label className="text-sm text-stone-400 mb-1 block">{t('groups.selectFromCatalog')}</label>
-                  <select value={sessionDrinkId} onChange={e => { setSessionDrinkId(e.target.value); setSessionDrinkName('') }}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500">
-                    <option value="">{t('groups.orFreeInput')}</option>
-                    {allDrinks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                  </select>
-                </div>
-
-                {!sessionDrinkId && (
-                  <div>
-                    <label className="text-sm text-stone-400 mb-1 block">{t('groups.enterNameLabel')}</label>
-                    <input maxLength={120} value={sessionDrinkName} onChange={e => setSessionDrinkName(e.target.value)}
-                      placeholder={t('groups.drinkNamePlaceholder')}
-                      className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
-                  </div>
-                )}
-
-                <div>
-                  <label className="text-sm text-stone-400 mb-1 block">{t('groups.messageLabel')}</label>
-                  <input maxLength={280} value={sessionMessage} onChange={e => setSessionMessage(e.target.value)}
-                    placeholder={t('groups.messagePlaceholder')}
-                    className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500" />
-                </div>
-
-                {postError && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{postError}</p>}
-
-                <div className="flex gap-3">
-                  <button onClick={handlePost} disabled={posting || (!sessionDrinkId && !sessionDrinkName.trim())}
-                    className="flex-1 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl py-3">
-                    {posting ? t('groups.sending') : t('groups.share')}
-                  </button>
-                  <button onClick={() => { setShowPost(false); setPostError(null) }}
-                    className="bg-stone-800 text-stone-300 rounded-xl px-4">
-                    {t('common.cancel')}
-                  </button>
-                </div>
-          </Modal>
-        </div>
+        <ActivityTab
+          activity={activity}
+          loading={activityLoading}
+          allDrinks={allDrinks}
+          myId={user?.id}
+          lang={i18n.language}
+          memberName={memberName}
+          onPost={handlePost}
+          onToggleReaction={toggleReaction}
+          onPostComment={postComment}
+          onDeleteComment={deleteComment}
+        />
       )}
 
-      {/* Archiv */}
-      {tab === 'archiv' && (
-        <div className="flex flex-col gap-3">
-          {archive.length === 0 ? (
-            <p className="text-stone-500 text-center py-8">
-              {t('groups.noArchive')}
-              <br />
-              <span className="text-sm">{t('groups.noArchiveSub')}</span>
-            </p>
-          ) : (
-            archive.map((drink, i) => {
-              const avg = drink.scores.length
-                ? Math.round(drink.scores.reduce((s, v) => s + v, 0) / drink.scores.length * 10) / 10
-                : null
-              return (
-                <Link
-                  key={drink.id}
-                  to={`/whisky/${drink.id}`}
-                  className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
-                >
-                  <span className="text-stone-600 font-mono text-sm w-5 text-center">{i + 1}</span>
-                  {drink.photo_url ? (
-                    <img src={thumbUrl(drink.photo_url, 112)} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
-                  ) : (
-                    <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-stone-100 truncate">{drink.name}</p>
-                    {drink.producer && <p className="text-sm text-stone-400 truncate">{drink.producer}</p>}
-                    <p className="text-xs text-stone-600 mt-0.5">
-                      {t('groups.ratingCount', { count: drink.scores.length })}
-                    </p>
-                  </div>
-                  {avg != null ? (
-                    <div className="text-right flex-shrink-0">
-                      <p className="text-xl font-bold text-amber-400">{avg}</p>
-                      <p className="text-xs text-stone-500">/10</p>
-                    </div>
-                  ) : (
-                    <span className="text-stone-600 text-sm">—</span>
-                  )}
-                </Link>
-              )
-            })
-          )}
-        </div>
+      {tab === 'archiv' && <ArchiveTab archive={archive} />}
+
+      {tab === 'tastings' && id && (
+        <TastingsTab groupId={id} tastings={tastings} onCreate={handleCreateTasting} />
       )}
 
-      {/* Tastings */}
-      {tab === 'tastings' && (
-        <div className="flex flex-col gap-3">
-          {tastings.map(ta => (
-            <Link
-              key={ta.id}
-              to={`/groups/${id}/tasting/${ta.id}`}
-              className="press flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
-            >
-              <div>
-                <p className="font-semibold text-stone-100">{ta.title}</p>
-                {ta.event_date && <p className="text-xs text-stone-500 mt-0.5">{ta.event_date}</p>}
-              </div>
-              <span className={`text-xs rounded-full px-3 py-1 ${ta.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                {ta.status === 'closed' ? t('groups.tastingClosed') : t('groups.tastingOpen')}
-              </span>
-            </Link>
-          ))}
-
-          {/* Neues Tasting erstellen */}
-          <div className="bg-stone-900 rounded-2xl p-5 mt-2">
-            <button
-              onClick={() => setShowNewTasting(v => !v)}
-              className="w-full text-left font-semibold text-stone-200 flex justify-between items-center"
-            >
-              <span>{t('groups.newTasting')}</span>
-              <span className="text-stone-500">{showNewTasting ? '▲' : '▼'}</span>
-            </button>
-            {showNewTasting && (
-              <form onSubmit={handleCreateTasting} className="flex flex-col gap-3 mt-4">
-                <input
-                  required
-                  maxLength={100}
-                  value={tastingTitle}
-                  onChange={e => setTastingTitle(e.target.value)}
-                  placeholder={t('groups.tastingTitlePlaceholder')}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-                />
-                <input
-                  type="date"
-                  value={tastingDate}
-                  onChange={e => setTastingDate(e.target.value)}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-                />
-                <button
-                  type="submit"
-                  disabled={creatingTasting}
-                  className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5"
-                >
-                  {creatingTasting ? t('groups.creatingTasting') : t('groups.createTasting')}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Battles */}
       {tab === 'battles' && (
-        <div className="flex flex-col gap-3">
-          {battles.length === 0 && (
-            <p className="text-stone-500 text-center py-8">
-              {t('battle.noBattles')}
-              <br />
-              <span className="text-sm">{t('battle.noBattlesSub')}</span>
-            </p>
-          )}
-          {battles.map(b => (
-            <Link
-              key={b.id}
-              to={`/battle/${b.id}`}
-              className="press flex items-center justify-between bg-stone-900 hover:bg-stone-800 rounded-xl px-4 py-3 transition-colors"
-            >
-              <p className="font-semibold text-stone-100 flex items-center gap-2 min-w-0"><span className="flex-shrink-0">⚔️</span><span className="truncate">{battleMatchup(b)}</span></p>
-              <span className={`text-xs rounded-full px-3 py-1 ${b.status === 'closed' ? 'bg-stone-700 text-stone-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                {b.status === 'closed' ? t('battle.closed') : t('battle.open')}
-              </span>
-            </Link>
-          ))}
-
-          {/* Neues Battle erstellen */}
-          <div className="bg-stone-900 rounded-2xl p-5 mt-2">
-            <button
-              onClick={() => setShowNewBattle(v => !v)}
-              className="w-full text-left font-semibold text-stone-200 flex justify-between items-center"
-            >
-              <span>{t('battle.newBattle')}</span>
-              <span className="text-stone-500">{showNewBattle ? '▲' : '▼'}</span>
-            </button>
-            {showNewBattle && (
-              <form onSubmit={handleCreateBattle} className="flex flex-col gap-3 mt-4">
-                <p className="text-sm text-stone-400">
-                  {t('battle.pickDrinks')}
-                  {battleDrinkIds.length > 0 && <span className="text-amber-400"> · {t('battle.selected')}: {battleDrinkIds.length}/5</span>}
-                </p>
-                <input
-                  type="search"
-                  value={battleSearch}
-                  onChange={e => setBattleSearch(e.target.value)}
-                  placeholder={t('battle.searchPlaceholder')}
-                  className="w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500"
-                />
-                <div className="max-h-56 overflow-y-auto flex flex-col gap-1 -mt-1">
-                  {allDrinks
-                    .filter(d => d.name.toLowerCase().includes(battleSearch.toLowerCase()))
-                    .map(d => {
-                      const sel = battleDrinkIds.includes(d.id)
-                      return (
-                        <button
-                          type="button"
-                          key={d.id}
-                          onClick={() => toggleBattleDrink(d.id)}
-                          className={`flex items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                            sel ? 'bg-amber-500/15 text-amber-300' : 'bg-stone-800 text-stone-300 hover:bg-stone-700'
-                          }`}
-                        >
-                          <span className="truncate">{d.name}</span>
-                          <span className="flex-shrink-0 ml-2">{sel ? '✓' : '+'}</span>
-                        </button>
-                      )
-                    })}
-                </div>
-                {battleError && <p className="text-red-400 text-sm bg-red-950 border border-red-800 rounded-lg px-4 py-2">{battleError}</p>}
-                <button
-                  type="submit"
-                  disabled={creatingBattle || battleDrinkIds.length < 2 || battleDrinkIds.length > 5}
-                  className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-lg px-4 py-2.5"
-                >
-                  {creatingBattle ? t('battle.creating') : t('battle.create')}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
+        <BattlesTab battles={battles} allDrinks={allDrinks} onCreate={handleCreateBattle} />
       )}
 
-      {/* Mitglieder */}
       {tab === 'mitglieder' && (
-        <div className="flex flex-col gap-2">
-          {members.map(m => (
-            <div key={m.user_id} className="flex items-center justify-between bg-stone-900 rounded-xl px-4 py-3">
-              <Link to={`/user/${m.user_id}`} className="min-w-0">
-                <p className="font-medium text-stone-200 hover:text-amber-400 transition-colors truncate">
-                  {m.profiles?.display_name ?? m.profiles?.username}
-                </p>
-                <p className="text-xs text-stone-500 truncate">@{m.profiles?.username}</p>
-              </Link>
-              <div className="flex items-center gap-2">
-                {m.user_id === group.owner_id && (
-                  <span className="text-xs bg-amber-500/20 text-amber-400 rounded px-2 py-0.5">{t('groups.owner')}</span>
-                )}
-                {m.role === 'admin' && m.user_id !== group.owner_id && (
-                  <span className="text-xs bg-stone-700 text-stone-300 rounded px-2 py-0.5">{t('groups.admin')}</span>
-                )}
-                {user?.id === group.owner_id && m.user_id !== group.owner_id && (
-                  <button
-                    onClick={() => handleRemoveMember(m.user_id)}
-                    className="text-xs text-red-400 hover:text-red-300 bg-red-900/20 hover:bg-red-900/40 rounded px-2 py-0.5 transition-colors"
-                  >
-                    {t('groups.remove')}
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {/* Einladen */}
-          <div className="mt-4 bg-stone-900 rounded-xl p-4 text-center">
-            <p className="text-stone-400 text-sm mb-3">{t('groups.inviteNewMembers')}</p>
-            <button
-              onClick={shareInvite}
-              className="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2.5 transition-colors mb-2"
-            >
-              {linkCopied ? t('groups.linkCopied') : t('groups.shareInviteLink')}
-            </button>
-            <button
-              onClick={copyInviteCode}
-              className="text-stone-500 hover:text-stone-300 text-xs font-mono"
-            >
-              {copied ? t('groups.codeCopied') : t('groups.orCopyCode', { code: group.invite_code })}
-            </button>
-          </div>
-        </div>
+        <MembersTab members={members} group={group} currentUserId={user?.id} onRemoveMember={handleRemoveMember} />
       )}
     </div>
   )
