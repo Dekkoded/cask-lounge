@@ -3,73 +3,31 @@ import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { listWhiskies } from '../lib/queries/drinks'
+import { getGroup, listMyGroups, listMembers, removeMember, type Group, type Member } from '../lib/queries/groups'
+import { listTastings, createTasting, type Tasting } from '../lib/queries/tastings'
+import { listBattles, createBattle, type BattleListItem } from '../lib/queries/battles'
+import {
+  loadGroupActivity,
+  postSession,
+  toggleSessionReaction,
+  postSessionComment,
+  deleteSessionComment,
+  type GroupSession,
+  type RatingShare,
+} from '../lib/queries/sessions'
+import { loadGroupArchive, type ArchiveDrink } from '../lib/queries/archive'
 import { useAuth } from '../context/AuthContext'
-import { ReactionBar, CommentSection, type SessionReaction, type SessionComment } from '../components/SessionSocial'
+import { ReactionBar, CommentSection } from '../components/SessionSocial'
 import { formatDateTime } from '../lib/format'
 import { thumbUrl } from '../lib/image'
 import LoadError from '../components/LoadError'
 import Modal from '../components/Modal'
 
-interface Group {
-  id: string
-  name: string
-  description: string | null
-  owner_id: string
-  invite_code: string
-}
-
-interface Member {
-  user_id: string
-  role: string
-  joined_at: string
-  profiles: { username: string; display_name: string | null }
-}
-
-interface GroupSession {
-  id: string
-  user_id: string
-  drink_id: string | null
-  drink_name: string | null
-  message: string | null
-  started_at: string
-  profiles: { display_name: string | null; username: string } | null
-  drinks: { name: string } | null
-  session_reactions: SessionReaction[]
-  session_comments: SessionComment[]
-}
-
-interface RatingShare {
-  rating_id: string
-  shared_at: string
-  shared_by: string
-  ratings: { overall: number | null; drinks: { id: string; name: string; photo_url: string | null } | null } | null
-}
-
+// View-Modell für den zusammengeführten Aktivitäts-Feed (Sessions + geteilte
+// Bewertungen). Die Daten-Interfaces leben in lib/queries/*.
 type Activity =
   | { kind: 'session'; ts: string; session: GroupSession }
   | { kind: 'rating'; ts: string; share: RatingShare }
-
-interface ArchiveDrink {
-  id: string
-  name: string
-  producer: string | null
-  photo_url: string | null
-  scores: number[]   // alle overall-Werte aus group_ratings + tasting_ratings
-}
-
-interface Tasting {
-  id: string
-  title: string
-  status: string
-  event_date: string | null
-  hosted_by: string
-}
-
-interface BattleListItem {
-  id: string
-  status: string
-  battle_drinks: { position: number; drinks: { name: string } | null }[]
-}
 
 type Tab = 'aktivitaet' | 'archiv' | 'tastings' | 'battles' | 'mitglieder'
 
@@ -115,24 +73,18 @@ export default function GroupHome() {
   const load = async (groupId: string) => {
     setLoadError(false)
 
-    const { data, error } = await supabase.from('groups').select('*').eq('id', groupId).single()
-    if (error) { setLoadError(true); return }
-    if (data) setGroup(data)
+    try {
+      const g = await getGroup(groupId)
+      if (g) setGroup(g)
+    } catch {
+      setLoadError(true)
+      return
+    }
 
-    supabase.from('groups').select('id, name, description').order('created_at', { ascending: false })
-      .then(({ data }) => setMyGroups(data ?? []))
-
-    supabase.from('group_members')
-      .select('user_id, role, joined_at, profiles(username, display_name)')
-      .eq('group_id', groupId)
-      .then(({ data }) => { setMembers((data as unknown as Member[]) ?? []) })
-
-    supabase.from('tastings').select('*').eq('group_id', groupId).order('created_at', { ascending: false })
-      .then(({ data }) => { setTastings(data ?? []) })
-
-    supabase.from('battles').select('id, status, battle_drinks(position, drinks(name))').eq('group_id', groupId).order('created_at', { ascending: false })
-      .then(({ data }) => { setBattles((data as unknown as BattleListItem[]) ?? []) })
-
+    listMyGroups().then(setMyGroups)
+    listMembers(groupId).then(setMembers)
+    listTastings(groupId).then(setTastings)
+    listBattles(groupId).then(setBattles)
     listWhiskies().then(setAllDrinks)
 
     loadArchive(groupId)
@@ -169,20 +121,9 @@ export default function GroupHome() {
   }, [id])
 
   const loadActivity = async (groupId: string) => {
-    const [{ data: sData }, { data: rData }] = await Promise.all([
-      supabase
-        .from('drink_sessions')
-        .select('id, user_id, drink_id, drink_name, message, started_at, profiles(display_name, username), drinks(name), session_reactions(emoji, user_id), session_comments(id, body, created_at, user_id, profiles(display_name, username))')
-        .eq('group_id', groupId)
-        .order('started_at', { ascending: false }),
-      supabase
-        .from('group_ratings')
-        .select('rating_id, shared_at, shared_by, ratings(overall, drinks(id, name, photo_url))')
-        .eq('group_id', groupId)
-        .order('shared_at', { ascending: false }),
-    ])
-    setSessions((sData as unknown as GroupSession[]) ?? [])
-    setRatingShares((rData as unknown as RatingShare[]) ?? [])
+    const { sessions, ratingShares } = await loadGroupActivity(groupId)
+    setSessions(sessions)
+    setRatingShares(ratingShares)
     setActivityLoading(false)
   }
 
@@ -190,18 +131,20 @@ export default function GroupHome() {
     if (!user || !id) return
     setPosting(true)
     setPostError(null)
-    const { error } = await supabase.from('drink_sessions').insert({
-      group_id: id,
-      user_id: user.id,
-      drink_id: sessionDrinkId || null,
-      drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
-      message: sessionMessage.trim() || null,
-    })
-    setPosting(false)
-    if (error) {
-      setPostError(t('groups.shareError', { message: error.message }))
+    try {
+      await postSession({
+        group_id: id,
+        user_id: user.id,
+        drink_id: sessionDrinkId || null,
+        drink_name: sessionDrinkId ? null : sessionDrinkName.trim() || null,
+        message: sessionMessage.trim() || null,
+      })
+    } catch (e) {
+      setPosting(false)
+      setPostError(t('groups.shareError', { message: (e as Error).message }))
       return
     }
+    setPosting(false)
     setShowPost(false)
     setSessionDrinkId(''); setSessionDrinkName(''); setSessionMessage('')
     loadActivity(id)
@@ -209,109 +152,44 @@ export default function GroupHome() {
 
   const toggleReaction = async (sessionId: string, emoji: string, active: boolean) => {
     if (!user || !id) return
-    if (active) {
-      await supabase.from('session_reactions').delete()
-        .eq('session_id', sessionId).eq('user_id', user.id).eq('emoji', emoji)
-    } else {
-      await supabase.from('session_reactions').insert({ session_id: sessionId, user_id: user.id, emoji })
-    }
+    await toggleSessionReaction(sessionId, user.id, emoji, active)
     loadActivity(id)
   }
 
   const postComment = async (sessionId: string, body: string) => {
     if (!user || !id) return
-    await supabase.from('session_comments').insert({ session_id: sessionId, user_id: user.id, body })
+    await postSessionComment(sessionId, user.id, body)
     loadActivity(id)
   }
 
   const deleteComment = async (commentId: string) => {
     if (!id) return
-    await supabase.from('session_comments').delete().eq('id', commentId)
+    await deleteSessionComment(commentId)
     loadActivity(id)
   }
 
   const loadArchive = async (groupId: string) => {
-    // Quelle 1: via group_ratings geteilte Bewertungen
-    const { data: grData } = await supabase
-      .from('group_ratings')
-      .select('ratings(overall, drinks(id, name, producer, photo_url))')
-      .eq('group_id', groupId)
-
-    // Quelle 2: Tasting-IDs dieser Gruppe holen, dann tasting_drinks + tasting_ratings
-    const { data: tastingRows } = await supabase
-      .from('tastings')
-      .select('id')
-      .eq('group_id', groupId)
-
-    const tastingIds = (tastingRows ?? []).map(t => t.id)
-
-    let tdData: { drink_id: string; drinks: { id: string; name: string; producer: string | null; photo_url: string | null } }[] = []
-    let trData: { drink_id: string; overall: number | null }[] = []
-
-    if (tastingIds.length > 0) {
-      const { data: td } = await supabase
-        .from('tasting_drinks')
-        .select('drink_id, drinks(id, name, producer, photo_url)')
-        .in('tasting_id', tastingIds)
-      tdData = (td as unknown as typeof tdData) ?? []
-
-      const { data: tr } = await supabase
-        .from('tasting_ratings')
-        .select('drink_id, overall')
-        .in('tasting_id', tastingIds)
-      trData = tr ?? []
-    }
-
-    // Alle Drinks zusammenführen — Map by drink_id
-    const map = new Map<string, ArchiveDrink>()
-
-    const addDrink = (d: { id: string; name: string; producer: string | null; photo_url: string | null }) => {
-      if (!map.has(d.id)) map.set(d.id, { id: d.id, name: d.name, producer: d.producer, photo_url: d.photo_url, scores: [] })
-    }
-
-    // group_ratings
-    for (const gr of grData ?? []) {
-      const r = gr.ratings as unknown as { overall: number | null; drinks: { id: string; name: string; producer: string | null; photo_url: string | null } }
-      if (!r?.drinks) continue
-      addDrink(r.drinks)
-      if (r.overall != null) map.get(r.drinks.id)!.scores.push(r.overall)
-    }
-
-    // tasting_drinks (stellt sicher dass auch unbewertete Whiskys erscheinen)
-    for (const td of tdData) {
-      if (td.drinks) addDrink(td.drinks)
-    }
-
-    // tasting_ratings scores hinzufügen
-    for (const tr of trData) {
-      if (tr.overall != null && map.has(tr.drink_id)) {
-        map.get(tr.drink_id)!.scores.push(tr.overall)
-      }
-    }
-
-    // Nach Durchschnitt sortieren
-    const sorted = Array.from(map.values()).sort((a, b) => {
-      const avgA = a.scores.length ? a.scores.reduce((s, v) => s + v, 0) / a.scores.length : -1
-      const avgB = b.scores.length ? b.scores.reduce((s, v) => s + v, 0) / b.scores.length : -1
-      return avgB - avgA
-    })
-
-    setArchive(sorted)
+    setArchive(await loadGroupArchive(groupId))
   }
 
   const handleCreateTasting = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!user || !id) return
     setCreatingTasting(true)
-    const { data, error } = await supabase.from('tastings').insert({
-      group_id: id,
-      title: tastingTitle.trim(),
-      hosted_by: user.id,
-      event_date: tastingDate || null,
-      status: 'open',
-    }).select('id').single()
+    let newId: string
+    try {
+      newId = await createTasting({
+        group_id: id,
+        title: tastingTitle.trim(),
+        hosted_by: user.id,
+        event_date: tastingDate || null,
+      })
+    } catch {
+      setCreatingTasting(false)
+      return
+    }
     setCreatingTasting(false)
-    if (!error && data) navigate(`/groups/${id}/tasting/${data.id}`)
+    navigate(`/groups/${id}/tasting/${newId}`)
   }
 
   const toggleBattleDrink = (drinkId: string) =>
@@ -330,25 +208,25 @@ export default function GroupHome() {
     if (battleDrinkIds.length < 2 || battleDrinkIds.length > 5) { setBattleError(t('battle.selectTwoToFive')); return }
     setCreatingBattle(true)
     setBattleError(null)
-    const { data, error } = await supabase.from('battles').insert({
-      group_id: id,
-      created_by: user.id,
-      status: 'open',
-    }).select('id').single()
-    if (error || !data) {
+    let newId: string
+    try {
+      newId = await createBattle(id, user.id, battleDrinkIds)
+    } catch (err) {
       setCreatingBattle(false)
-      setBattleError(t('battle.createError', { message: error?.message ?? '' }))
+      setBattleError(t('battle.createError', { message: (err as Error).message ?? '' }))
       return
     }
-    const rows = battleDrinkIds.map((drink_id, position) => ({ battle_id: data.id, drink_id, position }))
-    await supabase.from('battle_drinks').insert(rows)
     setCreatingBattle(false)
-    navigate(`/battle/${data.id}`)
+    navigate(`/battle/${newId}`)
   }
 
   const handleRemoveMember = async (userId: string) => {
     if (!id) return
-    await supabase.from('group_members').delete().eq('group_id', id).eq('user_id', userId)
+    try {
+      await removeMember(id, userId)
+    } catch {
+      return
+    }
     setMembers(prev => prev.filter(m => m.user_id !== userId))
   }
 
