@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { listWhiskies } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import { ReactionBar, CommentSection, type SessionReaction, type SessionComment } from '../components/SessionSocial'
 import { formatDateTime } from '../lib/format'
@@ -132,8 +133,7 @@ export default function GroupHome() {
     supabase.from('battles').select('id, status, battle_drinks(position, drinks(name))').eq('group_id', groupId).order('created_at', { ascending: false })
       .then(({ data }) => { setBattles((data as unknown as BattleListItem[]) ?? []) })
 
-    supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
-      .then(({ data }) => setAllDrinks(data ?? []))
+    listWhiskies().then(setAllDrinks)
 
     loadArchive(groupId)
     loadActivity(groupId)

@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { searchWhiskiesByName, createDrink } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
 import Modal from '../components/Modal'
@@ -26,10 +27,7 @@ export default function AddWhisky() {
   const checkDuplicates = async () => {
     const q = name.trim()
     if (q.length < 2) { setSimilar([]); return }
-    const { data } = await supabase.from('drinks')
-      .select('id, name, producer').eq('category', 'whisky')
-      .ilike('name', `%${q}%`).limit(4)
-    setSimilar(data ?? [])
+    setSimilar(await searchWhiskiesByName(q))
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -57,10 +55,8 @@ export default function AddWhisky() {
       photo_url = data.publicUrl
     }
 
-    const { data, error } = await supabase
-      .from('drinks')
-      .insert({
-        category: 'whisky',
+    try {
+      const drink = await createDrink({
         name: name.trim(),
         producer: producer.trim() || null,
         region: region.trim() || null,
@@ -69,17 +65,12 @@ export default function AddWhisky() {
         photo_url,
         created_by: user.id,
       })
-      .select('id')
-      .single()
-
-    if (error) {
-      setError(error.message)
       setLoading(false)
-      return
+      setCreatedId(drink.id)
+    } catch (e) {
+      setError((e as Error).message)
+      setLoading(false)
     }
-
-    setLoading(false)
-    setCreatedId(data.id)
   }
 
   const addToCollection = async () => {

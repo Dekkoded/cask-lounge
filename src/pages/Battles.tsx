@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { listWhiskies } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import { usePageMeta } from '../lib/pageMeta'
 import LoadError from '../components/LoadError'
@@ -54,8 +55,7 @@ export default function Battles() {
 
   useEffect(() => {
     if (!user) return
-    supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
-      .then(({ data }) => setAllDrinks(data ?? []))
+    listWhiskies().then(setAllDrinks)
     supabase.from('group_members').select('groups(id, name)').eq('user_id', user.id)
       .then(({ data }) => {
         const groups = ((data as unknown as { groups: { id: string; name: string } | null }[]) ?? [])

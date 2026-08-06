@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { listWhiskyOptions, createDrink } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import WheelStepper from '../components/WheelStepper'
 import AromaTags from '../components/AromaTags'
@@ -108,8 +109,7 @@ export default function Tasting() {
 
     loadRatings()
 
-    supabase.from('drinks').select('id, name, producer').eq('category', 'whisky').order('name')
-      .then(({ data }) => setAllDrinks(data ?? []))
+    listWhiskyOptions().then(setAllDrinks)
   }
 
   useEffect(() => {
@@ -208,9 +208,9 @@ export default function Tasting() {
       }
     }
 
-    const { data, error } = await supabase.from('drinks')
-      .insert({
-        category: 'whisky',
+    let created
+    try {
+      created = await createDrink({
         name: drinkSearch.trim(),
         producer: newProducer.trim() || null,
         region: newRegion.trim() || null,
@@ -219,15 +219,15 @@ export default function Tasting() {
         photo_url,
         created_by: user.id,
       })
-      .select('id, name, producer, photo_url')
-      .single()
-    setCreatingDrink(false)
-    if (!error && data) {
-      setAllDrinks(prev => [...prev, data])
-      await addDrinkToTasting(data.id, data.name, data.producer, data.photo_url)
-      setShowNewDrinkForm(false)
-      setNewProducer(''); setNewRegion(''); setNewAge(''); setNewAbv(''); setNewPhoto(null)
+    } catch {
+      setCreatingDrink(false)
+      return
     }
+    setCreatingDrink(false)
+    setAllDrinks(prev => [...prev, created])
+    await addDrinkToTasting(created.id, created.name, created.producer, created.photo_url)
+    setShowNewDrinkForm(false)
+    setNewProducer(''); setNewRegion(''); setNewAge(''); setNewAbv(''); setNewPhoto(null)
   }
 
   const closeTasting = async () => {

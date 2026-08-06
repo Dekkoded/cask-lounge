@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { getDrink, updateDrink } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
 import type { Drink } from '../lib/types'
@@ -25,22 +26,21 @@ export default function EditWhisky() {
 
   useEffect(() => {
     if (!id || !user) return
-    supabase.from('drinks').select('*').eq('id', id).single()
-      .then(async ({ data }) => {
-        if (!data) { setAllowed(false); return }
-        setDrink(data)
-        setName(data.name ?? '')
-        setProducer(data.producer ?? '')
-        setRegion(data.region ?? '')
-        setAgeYears(data.age_years != null ? String(data.age_years) : '')
-        setAbv(data.abv != null ? String(data.abv) : '')
+    getDrink(id).then(async data => {
+      if (!data) { setAllowed(false); return }
+      setDrink(data)
+      setName(data.name ?? '')
+      setProducer(data.producer ?? '')
+      setRegion(data.region ?? '')
+      setAgeYears(data.age_years != null ? String(data.age_years) : '')
+      setAbv(data.abv != null ? String(data.abv) : '')
 
-        if (isAdmin) { setAllowed(true); return }
-        if (data.created_by !== user.id) { setAllowed(false); return }
-        const { count } = await supabase.from('ratings').select('id', { count: 'exact', head: true })
-          .eq('drink_id', id).neq('user_id', user.id)
-        setAllowed((count ?? 0) === 0)
-      })
+      if (isAdmin) { setAllowed(true); return }
+      if (data.created_by !== user.id) { setAllowed(false); return }
+      const { count } = await supabase.from('ratings').select('id', { count: 'exact', head: true })
+        .eq('drink_id', id).neq('user_id', user.id)
+      setAllowed((count ?? 0) === 0)
+    })
   }, [id, user, isAdmin])
 
   const handleSubmit = async (e: FormEvent) => {
@@ -65,17 +65,22 @@ export default function EditWhisky() {
       photo_url = data.publicUrl
     }
 
-    const { error } = await supabase.from('drinks').update({
-      name: name.trim(),
-      producer: producer.trim() || null,
-      region: region.trim() || null,
-      age_years: ageYears ? parseInt(ageYears) : null,
-      abv: abv ? parseFloat(abv) : null,
-      photo_url,
-    }).eq('id', id)
+    try {
+      await updateDrink(id, {
+        name: name.trim(),
+        producer: producer.trim() || null,
+        region: region.trim() || null,
+        age_years: ageYears ? parseInt(ageYears) : null,
+        abv: abv ? parseFloat(abv) : null,
+        photo_url,
+      })
+    } catch (e) {
+      setLoading(false)
+      setError((e as Error).message)
+      return
+    }
 
     setLoading(false)
-    if (error) { setError(error.message); return }
     navigate(`/whisky/${id}`)
   }
 

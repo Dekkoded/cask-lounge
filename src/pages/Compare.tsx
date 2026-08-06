@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { getDrinkForCompare } from '../lib/queries/drinks'
 import type { GlobalDrinkScore } from '../lib/types'
 import CompareWheel from '../components/CompareWheel'
 import { aromaLabel } from '../components/AromaTags'
@@ -81,8 +82,8 @@ export default function Compare() {
     ;(async () => {
       const updates: Record<string, CompareData> = {}
       for (const id of missing) {
-        const [{ data: drink }, { data: ratings }] = await Promise.all([
-          supabase.from('drinks').select('id, name, producer, region, photo_url').eq('id', id).single(),
+        const [drink, { data: ratings }] = await Promise.all([
+          getDrinkForCompare(id),
           supabase.from('ratings').select('overall, nose, taste, finish, wheels').eq('drink_id', id).eq('is_public', true),
         ])
         if (!drink) continue

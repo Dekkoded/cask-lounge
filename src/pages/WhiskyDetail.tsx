@@ -2,6 +2,7 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { getDrink, deleteDrink } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
@@ -72,8 +73,7 @@ export default function WhiskyDetail() {
   useEffect(() => {
     if (!id) return
 
-    supabase.from('drinks').select('*').eq('id', id).single()
-      .then(({ data }) => { if (data) setDrink(data) })
+    getDrink(id).then(data => { if (data) setDrink(data) })
 
     // Aggregat (Schnitt + Anzahl) aus der öffentlichen View – auch ohne Login sichtbar.
     supabase.from('global_drink_scores').select('avg_overall, num_ratings').eq('id', id).maybeSingle()
@@ -278,9 +278,14 @@ export default function WhiskyDetail() {
       await supabase.from('group_ratings').delete().in('rating_id', ids)
       await supabase.from('ratings').delete().in('id', ids)
     }
-    const { error } = await supabase.from('drinks').delete().eq('id', drink.id)
+    try {
+      await deleteDrink(drink.id)
+    } catch (e) {
+      setDeletingDrink(false)
+      setError(t('whisky.deleteDrinkFailed', { message: (e as Error).message }))
+      return
+    }
     setDeletingDrink(false)
-    if (error) { setError(t('whisky.deleteDrinkFailed', { message: error.message })); return }
     navigate('/')
   }
 

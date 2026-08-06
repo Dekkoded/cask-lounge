@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { listWhiskies } from '../lib/queries/drinks'
 import { useAuth } from '../context/AuthContext'
 import Modal from './Modal'
 
@@ -31,8 +32,7 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
         setGroups(gs)
         setLoading(false)
       })
-    supabase.from('drinks').select('id, name').eq('category', 'whisky').order('name')
-      .then(({ data }) => setDrinks(data ?? []))
+    listWhiskies().then(setDrinks)
   }, [open, user])
 
   const hasGroups = groups.length > 0
