@@ -1,8 +1,25 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
 import { getDrink, deleteDrink } from '../lib/queries/drinks'
+import { listMyGroups } from '../lib/queries/groups'
+import {
+  getGlobalScore,
+  listPublicRatings,
+  getMyRating,
+  othersHaveRated,
+  upsertRating,
+  createCollectionEntry,
+  deleteRating,
+  deleteRatingsForDrink,
+  isInWishlist,
+  addToWishlist,
+  removeFromWishlist,
+  listSharedGroups,
+  shareRatingToGroup,
+  unshareRatingFromGroup,
+  type PublicRating,
+} from '../lib/queries/ratings'
 import { useAuth } from '../context/AuthContext'
 import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
@@ -25,9 +42,6 @@ const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: 
 }
 
 interface Group { id: string; name: string }
-interface PublicRating extends Rating {
-  profiles: { display_name: string | null; username: string }
-}
 
 type Tab = 'uebersicht' | 'bewertung'
 
@@ -76,69 +90,49 @@ export default function WhiskyDetail() {
     getDrink(id).then(data => { if (data) setDrink(data) })
 
     // Aggregat (Schnitt + Anzahl) aus der öffentlichen View – auch ohne Login sichtbar.
-    supabase.from('global_drink_scores').select('avg_overall, num_ratings').eq('id', id).maybeSingle()
-      .then(({ data }) => { if (data) setGlobalScore({ avg: data.avg_overall, count: data.num_ratings ?? 0 }) })
+    getGlobalScore(id).then(setGlobalScore)
 
     if (user) {
       // Einzelne Bewertungen (inkl. Namen) nur für eingeloggte Nutzer laden.
-      supabase.from('ratings')
-        .select('*, profiles(display_name, username)')
-        .eq('drink_id', id)
-        .eq('is_public', true)
-        .order('overall', { ascending: false })
-        .then(({ data }) => { setPublicRatings((data as unknown as PublicRating[]) ?? []) })
+      listPublicRatings(id).then(setPublicRatings)
 
-      supabase.from('ratings').select('*')
-        .eq('drink_id', id).eq('user_id', user.id).maybeSingle()
-        .then(({ data }) => {
-          if (data) {
-            setMyRating(data)
-            setNose(data.nose ?? 5)
-            setTaste(data.taste ?? 5)
-            setFinish(data.finish ?? 5)
-            setColorIdx(data.color_idx)
-            setWheels({ ...EMPTY_WHEELS, ...(data.wheels ?? {}) })
-            setNote(data.note ?? '')
-            setPurchasePrice(data.purchase_price != null ? String(data.purchase_price) : '')
-            setIsPublic(data.is_public)
-          }
-        })
+      getMyRating(id, user.id).then(data => {
+        if (data) {
+          setMyRating(data)
+          setNose(data.nose ?? 5)
+          setTaste(data.taste ?? 5)
+          setFinish(data.finish ?? 5)
+          setColorIdx(data.color_idx)
+          setWheels({ ...EMPTY_WHEELS, ...(data.wheels ?? {}) })
+          setNote(data.note ?? '')
+          setPurchasePrice(data.purchase_price != null ? String(data.purchase_price) : '')
+          setIsPublic(data.is_public)
+        }
+      })
 
-      supabase.from('groups').select('id, name')
-        .then(({ data }) => setGroups(data ?? []))
-
-      supabase.from('ratings').select('id', { count: 'exact', head: true })
-        .eq('drink_id', id).neq('user_id', user.id)
-        .then(({ count }) => setOthersRated((count ?? 0) > 0))
-
-      supabase.from('wishlist').select('id')
-        .eq('drink_id', id).eq('user_id', user.id).maybeSingle()
-        .then(({ data }) => setInWishlist(!!data))
+      listMyGroups().then(setGroups)
+      othersHaveRated(id, user.id).then(setOthersRated)
+      isInWishlist(id, user.id).then(setInWishlist)
     }
   }, [id, user])
 
   useEffect(() => {
     if (!myRating) return
-    supabase.from('group_ratings').select('group_id').eq('rating_id', myRating.id)
-      .then(({ data }) => {
-        setSharedGroups(new Set((data ?? []).map(r => r.group_id)))
-      })
+    listSharedGroups(myRating.id).then(ids => setSharedGroups(new Set(ids)))
   }, [myRating])
 
   const toggleShare = async (groupId: string) => {
     if (!myRating || !user) return
     if (sharedGroups.has(groupId)) {
-      await supabase.from('group_ratings')
-        .delete().eq('group_id', groupId).eq('rating_id', myRating.id)
+      await unshareRatingFromGroup(groupId, myRating.id)
       setSharedGroups(s => { const n = new Set(s); n.delete(groupId); return n })
       setShareMsg(t('whisky.removedFromGroup'))
     } else {
-      const { error } = await supabase.from('group_ratings').insert({
-        group_id: groupId,
-        rating_id: myRating.id,
-        shared_by: user.id,
-      })
-      if (error) { setShareMsg(t('whisky.shareError', { message: error.message })); return }
+      try {
+        await shareRatingToGroup(groupId, myRating.id, user.id)
+      } catch (e) {
+        setShareMsg(t('whisky.shareError', { message: (e as Error).message })); return
+      }
       setSharedGroups(s => new Set(s).add(groupId))
       setShareMsg(t('whisky.sharedToGroup'))
     }
@@ -186,24 +180,21 @@ export default function WhiskyDetail() {
       updated_at: new Date().toISOString(),
     }
 
-    const { data, error } = await supabase.from('ratings').upsert(payload, {
-      onConflict: 'drink_id,user_id',
-    }).select('*').single()
+    let data: Rating
+    try {
+      data = await upsertRating(payload)
+    } catch (e) {
+      setSaving(false)
+      setError((e as Error).message); return
+    }
 
     setSaving(false)
-    if (error) { setError(error.message); return }
-
-    if (data) setMyRating(data)
+    setMyRating(data)
     removeFromWishlistSilently()
     setSaved(true)
 
     // Öffentliche Ratings neu laden
-    supabase.from('ratings')
-      .select('*, profiles(display_name, username)')
-      .eq('drink_id', id)
-      .eq('is_public', true)
-      .order('overall', { ascending: false })
-      .then(({ data }) => { setPublicRatings((data as unknown as PublicRating[]) ?? []) })
+    listPublicRatings(id).then(setPublicRatings)
 
     setTimeout(() => {
       setSaved(false)
@@ -216,20 +207,22 @@ export default function WhiskyDetail() {
     if (!user || !id) return
     setWishlistBusy(true)
     setError(null)
-    if (inWishlist) {
-      const { error } = await supabase.from('wishlist').delete().eq('drink_id', id).eq('user_id', user.id)
-      if (!error) setInWishlist(false)
-    } else {
-      const { error } = await supabase.from('wishlist').insert({ drink_id: id, user_id: user.id })
-      if (!error) setInWishlist(true)
-    }
+    try {
+      if (inWishlist) {
+        await removeFromWishlist(id, user.id)
+        setInWishlist(false)
+      } else {
+        await addToWishlist(id, user.id)
+        setInWishlist(true)
+      }
+    } catch { /* Zustand bleibt unverändert */ }
     setWishlistBusy(false)
   }
 
   // Whisky aus der Wunschliste nehmen, sobald er in die Sammlung wandert.
   const removeFromWishlistSilently = async () => {
     if (!user || !id || !inWishlist) return
-    await supabase.from('wishlist').delete().eq('drink_id', id).eq('user_id', user.id)
+    await removeFromWishlist(id, user.id)
     setInWishlist(false)
   }
 
@@ -238,14 +231,15 @@ export default function WhiskyDetail() {
     setAddingCollection(true)
     setError(null)
     // Sammlungs-Eintrag ohne Bewertung: privat, keine Noten.
-    const { data, error } = await supabase.from('ratings').insert({
-      drink_id: id,
-      user_id: user.id,
-      is_public: false,
-    }).select('*').single()
+    let data: Rating
+    try {
+      data = await createCollectionEntry(id, user.id)
+    } catch (e) {
+      setAddingCollection(false)
+      setError((e as Error).message); return
+    }
     setAddingCollection(false)
-    if (error) { setError(error.message); return }
-    if (data) setMyRating(data)
+    setMyRating(data)
     removeFromWishlistSilently()
     setCollectionMsg(t('whisky.addedToCollection'))
     setTimeout(() => setCollectionMsg(null), 2500)
@@ -255,10 +249,13 @@ export default function WhiskyDetail() {
     if (!myRating) return
     setDeletingRating(true)
     setError(null)
-    await supabase.from('group_ratings').delete().eq('rating_id', myRating.id)
-    const { error } = await supabase.from('ratings').delete().eq('id', myRating.id)
+    try {
+      await deleteRating(myRating.id)
+    } catch (e) {
+      setDeletingRating(false)
+      setError(t('whisky.deleteRatingFailed', { message: (e as Error).message })); return
+    }
     setDeletingRating(false)
-    if (error) { setError(t('whisky.deleteRatingFailed', { message: error.message })); return }
     setMyRating(null)
     setNose(5); setTaste(5); setFinish(5); setColorIdx(null)
     setWheels(EMPTY_WHEELS); setNote(''); setIsPublic(true)
@@ -272,12 +269,7 @@ export default function WhiskyDetail() {
     if (othersRated && !isAdmin) return
     setDeletingDrink(true)
     setError(null)
-    const { data: rids } = await supabase.from('ratings').select('id').eq('drink_id', drink.id)
-    const ids = (rids ?? []).map(r => r.id)
-    if (ids.length) {
-      await supabase.from('group_ratings').delete().in('rating_id', ids)
-      await supabase.from('ratings').delete().in('id', ids)
-    }
+    await deleteRatingsForDrink(drink.id)
     try {
       await deleteDrink(drink.id)
     } catch (e) {
