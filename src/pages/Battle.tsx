@@ -2,27 +2,20 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import {
+  getBattle,
+  listBattleContenders,
+  loadBattleVotes,
+  castBattleVote,
+  setBattleStatus,
+  deleteBattle,
+  type BattleRow,
+  type BattleVote,
+  type BattleContender,
+} from '../lib/queries/battles'
 import { useAuth } from '../context/AuthContext'
-import type { Drink } from '../lib/types'
 import { thumbUrl } from '../lib/image'
 import LoadError from '../components/LoadError'
-
-interface BattleRow {
-  id: string
-  group_id: string | null
-  status: string
-  created_by: string | null
-}
-
-interface BattleVote {
-  drink_id: string
-  user_id: string
-}
-
-interface Contender {
-  drink: Drink
-  position: number
-}
 
 export default function Battle() {
   const { t } = useTranslation()
@@ -31,7 +24,7 @@ export default function Battle() {
   const { user } = useAuth()
 
   const [battle, setBattle] = useState<BattleRow | null>(null)
-  const [contenders, setContenders] = useState<Contender[]>([])
+  const [contenders, setContenders] = useState<BattleContender[]>([])
   const [votes, setVotes] = useState<BattleVote[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -39,35 +32,25 @@ export default function Battle() {
   const [busy, setBusy] = useState(false)
 
   const loadVotes = async (battleId: string) => {
-    const { data } = await supabase
-      .from('battle_votes')
-      .select('drink_id, user_id')
-      .eq('battle_id', battleId)
-    setVotes((data as BattleVote[]) ?? [])
+    setVotes(await loadBattleVotes(battleId))
   }
 
   const load = async (isActive: () => boolean) => {
     if (!bid) return
     setLoading(true)
     setLoadError(false)
-    const { data: b, error: bErr } = await supabase
-      .from('battles')
-      .select('id, group_id, status, created_by')
-      .eq('id', bid)
-      .maybeSingle()
+    let b: BattleRow | null
+    try {
+      b = await getBattle(bid)
+    } catch {
+      if (isActive()) { setLoadError(true); setLoading(false) }
+      return
+    }
     if (!isActive()) return
-    if (bErr) { setLoadError(true); setLoading(false); return }
-    setBattle((b as BattleRow) ?? null)
+    setBattle(b)
 
-    const { data: bd } = await supabase
-      .from('battle_drinks')
-      .select('position, drinks(*)')
-      .eq('battle_id', bid)
-      .order('position')
+    const list = await listBattleContenders(bid)
     if (!isActive()) return
-    const list = ((bd as unknown as { position: number; drinks: Drink | null }[]) ?? [])
-      .filter(r => r.drinks)
-      .map(r => ({ drink: r.drinks as Drink, position: r.position }))
     setContenders(list)
 
     await loadVotes(bid)
@@ -106,11 +89,11 @@ export default function Battle() {
     setVoteError(false)
     // Optimistisch aktualisieren
     setVotes(prev => [...prev.filter(v => v.user_id !== user.id), { drink_id: drinkId, user_id: user.id }])
-    const { error } = await supabase.from('battle_votes').upsert(
-      { battle_id: bid, drink_id: drinkId, user_id: user.id },
-      { onConflict: 'battle_id,user_id' },
-    )
-    if (error) setVoteError(true)
+    try {
+      await castBattleVote(bid, drinkId, user.id)
+    } catch {
+      setVoteError(true)
+    }
     // Mit dem Server abgleichen (entfernt die optimistische Stimme bei Fehler).
     await loadVotes(bid)
     setBusy(false)
@@ -120,13 +103,13 @@ export default function Battle() {
     if (!battle || !isCreator) return
     const next = isOpen ? 'closed' : 'open'
     setBattle({ ...battle, status: next })
-    await supabase.from('battles').update({ status: next }).eq('id', battle.id)
+    await setBattleStatus(battle.id, next)
   }
 
   const remove = async () => {
     if (!battle || !isCreator) return
     if (!confirm(t('battle.confirmDelete'))) return
-    await supabase.from('battles').delete().eq('id', battle.id)
+    await deleteBattle(battle.id)
     navigate('/battles')
   }
 

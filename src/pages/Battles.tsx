@@ -1,19 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
 import { listWhiskies } from '../lib/queries/drinks'
+import { listMyGroups } from '../lib/queries/groups'
+import { listAllBattles, createBattle, type BattleFeedItem } from '../lib/queries/battles'
 import { useAuth } from '../context/AuthContext'
 import { usePageMeta } from '../lib/pageMeta'
 import LoadError from '../components/LoadError'
-
-interface BattleListItem {
-  id: string
-  status: string
-  created_at: string
-  group_id: string | null
-  battle_drinks: { position: number; drinks: { name: string } | null }[]
-}
 
 export default function Battles() {
   const { t } = useTranslation()
@@ -22,7 +15,7 @@ export default function Battles() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
-  const [battles, setBattles] = useState<BattleListItem[]>([])
+  const [battles, setBattles] = useState<BattleFeedItem[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
 
@@ -38,15 +31,10 @@ export default function Battles() {
   const loadBattles = () => {
     setLoading(true)
     setLoadError(false)
-    supabase
-      .from('battles')
-      .select('id, status, created_at, group_id, battle_drinks(position, drinks(name))')
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) setLoadError(true)
-        else setBattles((data as unknown as BattleListItem[]) ?? [])
-        setLoading(false)
-      })
+    listAllBattles()
+      .then(setBattles)
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false))
   }
 
   useEffect(() => {
@@ -56,12 +44,7 @@ export default function Battles() {
   useEffect(() => {
     if (!user) return
     listWhiskies().then(setAllDrinks)
-    supabase.from('group_members').select('groups(id, name)').eq('user_id', user.id)
-      .then(({ data }) => {
-        const groups = ((data as unknown as { groups: { id: string; name: string } | null }[]) ?? [])
-          .map(r => r.groups).filter((g): g is { id: string; name: string } => !!g)
-        setMyGroups(groups)
-      })
+    listMyGroups().then(setMyGroups)
   }, [user])
 
   const toggleDrink = (id: string) =>
@@ -73,23 +56,19 @@ export default function Battles() {
     if (drinkIds.length < 2 || drinkIds.length > 5) { setError(t('battle.selectTwoToFive')); return }
     setCreating(true)
     setError(null)
-    const { data, error: insErr } = await supabase.from('battles').insert({
-      created_by: user.id,
-      group_id: groupId || null,
-      status: 'open',
-    }).select('id').single()
-    if (insErr || !data) {
+    let newId: string
+    try {
+      newId = await createBattle(groupId || null, user.id, drinkIds)
+    } catch (err) {
       setCreating(false)
-      setError(t('battle.createError', { message: insErr?.message ?? '' }))
+      setError(t('battle.createError', { message: (err as Error).message ?? '' }))
       return
     }
-    const rows = drinkIds.map((drink_id, position) => ({ battle_id: data.id, drink_id, position }))
-    await supabase.from('battle_drinks').insert(rows)
     setCreating(false)
-    navigate(`/battle/${data.id}`)
+    navigate(`/battle/${newId}`)
   }
 
-  const matchupOf = (b: BattleListItem) =>
+  const matchupOf = (b: BattleFeedItem) =>
     [...b.battle_drinks]
       .sort((a, c) => a.position - c.position)
       .map(d => d.drinks?.name)
