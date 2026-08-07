@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
+import { getProfile, loadRatingStats, isUsernameTaken, updateProfile } from '../lib/queries/profile'
 import { useAuth } from '../context/AuthContext'
 import { usePushNotifications } from '../hooks/usePushNotifications'
 import { compressImage, thumbUrl } from '../lib/image'
@@ -46,39 +47,25 @@ export default function Profile() {
 
   useEffect(() => {
     if (!user) return
-    supabase.from('profiles').select('*').eq('id', user.id).single()
-      .then(({ data }) => {
-        if (data) {
-          setDisplayName(data.display_name ?? '')
-          setUsername(data.username ?? '')
-          setAvatarUrl(data.avatar_url)
-          setEmailNotifications(data.email_notifications ?? true)
-          setNotifPrefs((data.notification_prefs as Record<string, boolean>) ?? {})
-        }
-        setLoading(false)
-      })
+    getProfile(user.id).then(data => {
+      if (data) {
+        setDisplayName(data.display_name ?? '')
+        setUsername(data.username ?? '')
+        setAvatarUrl(data.avatar_url)
+        setEmailNotifications(data.email_notifications ?? true)
+        setNotifPrefs(data.notification_prefs ?? {})
+      }
+      setLoading(false)
+    })
     setNewEmail(user.email ?? '')
 
-    supabase.from('ratings').select('overall, drinks(region)').eq('user_id', user.id)
-      .then(({ data }) => {
-        const rows = (data as unknown as { overall: number | null; drinks: { region: string | null } | null }[]) ?? []
-        const scored = rows.filter(r => r.overall != null)
-        const avg = scored.length ? scored.reduce((s, r) => s + (r.overall ?? 0), 0) / scored.length : null
-        const regionCounts = new Map<string, number>()
-        for (const r of rows) {
-          const region = r.drinks?.region
-          if (region) regionCounts.set(region, (regionCounts.get(region) ?? 0) + 1)
-        }
-        const topRegion = [...regionCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
-        setStats({ count: rows.length, avg, topRegion })
-      })
+    loadRatingStats(user.id).then(setStats)
   }, [user])
 
   const checkUsername = async (val: string) => {
     if (!val.trim()) { setUsernameError(t('profile.usernameEmpty')); return }
-    const { data } = await supabase.from('profiles')
-      .select('id').eq('username', val.trim()).neq('id', user!.id).maybeSingle()
-    if (data) setUsernameError(t('profile.usernameTaken'))
+    const taken = await isUsernameTaken(val.trim(), user!.id)
+    if (taken) setUsernameError(t('profile.usernameTaken'))
     else setUsernameError(null)
   }
 
@@ -104,15 +91,19 @@ export default function Profile() {
       newAvatarUrl = urlData.publicUrl + `?t=${Date.now()}`
     }
 
-    const { error } = await supabase.from('profiles').update({
-      display_name: displayName.trim() || null,
-      username: username.trim(),
-      avatar_url: newAvatarUrl,
-      email_notifications: emailNotifications,
-    }).eq('id', user.id)
+    try {
+      await updateProfile(user.id, {
+        display_name: displayName.trim() || null,
+        username: username.trim(),
+        avatar_url: newAvatarUrl,
+        email_notifications: emailNotifications,
+      })
+    } catch (e) {
+      setSaving(false)
+      setError((e as Error).message); return
+    }
 
     setSaving(false)
-    if (error) { setError(error.message); return }
     setAvatarUrl(newAvatarUrl)
     setAvatarFile(null)
     setSaved(true)
@@ -123,10 +114,11 @@ export default function Profile() {
     const prev = notifPrefs
     const next = { ...prev, [key]: val }
     setNotifPrefs(next)
-    const { error } = await supabase.from('profiles').update({ notification_prefs: next }).eq('id', user!.id)
-    if (error) {
+    try {
+      await updateProfile(user!.id, { notification_prefs: next })
+    } catch (e) {
       setNotifPrefs(prev)
-      setError(t('profile.settingSaveFailed') + error.message)
+      setError(t('profile.settingSaveFailed') + (e as Error).message)
     }
   }
 
@@ -304,10 +296,11 @@ export default function Profile() {
             <Toggle enabled={emailNotifications} onToggle={async () => {
               const next = !emailNotifications
               setEmailNotifications(next)
-              const { error } = await supabase.from('profiles').update({ email_notifications: next }).eq('id', user!.id)
-              if (error) {
+              try {
+                await updateProfile(user!.id, { email_notifications: next })
+              } catch (e) {
                 setEmailNotifications(!next)
-                setError(t('profile.settingSaveFailed') + error.message)
+                setError(t('profile.settingSaveFailed') + (e as Error).message)
               }
             }} />
           </div>
