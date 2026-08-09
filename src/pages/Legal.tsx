@@ -62,7 +62,7 @@ function Datenschutz() {
       <H2>9. Amazon-Partnerprogramm</H2>
       <P>Wir nehmen am Partnerprogramm von Amazon (Amazon EU S.à r.l.) teil. Auf Produktseiten findest du mit „*“ gekennzeichnete Links zu amazon.de. Kaufst du nach dem Klick auf einen solchen Link ein Produkt, erhalten wir eine Werbekostenerstattung (Provision). Für dich entstehen dadurch keine zusätzlichen Kosten. Beim Klick auf einen Amazon-Link verlässt du unsere Anwendung; es gelten dann die Datenschutzbestimmungen von Amazon. Amazon und das Amazon-Logo sind Warenzeichen von Amazon.com, Inc. oder seiner verbundenen Unternehmen.</P>
 
-      <P className="text-stone-500 mt-6">Stand: Juni 2026</P>
+      <P className="text-stone-500 mt-6">Stand: August 2026</P>
     </div>
   )
 }
@@ -94,7 +94,7 @@ function AGB() {
       <H2>8. Schlussbestimmungen</H2>
       <P>Es gilt das Recht der Bundesrepublik Deutschland. Sollten einzelne Bestimmungen unwirksam sein, bleibt die Wirksamkeit der übrigen Bestimmungen unberührt.</P>
 
-      <P className="text-stone-500 mt-6">Stand: Juni 2026</P>
+      <P className="text-stone-500 mt-6">Stand: August 2026</P>
     </div>
   )
 }
