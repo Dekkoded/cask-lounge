@@ -1,7 +1,7 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { getMemberInfo, listPublicRatedDrinks, type MemberInfo, type PublicRatedDrink } from '../lib/queries/profile'
 import { lookupDistillery } from '../lib/distilleries'
 import Lightbox from '../components/Lightbox'
 import { usePageMeta } from '../lib/pageMeta'
@@ -10,21 +10,6 @@ import type { MapPin } from '../components/DistilleryMap'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
-interface MemberInfo {
-  username: string
-  display_name: string | null
-  avatar_url: string | null
-}
-
-interface RatedDrink {
-  id: string
-  name: string
-  producer: string | null
-  region: string | null
-  photo_url: string | null
-  overall: number | null
-}
-
 export default function MemberProfile() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -32,7 +17,7 @@ export default function MemberProfile() {
 
   const [member, setMember] = useState<MemberInfo | null>(null)
   const [topRegion, setTopRegion] = useState<string | null>(null)
-  const [whiskies, setWhiskies] = useState<RatedDrink[]>([])
+  const [whiskies, setWhiskies] = useState<PublicRatedDrink[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
@@ -41,29 +26,20 @@ export default function MemberProfile() {
     if (!id) return
     setLoading(true)
 
-    supabase.from('profiles').select('username, display_name, avatar_url').eq('id', id).maybeSingle()
-      .then(({ data }) => {
-        if (!data) { setNotFound(true); setLoading(false); return }
-        setMember(data)
+    getMemberInfo(id).then(async info => {
+      if (!info) { setNotFound(true); setLoading(false); return }
+      setMember(info)
 
-        supabase.from('ratings')
-          .select('overall, drinks(id, name, producer, region, photo_url)')
-          .eq('user_id', id).eq('is_public', true)
-          .order('overall', { ascending: false, nullsFirst: false })
-          .then(({ data: rows }) => {
-            const list = (rows as unknown as { overall: number | null; drinks: Omit<RatedDrink, 'overall'> | null }[]) ?? []
+      const list = await listPublicRatedDrinks(id)
+      const regionCounts = new Map<string, number>()
+      for (const w of list) {
+        if (w.region) regionCounts.set(w.region, (regionCounts.get(w.region) ?? 0) + 1)
+      }
+      setTopRegion([...regionCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null)
 
-            const regionCounts = new Map<string, number>()
-            for (const r of list) {
-              const region = r.drinks?.region
-              if (region) regionCounts.set(region, (regionCounts.get(region) ?? 0) + 1)
-            }
-            setTopRegion([...regionCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null)
-
-            setWhiskies(list.filter(r => r.drinks).map(r => ({ ...r.drinks!, overall: r.overall })))
-            setLoading(false)
-          })
-      })
+      setWhiskies(list)
+      setLoading(false)
+    })
   }, [id])
 
   usePageMeta({ title: member ? (member.display_name ?? member.username) : undefined })

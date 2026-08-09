@@ -2,7 +2,7 @@
 // Teilen von Bewertungen in Gruppen (group_ratings). Reads sind best-effort
 // (liefern []/null), Writes werfen bei Postgrest-Fehler.
 import { supabase } from '../supabase'
-import type { Rating } from '../types'
+import type { Rating, Drink, GlobalDrinkScore } from '../types'
 
 export interface PublicRating extends Rating {
   profiles: { display_name: string | null; username: string }
@@ -11,6 +11,31 @@ export interface PublicRating extends Rating {
 export interface GlobalScore {
   avg: number | null
   count: number
+}
+
+/** Reduzierte Bewertung (Noten + Aromaräder) für die Vergleichsansicht. */
+export interface RatingDetail {
+  overall: number | null
+  nose: number | null
+  taste: number | null
+  finish: number | null
+  wheels: { nose?: number[]; taste?: number[]; aromas?: string[]; extra?: string[] } | null
+}
+
+/** Sammlungs-Eintrag (eigene Bewertung inkl. Drink) für die Vitrine. */
+export interface VitrineEntry {
+  id: string
+  overall: number | null
+  updated_at: string
+  purchase_price: number | null
+  drinks: Drink | null
+}
+
+/** Wunschlisten-Eintrag inkl. Drink. */
+export interface WishlistEntry {
+  id: string
+  created_at: string
+  drinks: Drink | null
 }
 
 export type RatingPayload = {
@@ -36,6 +61,36 @@ export async function getGlobalScore(drinkId: string): Promise<GlobalScore> {
     .eq('id', drinkId)
     .maybeSingle()
   return data ? { avg: data.avg_overall, count: data.num_ratings ?? 0 } : { avg: null, count: 0 }
+}
+
+/** Gesamt-Ranking aus der öffentlichen View, höchste zuerst. Wirft bei Fehler. */
+export async function listGlobalScores(): Promise<GlobalDrinkScore[]> {
+  const { data, error } = await supabase
+    .from('global_drink_scores')
+    .select('*')
+    .order('avg_overall', { ascending: false, nullsFirst: false })
+  if (error) throw error
+  return (data as GlobalDrinkScore[]) ?? []
+}
+
+/** Öffentliche Bewertungs-Details (Noten + Aromaräder) eines Whiskys. */
+export async function listRatingDetails(drinkId: string): Promise<RatingDetail[]> {
+  const { data } = await supabase
+    .from('ratings')
+    .select('overall, nose, taste, finish, wheels')
+    .eq('drink_id', drinkId)
+    .eq('is_public', true)
+  return (data as RatingDetail[]) ?? []
+}
+
+/** Alle bewerteten Whiskys eines Nutzers (Vitrine), höchste Note zuerst. */
+export async function listMyRatedDrinks(userId: string): Promise<VitrineEntry[]> {
+  const { data } = await supabase
+    .from('ratings')
+    .select('id, overall, updated_at, purchase_price, drinks(*)')
+    .eq('user_id', userId)
+    .order('overall', { ascending: false, nullsFirst: false })
+  return (data as unknown as VitrineEntry[]) ?? []
 }
 
 /** Öffentliche Einzelbewertungen (inkl. Profil), höchste zuerst. */
@@ -118,6 +173,21 @@ export async function isInWishlist(drinkId: string, userId: string): Promise<boo
     .eq('user_id', userId)
     .maybeSingle()
   return !!data
+}
+
+/** Die komplette Wunschliste eines Nutzers inkl. Drinks, neueste zuerst. */
+export async function listWishlist(userId: string): Promise<WishlistEntry[]> {
+  const { data } = await supabase
+    .from('wishlist')
+    .select('id, created_at, drinks(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+  return (data as unknown as WishlistEntry[]) ?? []
+}
+
+/** Entfernt einen Wunschlisten-Eintrag per ID (best-effort). */
+export async function removeWishlistEntry(entryId: string): Promise<void> {
+  await supabase.from('wishlist').delete().eq('id', entryId)
 }
 
 /** Fügt den Whisky zur Wunschliste hinzu. Wirft bei Fehler. */

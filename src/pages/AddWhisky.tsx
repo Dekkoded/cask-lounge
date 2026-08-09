@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { searchWhiskiesByName, createDrink } from '../lib/queries/drinks'
+import { createCollectionEntry } from '../lib/queries/ratings'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
 import Modal from '../components/Modal'
@@ -77,11 +78,11 @@ export default function AddWhisky() {
     if (!user || !createdId) return
     setAddingCollection(true)
     // Sammlungs-Eintrag ohne Bewertung: privat, keine Noten.
-    await supabase.from('ratings').insert({
-      drink_id: createdId,
-      user_id: user.id,
-      is_public: false,
-    })
+    try {
+      await createCollectionEntry(createdId, user.id)
+    } catch {
+      // best-effort: trotzdem zum Whisky navigieren
+    }
     navigate(`/whisky/${createdId}`)
   }
 

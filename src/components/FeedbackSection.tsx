@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { listMyFeedback, submitFeedback, type FeedbackType, type FeedbackRow } from '../lib/queries/feedback'
 import { useAuth } from '../context/AuthContext'
-
-type FeedbackType = 'idea' | 'problem'
-
-interface FeedbackRow {
-  id: string
-  type: FeedbackType
-  message: string
-  status: string
-  created_at: string
-}
 
 const STATUS_STYLE: Record<string, string> = {
   open: 'bg-stone-700 text-stone-300',
@@ -33,11 +23,7 @@ export default function FeedbackSection() {
 
   const load = () => {
     if (!user) return
-    supabase.from('feedback')
-      .select('id, type, message, status, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => setEntries((data as FeedbackRow[]) ?? []))
+    listMyFeedback(user.id).then(setEntries)
   }
 
   useEffect(load, [user])
@@ -46,13 +32,14 @@ export default function FeedbackSection() {
     if (!user || !message.trim() || sending) return
     setSending(true)
     setError(null)
-    const { error: insErr } = await supabase.from('feedback').insert({
-      user_id: user.id,
-      type,
-      message: message.trim(),
-    })
+    try {
+      await submitFeedback(user.id, type, message.trim())
+    } catch (err) {
+      setSending(false)
+      setError(t('profile.feedback.error') + (err as Error).message)
+      return
+    }
     setSending(false)
-    if (insErr) { setError(t('profile.feedback.error') + insErr.message); return }
     setMessage('')
     setSent(true)
     setTimeout(() => setSent(false), 3000)

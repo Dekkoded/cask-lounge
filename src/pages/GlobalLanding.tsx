@@ -1,11 +1,18 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import {
+  listGlobalScores,
+  listMyRatedDrinks,
+  listWishlist,
+  removeWishlistEntry,
+  type VitrineEntry,
+  type WishlistEntry,
+} from '../lib/queries/ratings'
 import { lookupDistillery } from '../lib/distilleries'
 import type { MapPin } from '../components/DistilleryMap'
-import type { GlobalDrinkScore, Drink } from '../lib/types'
+import type { GlobalDrinkScore } from '../lib/types'
 import { usePageMeta } from '../lib/pageMeta'
 import { formatDate, formatNumber } from '../lib/format'
 import { thumbUrl } from '../lib/image'
@@ -13,20 +20,6 @@ import { thumbUrl } from '../lib/image'
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
 type View = 'ranking' | 'vitrine' | 'wishlist'
-
-interface VitrineEntry {
-  id: string
-  overall: number | null
-  updated_at: string
-  purchase_price: number | null
-  drinks: Drink | null
-}
-
-interface WishlistEntry {
-  id: string
-  created_at: string
-  drinks: Drink | null
-}
 
 export default function GlobalLanding() {
   const { t, i18n } = useTranslation()
@@ -48,45 +41,31 @@ export default function GlobalLanding() {
   const [searchReadonly, setSearchReadonly] = useState(true)
 
   useEffect(() => {
-    supabase
-      .from('global_drink_scores')
-      .select('*')
-      .order('avg_overall', { ascending: false, nullsFirst: false })
-      .then(({ data }) => {
-        setScores(data ?? [])
-        setLoading(false)
-      })
+    listGlobalScores()
+      .then(setScores)
+      .catch(() => setScores([]))
+      .finally(() => setLoading(false))
   }, [])
 
   useEffect(() => {
     if (!user) { setVitrineLoading(false); return }
-    supabase
-      .from('ratings')
-      .select('id, overall, updated_at, purchase_price, drinks(*)')
-      .eq('user_id', user.id)
-      .order('overall', { ascending: false, nullsFirst: false })
-      .then(({ data }) => {
-        setVitrine((data as unknown as VitrineEntry[]) ?? [])
-        setVitrineLoading(false)
-      })
+    listMyRatedDrinks(user.id).then(data => {
+      setVitrine(data)
+      setVitrineLoading(false)
+    })
   }, [user])
 
   useEffect(() => {
     if (!user) { setWishlistLoading(false); return }
-    supabase
-      .from('wishlist')
-      .select('id, created_at, drinks(*)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setWishlist((data as unknown as WishlistEntry[]) ?? [])
-        setWishlistLoading(false)
-      })
+    listWishlist(user.id).then(data => {
+      setWishlist(data)
+      setWishlistLoading(false)
+    })
   }, [user])
 
   const removeFromWishlist = async (entryId: string) => {
     setWishlist(prev => prev.filter(w => w.id !== entryId))
-    await supabase.from('wishlist').delete().eq('id', entryId)
+    await removeWishlistEntry(entryId)
   }
 
   const q = search.toLowerCase()

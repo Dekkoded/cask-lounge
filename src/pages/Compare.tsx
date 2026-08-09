@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
 import { getDrinkForCompare } from '../lib/queries/drinks'
+import { listGlobalScores, listRatingDetails, type RatingDetail } from '../lib/queries/ratings'
 import type { GlobalDrinkScore } from '../lib/types'
 import CompareWheel from '../components/CompareWheel'
 import { aromaLabel } from '../components/AromaTags'
@@ -12,14 +12,6 @@ import LoadError from '../components/LoadError'
 
 const COLORS = ['#f59e0b', '#60a5fa', '#34d399']
 const MAX = 3
-
-interface RatingRow {
-  overall: number | null
-  nose: number | null
-  taste: number | null
-  finish: number | null
-  wheels: { nose?: number[]; taste?: number[]; aromas?: string[]; extra?: string[] } | null
-}
 
 interface CompareData {
   id: string
@@ -42,7 +34,7 @@ function avg(nums: number[]): number | null {
   return Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10
 }
 
-function avgWheel(rows: RatingRow[], type: 'nose' | 'taste'): number[] {
+function avgWheel(rows: RatingDetail[], type: 'nose' | 'taste'): number[] {
   return Array.from({ length: 12 }, (_, i) => {
     const vs = rows.map(r => r.wheels?.[type]?.[i]).filter((v): v is number => typeof v === 'number')
     return vs.length ? vs.reduce((a, b) => a + b, 0) / vs.length : 0
@@ -63,12 +55,9 @@ export default function Compare() {
 
   const loadScores = () => {
     setScoresError(false)
-    supabase.from('global_drink_scores').select('*')
-      .order('avg_overall', { ascending: false, nullsFirst: false })
-      .then(({ data, error }) => {
-        if (error) setScoresError(true)
-        else setScores(data ?? [])
-      })
+    listGlobalScores()
+      .then(setScores)
+      .catch(() => setScoresError(true))
   }
 
   useEffect(() => {
@@ -82,12 +71,12 @@ export default function Compare() {
     ;(async () => {
       const updates: Record<string, CompareData> = {}
       for (const id of missing) {
-        const [drink, { data: ratings }] = await Promise.all([
+        const [drink, ratings] = await Promise.all([
           getDrinkForCompare(id),
-          supabase.from('ratings').select('overall, nose, taste, finish, wheels').eq('drink_id', id).eq('is_public', true),
+          listRatingDetails(id),
         ])
         if (!drink) continue
-        const rs = (ratings ?? []) as RatingRow[]
+        const rs = ratings
         const freq = new Map<string, number>()
         for (const r of rs) {
           const tokens = [...(r.wheels?.aromas ?? []), ...(r.wheels?.extra ?? [])]

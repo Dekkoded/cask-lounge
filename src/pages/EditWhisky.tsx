@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getDrink, updateDrink } from '../lib/queries/drinks'
+import { othersHaveRated } from '../lib/queries/ratings'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
 import type { Drink } from '../lib/types'
@@ -37,9 +38,7 @@ export default function EditWhisky() {
 
       if (isAdmin) { setAllowed(true); return }
       if (data.created_by !== user.id) { setAllowed(false); return }
-      const { count } = await supabase.from('ratings').select('id', { count: 'exact', head: true })
-        .eq('drink_id', id).neq('user_id', user.id)
-      setAllowed((count ?? 0) === 0)
+      setAllowed(!(await othersHaveRated(id, user.id)))
     })
   }, [id, user, isAdmin])
 

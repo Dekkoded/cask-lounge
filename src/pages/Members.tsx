@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { searchProfiles, type MemberListItem } from '../lib/queries/profile'
 import { thumbUrl } from '../lib/image'
-
-interface Member {
-  id: string
-  username: string
-  display_name: string | null
-  avatar_url: string | null
-}
 
 export default function Members() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
-  const [members, setMembers] = useState<Member[]>([])
+  const [members, setMembers] = useState<MemberListItem[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -23,14 +16,9 @@ export default function Members() {
     setLoading(true)
 
     const run = async () => {
-      let req = supabase.from('profiles').select('id, username, display_name, avatar_url')
-      const q = query.trim()
-      if (q.length >= 1) {
-        req = req.or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
-      }
-      const { data } = await req.order('username').limit(30)
+      const data = await searchProfiles(query)
       if (active) {
-        setMembers(data ?? [])
+        setMembers(data)
         setLoading(false)
       }
     }

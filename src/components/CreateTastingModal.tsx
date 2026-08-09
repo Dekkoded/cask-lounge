@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { listMyGroups } from '../lib/queries/groups'
+import { createTasting } from '../lib/queries/tastings'
 import { useAuth } from '../context/AuthContext'
 import Modal from './Modal'
 
@@ -22,15 +23,12 @@ export default function CreateTastingModal({ open, onClose }: { open: boolean; o
   useEffect(() => {
     if (!open || !user) return
     setLoading(true); setError(null); setTitle('')
-    supabase.from('group_members').select('groups(id, name)').eq('user_id', user.id)
-      .then(({ data }) => {
-        const gs = ((data ?? []) as unknown as { groups: GroupOpt | null }[])
-          .map(r => r.groups).filter((g): g is GroupOpt => !!g)
-        setGroups(gs)
-        const last = localStorage.getItem('lastGroupId')
-        setGroupId(gs.find(g => g.id === last)?.id ?? gs[0]?.id ?? '')
-        setLoading(false)
-      })
+    listMyGroups().then(gs => {
+      setGroups(gs)
+      const last = localStorage.getItem('lastGroupId')
+      setGroupId(gs.find(g => g.id === last)?.id ?? gs[0]?.id ?? '')
+      setLoading(false)
+    })
   }, [open, user])
 
   const hasGroups = groups.length > 0
@@ -39,17 +37,23 @@ export default function CreateTastingModal({ open, onClose }: { open: boolean; o
   const create = async () => {
     if (!user || !canCreate || creating) return
     setCreating(true); setError(null)
-    const { data, error: insErr } = await supabase.from('tastings').insert({
-      group_id: groupId,
-      title: title.trim(),
-      hosted_by: user.id,
-      status: 'open',
-    }).select('id').single()
+    let newId: string
+    try {
+      newId = await createTasting({
+        group_id: groupId,
+        title: title.trim(),
+        hosted_by: user.id,
+        event_date: null,
+      })
+    } catch (err) {
+      setCreating(false)
+      setError((err as Error).message ?? 'Error')
+      return
+    }
     setCreating(false)
-    if (insErr || !data) { setError(insErr?.message ?? 'Error'); return }
     setTitle('')
     onClose()
-    navigate(`/groups/${groupId}/tasting/${data.id}`)
+    navigate(`/groups/${groupId}/tasting/${newId}`)
   }
 
   const field = 'w-full bg-stone-800 border border-stone-700 rounded-lg px-4 py-2.5 text-stone-100 focus:outline-none focus:border-amber-500'

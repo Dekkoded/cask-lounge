@@ -26,6 +26,31 @@ export type ProfileUpdate = Partial<{
   notification_prefs: Record<string, boolean>
 }>
 
+/** Kompakter Profil-Eintrag für die Mitglieder-Suche. */
+export interface MemberListItem {
+  id: string
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+/** Öffentliche Profil-Infos eines anderen Nutzers. */
+export interface MemberInfo {
+  username: string
+  display_name: string | null
+  avatar_url: string | null
+}
+
+/** Ein öffentlich bewerteter Whisky eines Nutzers (Drink + eigene Note). */
+export interface PublicRatedDrink {
+  id: string
+  name: string
+  producer: string | null
+  region: string | null
+  photo_url: string | null
+  overall: number | null
+}
+
 /** Das eigene Profil, oder null. */
 export async function getProfile(userId: string): Promise<ProfileRow | null> {
   const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
@@ -62,4 +87,38 @@ export async function isUsernameTaken(username: string, excludeUserId: string): 
 export async function updateProfile(userId: string, patch: ProfileUpdate): Promise<void> {
   const { error } = await supabase.from('profiles').update(patch).eq('id', userId)
   if (error) throw error
+}
+
+/**
+ * Sucht Profile nach Username/Anzeigename (leerer Query → erste 30 alphabetisch).
+ * Best-effort, liefert [] bei Fehler.
+ */
+export async function searchProfiles(query: string): Promise<MemberListItem[]> {
+  let req = supabase.from('profiles').select('id, username, display_name, avatar_url')
+  const q = query.trim()
+  if (q.length >= 1) req = req.or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+  const { data } = await req.order('username').limit(30)
+  return (data as MemberListItem[]) ?? []
+}
+
+/** Öffentliche Profil-Infos eines Nutzers, oder null. */
+export async function getMemberInfo(userId: string): Promise<MemberInfo | null> {
+  const { data } = await supabase
+    .from('profiles')
+    .select('username, display_name, avatar_url')
+    .eq('id', userId)
+    .maybeSingle()
+  return (data as MemberInfo | null) ?? null
+}
+
+/** Öffentlich bewertete Whiskys eines Nutzers, nach Note absteigend. */
+export async function listPublicRatedDrinks(userId: string): Promise<PublicRatedDrink[]> {
+  const { data } = await supabase
+    .from('ratings')
+    .select('overall, drinks(id, name, producer, region, photo_url)')
+    .eq('user_id', userId)
+    .eq('is_public', true)
+    .order('overall', { ascending: false, nullsFirst: false })
+  const rows = (data as unknown as { overall: number | null; drinks: Omit<PublicRatedDrink, 'overall'> | null }[]) ?? []
+  return rows.filter(r => r.drinks).map(r => ({ ...r.drinks!, overall: r.overall }))
 }

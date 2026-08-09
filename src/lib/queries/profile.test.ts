@@ -1,6 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { supabase } from '../supabase'
-import { getProfile, loadRatingStats, isUsernameTaken, updateProfile } from './profile'
+import {
+  getProfile,
+  loadRatingStats,
+  isUsernameTaken,
+  updateProfile,
+  searchProfiles,
+  getMemberInfo,
+  listPublicRatedDrinks,
+} from './profile'
 
 // Der Supabase-Client wird komplett gemockt: kein Netzwerk, keine Env-Variablen.
 vi.mock('../supabase', () => ({ supabase: { from: vi.fn() } }))
@@ -9,7 +17,7 @@ vi.mock('../supabase', () => ({ supabase: { from: vi.fn() } }))
 // zurück, und `await builder` löst zum vorgegebenen Ergebnis auf.
 function builder(result: { data?: unknown; error?: unknown }) {
   const b: Record<string, unknown> = {}
-  for (const m of ['select', 'eq', 'neq', 'update', 'single', 'maybeSingle']) {
+  for (const m of ['select', 'eq', 'neq', 'or', 'order', 'limit', 'update', 'single', 'maybeSingle']) {
     b[m] = vi.fn(() => b)
   }
   b.then = (resolve: (r: unknown) => unknown) => resolve(result)
@@ -57,6 +65,32 @@ describe('profile queries – Lesezugriffe (best-effort)', () => {
   it('isUsernameTaken ist false ohne Treffer', async () => {
     from.mockReturnValue(builder({ data: null }))
     await expect(isUsernameTaken('leon', 'u1')).resolves.toBe(false)
+  })
+
+  it('searchProfiles liefert die Trefferliste', async () => {
+    const rows = [{ id: 'u2', username: 'ida', display_name: null, avatar_url: null }]
+    from.mockReturnValue(builder({ data: rows }))
+    await expect(searchProfiles('ida')).resolves.toEqual(rows)
+  })
+
+  it('searchProfiles liefert [] bei leerem Ergebnis', async () => {
+    from.mockReturnValue(builder({ data: null }))
+    await expect(searchProfiles('')).resolves.toEqual([])
+  })
+
+  it('getMemberInfo gibt null zurück, wenn nichts gefunden wird', async () => {
+    from.mockReturnValue(builder({ data: null }))
+    await expect(getMemberInfo('u2')).resolves.toBeNull()
+  })
+
+  it('listPublicRatedDrinks flacht Drinks samt Note ab und filtert Leere', async () => {
+    from.mockReturnValue(builder({ data: [
+      { overall: 9, drinks: { id: 'd1', name: 'Ardbeg', producer: 'A', region: 'Islay', photo_url: null } },
+      { overall: 5, drinks: null },
+    ] }))
+    await expect(listPublicRatedDrinks('u2')).resolves.toEqual([
+      { id: 'd1', name: 'Ardbeg', producer: 'A', region: 'Islay', photo_url: null, overall: 9 },
+    ])
   })
 })
 

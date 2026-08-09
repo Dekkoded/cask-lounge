@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { savePushSubscription, removePushSubscription } from '../lib/queries/push'
 import { useAuth } from '../context/AuthContext'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
@@ -57,14 +57,10 @@ export function usePushNotifications() {
       })
 
       const subJson = sub.toJSON()
-      const { error } = await supabase.from('push_subscriptions').upsert({
-        user_id: user.id,
-        endpoint: sub.endpoint,
-        subscription: subJson,
-      }, { onConflict: 'user_id,endpoint' })
-
-      if (error) {
-        alert('Fehler beim Speichern: ' + error.message)
+      try {
+        await savePushSubscription(user.id, sub.endpoint, subJson)
+      } catch (error) {
+        alert('Fehler beim Speichern: ' + (error as Error).message)
         setLoading(false)
         return
       }
@@ -83,8 +79,7 @@ export function usePushNotifications() {
     const sub = await reg.pushManager.getSubscription()
     if (sub) {
       await sub.unsubscribe()
-      await supabase.from('push_subscriptions').delete()
-        .eq('user_id', user.id).eq('endpoint', sub.endpoint)
+      await removePushSubscription(user.id, sub.endpoint)
     }
     setSubscribed(false)
     setLoading(false)

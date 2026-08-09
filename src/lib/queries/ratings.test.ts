@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { supabase } from '../supabase'
 import {
   getGlobalScore,
+  listGlobalScores,
+  listRatingDetails,
+  listMyRatedDrinks,
+  listWishlist,
+  removeWishlistEntry,
   listPublicRatings,
   getMyRating,
   othersHaveRated,
@@ -70,6 +75,37 @@ describe('ratings queries – Lesezugriffe (best-effort)', () => {
   it('isInWishlist ist false ohne Treffer', async () => {
     from.mockReturnValue(builder({ data: null }))
     await expect(isInWishlist('d1', 'u1')).resolves.toBe(false)
+  })
+
+  it('listGlobalScores gibt das Ranking zurück', async () => {
+    const rows = [{ id: 'd1', name: 'Ardbeg', avg_overall: 9 }]
+    from.mockReturnValue(builder({ data: rows, error: null }))
+    await expect(listGlobalScores()).resolves.toEqual(rows)
+  })
+
+  it('listGlobalScores wirft bei einem Fehler', async () => {
+    from.mockReturnValue(builder({ data: null, error: { message: 'boom' } }))
+    await expect(listGlobalScores()).rejects.toMatchObject({ message: 'boom' })
+  })
+
+  it('listRatingDetails liefert [] bei leerem Ergebnis', async () => {
+    from.mockReturnValue(builder({ data: null }))
+    await expect(listRatingDetails('d1')).resolves.toEqual([])
+  })
+
+  it('listMyRatedDrinks liefert [] bei leerem Ergebnis', async () => {
+    from.mockReturnValue(builder({ data: null }))
+    await expect(listMyRatedDrinks('u1')).resolves.toEqual([])
+  })
+
+  it('listWishlist liefert [] bei leerem Ergebnis', async () => {
+    from.mockReturnValue(builder({ data: null }))
+    await expect(listWishlist('u1')).resolves.toEqual([])
+  })
+
+  it('removeWishlistEntry läuft ohne Fehler durch (best-effort)', async () => {
+    from.mockReturnValue(builder({ error: null }))
+    await expect(removeWishlistEntry('w1')).resolves.toBeUndefined()
   })
 })
 

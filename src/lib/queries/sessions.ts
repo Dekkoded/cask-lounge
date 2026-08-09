@@ -59,6 +59,12 @@ export async function postSession(input: NewSession): Promise<void> {
   if (error) throw error
 }
 
+/** Postet dieselbe Session in mehrere Gruppen auf einmal. Wirft bei Fehler. */
+export async function postSessions(inputs: NewSession[]): Promise<void> {
+  const { error } = await supabase.from('drink_sessions').insert(inputs)
+  if (error) throw error
+}
+
 /** Fügt eine Emoji-Reaktion hinzu oder entfernt sie (best-effort). */
 export async function toggleSessionReaction(
   sessionId: string,

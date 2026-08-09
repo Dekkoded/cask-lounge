@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
 import { listWhiskies } from '../lib/queries/drinks'
+import { listMyGroups } from '../lib/queries/groups'
+import { postSessions } from '../lib/queries/sessions'
 import { useAuth } from '../context/AuthContext'
 import Modal from './Modal'
 
@@ -25,13 +26,10 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
   useEffect(() => {
     if (!open || !user) return
     setLoading(true); setError(null); setSent(false); setTarget('all')
-    supabase.from('group_members').select('groups(id, name)').eq('user_id', user.id)
-      .then(({ data }) => {
-        const gs = ((data ?? []) as unknown as { groups: GroupOpt | null }[])
-          .map(r => r.groups).filter((g): g is GroupOpt => !!g)
-        setGroups(gs)
-        setLoading(false)
-      })
+    listMyGroups().then(gs => {
+      setGroups(gs)
+      setLoading(false)
+    })
     listWhiskies().then(setDrinks)
   }, [open, user])
 
@@ -50,9 +48,14 @@ export default function LivePostModal({ open, onClose }: { open: boolean; onClos
       drink_name: drinkId ? null : drinkName.trim() || null,
       message: message.trim() || null,
     }))
-    const { error: insErr } = await supabase.from('drink_sessions').insert(rows)
+    try {
+      await postSessions(rows)
+    } catch (err) {
+      setPosting(false)
+      setError(t('groups.shareError', { message: (err as Error).message }))
+      return
+    }
     setPosting(false)
-    if (insErr) { setError(t('groups.shareError', { message: insErr.message })); return }
     setSent(true)
     setDrinkId(''); setDrinkName(''); setMessage('')
     setTimeout(() => { setSent(false); onClose() }, 900)
