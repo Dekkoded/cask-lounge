@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { getDrink, updateDrink } from '../lib/queries/drinks'
 import { othersHaveRated } from '../lib/queries/ratings'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import { compressImage } from '../lib/image'
 import type { Drink } from '../lib/types'
 

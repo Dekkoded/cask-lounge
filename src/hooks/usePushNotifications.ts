@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { savePushSubscription, removePushSubscription } from '../lib/queries/push'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string
 

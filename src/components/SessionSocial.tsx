@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-export const REACTIONS = ['🥃', '🔥', '👏', '😍', '🤤']
+const REACTIONS = ['🥃', '🔥', '👏', '😍', '🤤']
 
 export interface SessionReaction {
   emoji: string

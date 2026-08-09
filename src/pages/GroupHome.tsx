@@ -16,7 +16,7 @@ import {
   type RatingShare,
 } from '../lib/queries/sessions'
 import { loadGroupArchive, type ArchiveDrink } from '../lib/queries/archive'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import LoadError from '../components/LoadError'
 import GroupSwitcher from '../components/groups/GroupSwitcher'
 import ActivityTab, { type Activity } from '../components/groups/ActivityTab'

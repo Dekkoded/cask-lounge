@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { listWhiskies } from '../lib/queries/drinks'
 import { listMyGroups } from '../lib/queries/groups'
 import { postSessions } from '../lib/queries/sessions'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import Modal from './Modal'
 
 interface GroupOpt { id: string; name: string }

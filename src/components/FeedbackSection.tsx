@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { listMyFeedback, submitFeedback, type FeedbackType, type FeedbackRow } from '../lib/queries/feedback'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 
 const STATUS_STYLE: Record<string, string> = {
   open: 'bg-stone-700 text-stone-300',

@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { INTRO_EVENT } from '../lib/intro'
 
 const SEEN_KEY = 'cl_intro_seen'
-
-export function openIntro() {
-  window.dispatchEvent(new Event('open-intro'))
-}
 
 interface IntroStep { icon: string; title: string; body: string }
 
@@ -21,8 +18,8 @@ export default function IntroTour() {
   useEffect(() => {
     if (!localStorage.getItem(SEEN_KEY)) setOpen(true)
     const reopen = () => { setDir(1); setStep(0); setOpen(true) }
-    window.addEventListener('open-intro', reopen)
-    return () => window.removeEventListener('open-intro', reopen)
+    window.addEventListener(INTRO_EVENT, reopen)
+    return () => window.removeEventListener(INTRO_EVENT, reopen)
   }, [])
 
   const finish = () => {

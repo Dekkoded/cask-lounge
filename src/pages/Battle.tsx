@@ -13,7 +13,7 @@ import {
   type BattleVote,
   type BattleContender,
 } from '../lib/queries/battles'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import { thumbUrl } from '../lib/image'
 import LoadError from '../components/LoadError'
 

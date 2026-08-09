@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { listWhiskies } from '../lib/queries/drinks'
 import { listMyGroups } from '../lib/queries/groups'
 import { listAllBattles, createBattle, type BattleFeedItem } from '../lib/queries/battles'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import { usePageMeta } from '../lib/pageMeta'
 import LoadError from '../components/LoadError'
 

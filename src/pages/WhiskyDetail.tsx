@@ -20,12 +20,13 @@ import {
   unshareRatingFromGroup,
   type PublicRating,
 } from '../lib/queries/ratings'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import type { Drink, Rating } from '../lib/types'
 import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
 import Lightbox from '../components/Lightbox'
-import AromaTags, { aromaLabel } from '../components/AromaTags'
+import AromaTags from '../components/AromaTags'
+import { aromaLabel } from '../lib/aromas'
 import { usePageMeta } from '../lib/pageMeta'
 import { amazonSearchUrl, AMAZON_ENABLED } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'

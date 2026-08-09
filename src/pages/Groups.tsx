@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { listMyGroups, createGroup, joinGroup, type GroupSummary } from '../lib/queries/groups'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 
 export default function Groups() {
   const { t } = useTranslation()

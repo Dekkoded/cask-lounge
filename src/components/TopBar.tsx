@@ -1,6 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 
 export default function TopBar() {
   const navigate = useNavigate()

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { listMyGroups } from '../lib/queries/groups'
 import { createTasting } from '../lib/queries/tastings'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import Modal from './Modal'
 
 interface GroupOpt { id: string; name: string }

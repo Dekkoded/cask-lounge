@@ -14,7 +14,7 @@ import {
   type TastingDrink,
   type TastingRating,
 } from '../lib/queries/tastings'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import WheelStepper from '../components/WheelStepper'
 import AromaTags from '../components/AromaTags'
 import { thumbUrl } from '../lib/image'

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { searchWhiskiesByName, createDrink } from '../lib/queries/drinks'
 import { createCollectionEntry, addToWishlist } from '../lib/queries/ratings'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/auth-context'
 import { compressImage } from '../lib/image'
 import Modal from '../components/Modal'
 
