@@ -45,9 +45,9 @@
     "start": "Los geht’s",
     "steps": [
       { "icon": "🥃", "title": "Willkommen in der Cask Lounge", "body": "Deine ganze Whisky-Welt in einer App – entdecken, verkosten, sammeln und mit Freunden teilen." },
-      { "icon": "🌍", "title": "Entdecken & Community-Ranking", "body": "Stöbere durch hunderte Whiskys, filtere nach Region und sieh, wie die Community sie bewertet." },
+      { "icon": "🌍", "title": "Entdecken & Community-Ranking", "body": "Stöbere durch die Whisky-Sammlung der Community, filtere nach Region und sieh, wie sie bewertet wird." },
       { "icon": "📝", "title": "Verkosten wie ein Profi", "body": "Bewerte mit interaktivem Aromarad und eigenen Notizen – ganz nach deinem Geschmack." },
-      { "icon": "🗺️", "title": "Sammlung, Weltkarte & Wunschliste", "body": "Jeder Dram landet in deiner Sammlung, auf deiner Whisky-Weltkarte und – was du noch suchst – auf der Wunschliste." },
+      { "icon": "🗺️", "title": "Sammlung, Weltkarte & Wunschliste", "body": "Bewertete Drams füllen deine Sammlung und deine persönliche Whisky-Weltkarte. Was du noch suchst, kommt auf die Wunschliste." },
       { "icon": "⚔️", "title": "Vergleichen & Battles", "body": "Stelle zwei Whiskys direkt gegenüber oder lass die Community im Battle abstimmen, wer gewinnt." },
       { "icon": "👥", "title": "Gruppen & Live-Tastings", "body": "Gründe Gruppen, teile live was im Glas ist und veranstaltet gemeinsame Tastings. Prost! 🥂" }
     ]
