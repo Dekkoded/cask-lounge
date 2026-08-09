@@ -22,12 +22,12 @@ function Impressum() {
     <div className="flex flex-col gap-1">
       <P>Angaben gemäß § 5 DDG (Digitale-Dienste-Gesetz):</P>
       <P>Leon Evers</P>
-      <P>Untere Str. 18</P>
-      <P>51688 Wipperfürth</P>
+      <P>Bonner Str. 381</P>
+      <P>50968 Köln</P>
       <H2>Kontakt</H2>
       <P>E-Mail: info@casklounge.com</P>
       <H2>Verantwortlich für den Inhalt</H2>
-      <P>Leon Evers, Untere Str. 18, 51688 Wipperfürth</P>
+      <P>Leon Evers, Bonner Str. 381, 50968 Köln</P>
     </div>
   )
 }
@@ -36,7 +36,7 @@ function Datenschutz() {
   return (
     <div className="flex flex-col gap-1">
       <H2>1. Verantwortlicher</H2>
-      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist Leon Evers, Untere Str. 18, 51688 Wipperfürth, erreichbar unter info@casklounge.com.</P>
+      <P>Verantwortlich für die Datenverarbeitung auf dieser Website ist Leon Evers, Bonner Str. 381, 50968 Köln, erreichbar unter info@casklounge.com.</P>
 
       <H2>2. Welche Daten wir verarbeiten</H2>
       <P>Bei der Registrierung erheben wir deine E-Mail-Adresse, deinen Benutzernamen und ein verschlüsselt gespeichertes Passwort. Inhalte, die du erstellst (Bewertungen, Notizen, Kommentare, Fotos, Gruppen), werden gespeichert, um den Dienst bereitzustellen.</P>
