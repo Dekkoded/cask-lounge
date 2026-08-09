@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase'
 import { searchWhiskiesByName, createDrink } from '../lib/queries/drinks'
-import { createCollectionEntry } from '../lib/queries/ratings'
+import { createCollectionEntry, addToWishlist } from '../lib/queries/ratings'
 import { useAuth } from '../context/AuthContext'
 import { compressImage } from '../lib/image'
 import Modal from '../components/Modal'
@@ -12,6 +12,8 @@ export default function AddWhisky() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const [searchParams] = useSearchParams()
+  const fromWishlist = searchParams.get('to') === 'wishlist'
 
   const [name, setName] = useState('')
   const [producer, setProducer] = useState('')
@@ -24,6 +26,7 @@ export default function AddWhisky() {
   const [similar, setSimilar] = useState<{ id: string; name: string; producer: string | null }[]>([])
   const [createdId, setCreatedId] = useState<string | null>(null)
   const [addingCollection, setAddingCollection] = useState(false)
+  const [addingWishlist, setAddingWishlist] = useState(false)
 
   const checkDuplicates = async () => {
     const q = name.trim()
@@ -86,6 +89,18 @@ export default function AddWhisky() {
     navigate(`/whisky/${createdId}`)
   }
 
+  const addWishlist = async () => {
+    if (!user || !createdId) return
+    setAddingWishlist(true)
+    try {
+      await addToWishlist(createdId, user.id)
+      navigate('/?view=wishlist')
+    } catch {
+      // best-effort: bei Fehler zum Whisky navigieren
+      navigate(`/whisky/${createdId}`)
+    }
+  }
+
   return (
     <div className="max-w-lg mx-auto p-6">
       <Modal
@@ -99,15 +114,32 @@ export default function AddWhisky() {
       >
         <div className="text-4xl mb-3">🥃</div>
         <h2 className="text-lg font-bold text-stone-100 mb-1">{t('whisky.createdHeading', { name: name.trim() })}</h2>
-        <p className="text-stone-400 text-sm mb-6">{t('whisky.createdPrompt')}</p>
+        <p className="text-stone-400 text-sm mb-6">{fromWishlist ? t('whisky.createdPromptWishlist') : t('whisky.createdPrompt')}</p>
         <div className="flex flex-col gap-2">
-          <button
-            onClick={addToCollection}
-            disabled={addingCollection}
-            className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-stone-950 font-semibold rounded-xl px-4 py-2.5 transition-colors"
-          >
-            {addingCollection ? t('whisky.addingToCollection') : t('whisky.addToCollection')}
-          </button>
+          {(() => {
+            const busy = addingCollection || addingWishlist
+            const collectionBtn = (
+              <button
+                key="collection"
+                onClick={addToCollection}
+                disabled={busy}
+                className={`disabled:opacity-50 font-semibold rounded-xl px-4 py-2.5 transition-colors ${fromWishlist ? 'bg-stone-800 hover:bg-stone-700 text-stone-100' : 'bg-amber-500 hover:bg-amber-400 text-stone-950'}`}
+              >
+                {addingCollection ? t('whisky.addingToCollection') : t('whisky.addToCollection')}
+              </button>
+            )
+            const wishlistBtn = (
+              <button
+                key="wishlist"
+                onClick={addWishlist}
+                disabled={busy}
+                className={`disabled:opacity-50 font-semibold rounded-xl px-4 py-2.5 transition-colors ${fromWishlist ? 'bg-amber-500 hover:bg-amber-400 text-stone-950' : 'bg-stone-800 hover:bg-stone-700 text-stone-100'}`}
+              >
+                {addingWishlist ? t('whisky.addingToWishlist') : t('whisky.addToWishlistAction')}
+              </button>
+            )
+            return fromWishlist ? [wishlistBtn, collectionBtn] : [collectionBtn, wishlistBtn]
+          })()}
           <button
             onClick={() => navigate(`/whisky/${createdId}`)}
             className="text-stone-400 hover:text-stone-200 text-sm py-2 transition-colors"
@@ -117,7 +149,7 @@ export default function AddWhisky() {
         </div>
       </Modal>
 
-      <button onClick={() => navigate('/')} className="text-stone-400 hover:text-stone-200 text-sm mb-6 flex items-center gap-1">
+      <button onClick={() => navigate(fromWishlist ? '/?view=wishlist' : '/')} className="text-stone-400 hover:text-stone-200 text-sm mb-6 flex items-center gap-1">
         ← {t('common.back')}
       </button>
 

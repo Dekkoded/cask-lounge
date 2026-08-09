@@ -24,6 +24,7 @@
     "noWishlist": "Your wishlist is empty.",
     "noWishlistMatches": "No matches in your wishlist.",
     "savedOn": "Saved on {{date}}",
-    "removeFromWishlist": "Remove"
+    "removeFromWishlist": "Remove",
+    "addNewToWishlist": "Add a new whisky to your wishlist"
   }
 }

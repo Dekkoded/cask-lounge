@@ -339,16 +339,30 @@ export default function GlobalLanding() {
                 : t('landing.noWishlistMatches')}
             </p>
             {wishlist.length === 0 && (
-              <button
-                onClick={() => setView('ranking')}
-                className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
-              >
-                {t('landing.discoverWhiskies')}
-              </button>
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => setView('ranking')}
+                  className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
+                >
+                  {t('landing.discoverWhiskies')}
+                </button>
+                <button
+                  onClick={() => navigate('/add-whisky?to=wishlist')}
+                  className="text-amber-400 hover:text-amber-300 text-sm font-medium py-1"
+                >
+                  {t('landing.addNewToWishlist')}
+                </button>
+              </div>
             )}
           </div>
         ) : (
           <div className="stagger flex flex-col gap-3">
+            <button
+              onClick={() => navigate('/add-whisky?to=wishlist')}
+              className="press flex items-center justify-center gap-2 bg-stone-900 hover:bg-stone-800 border border-dashed border-stone-700 rounded-xl p-3 text-amber-400 font-medium transition-colors"
+            >
+              <span className="text-lg leading-none">＋</span> {t('landing.addNewToWishlist')}
+            </button>
             {filteredWishlist.filter(w => w.drinks).map(w => (
               <div
                 key={w.id}

@@ -4,9 +4,12 @@
     "editTitle": "Whisky bearbeiten",
     "createdHeading": "„{{name}}\" angelegt",
     "createdPrompt": "Möchtest du den Whisky zu deiner Sammlung hinzufügen? Bewerten kannst du ihn später jederzeit.",
+    "createdPromptWishlist": "Möchtest du den Whisky auf deine Wunschliste setzen? In deine Sammlung kannst du ihn auch später jederzeit aufnehmen.",
     "addingToCollection": "Wird hinzugefügt…",
     "addToCollection": "Zur Sammlung hinzufügen",
     "addToCollectionIcon": "➕ Zur Sammlung hinzufügen",
+    "addingToWishlist": "Wird hinzugefügt…",
+    "addToWishlistAction": "Auf die Wunschliste setzen",
     "fields": {
       "nameRequired": "Name *",
       "producer": "Brennerei",

@@ -4,9 +4,12 @@
     "editTitle": "Edit whisky",
     "createdHeading": "“{{name}}” created",
     "createdPrompt": "Would you like to add this whisky to your collection? You can rate it anytime later.",
+    "createdPromptWishlist": "Would you like to put this whisky on your wishlist? You can add it to your collection anytime later.",
     "addingToCollection": "Adding…",
     "addToCollection": "Add to collection",
     "addToCollectionIcon": "➕ Add to collection",
+    "addingToWishlist": "Adding…",
+    "addToWishlistAction": "Add to wishlist",
     "fields": {
       "nameRequired": "Name *",
       "producer": "Distillery",
