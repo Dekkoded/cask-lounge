@@ -57,6 +57,12 @@ export async function getProfile(userId: string): Promise<ProfileRow | null> {
   return (data as ProfileRow | null) ?? null
 }
 
+/** Ob der Nutzer Admin-Rechte hat. Best-effort, liefert false bei Fehler. */
+export async function isUserAdmin(userId: string): Promise<boolean> {
+  const { data } = await supabase.from('profiles').select('is_admin').eq('id', userId).single()
+  return (data as { is_admin: boolean | null } | null)?.is_admin === true
+}
+
 /** Aggregierte Bewertungs-Statistiken (Anzahl, Schnitt, häufigste Region). */
 export async function loadRatingStats(userId: string): Promise<RatingStats> {
   const { data } = await supabase.from('ratings').select('overall, drinks(region)').eq('user_id', userId)

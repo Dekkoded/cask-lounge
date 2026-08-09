@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { isUserAdmin } from '../lib/queries/profile'
 
 interface AuthContextType {
   user: User | null
@@ -39,8 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const uid = session?.user?.id
     if (!uid) { setIsAdmin(false); return }
-    supabase.from('profiles').select('is_admin').eq('id', uid).single()
-      .then(({ data }) => setIsAdmin(data?.is_admin === true))
+    isUserAdmin(uid).then(setIsAdmin)
   }, [session?.user?.id])
 
   const signOut = async () => {

@@ -4,6 +4,7 @@ import {
   getProfile,
   loadRatingStats,
   isUsernameTaken,
+  isUserAdmin,
   updateProfile,
   searchProfiles,
   getMemberInfo,
@@ -65,6 +66,16 @@ describe('profile queries – Lesezugriffe (best-effort)', () => {
   it('isUsernameTaken ist false ohne Treffer', async () => {
     from.mockReturnValue(builder({ data: null }))
     await expect(isUsernameTaken('leon', 'u1')).resolves.toBe(false)
+  })
+
+  it('isUserAdmin ist true, wenn is_admin gesetzt ist', async () => {
+    from.mockReturnValue(builder({ data: { is_admin: true } }))
+    await expect(isUserAdmin('u1')).resolves.toBe(true)
+  })
+
+  it('isUserAdmin ist false ohne Treffer oder ohne Flag', async () => {
+    from.mockReturnValue(builder({ data: null }))
+    await expect(isUserAdmin('u1')).resolves.toBe(false)
   })
 
   it('searchProfiles liefert die Trefferliste', async () => {
