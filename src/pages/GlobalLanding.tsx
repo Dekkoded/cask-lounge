@@ -1,6 +1,6 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useViewTransitionState } from 'react-router-dom'
 import { useAuth } from '../context/auth-context'
 import {
   listGlobalScores,
@@ -21,6 +21,22 @@ import Img from '../components/Img'
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
 type View = 'ranking' | 'vitrine' | 'wishlist'
+
+/**
+ * Thumbnail einer Whisky-Zeile mit geteiltem View-Transition-Element:
+ * Beim Navigieren zum Detail „morpht" genau das angetippte Foto in den
+ * Detail-Header (App-Store-Manier). Der `view-transition-name` wird nur
+ * am aktiven Ziel gesetzt (useViewTransitionState), damit nie zwei
+ * Elemente gleichzeitig denselben Namen tragen. */
+function TransitionThumb({ to, photoUrl, name }: { to: string; photoUrl: string | null; name: string }) {
+  const active = useViewTransitionState(to)
+  const vt = active ? ({ viewTransitionName: 'whisky-photo' } as const) : undefined
+  return photoUrl ? (
+    <Img src={thumbUrl(photoUrl, 112)} alt={name} loading="lazy" decoding="async" style={vt} className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+  ) : (
+    <div style={vt} className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
+  )
+}
 
 export default function GlobalLanding() {
   const { t, i18n } = useTranslation()
@@ -207,16 +223,13 @@ export default function GlobalLanding() {
               <Link
                 key={s.id}
                 to={`/whisky/${s.id}`}
+                viewTransition
                 className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 <span className="text-stone-500 text-sm w-6 text-center font-mono">
                   {rank + 1}
                 </span>
-                {s.photo_url ? (
-                  <Img src={thumbUrl(s.photo_url, 112)} alt={s.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
-                ) : (
-                  <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
-                )}
+                <TransitionThumb to={`/whisky/${s.id}`} photoUrl={s.photo_url} name={s.name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-stone-100 truncate">{s.name}</p>
                   <p className="text-sm text-stone-400 truncate">
@@ -294,13 +307,10 @@ export default function GlobalLanding() {
               <Link
                 key={v.id}
                 to={`/whisky/${v.drinks!.id}`}
+                viewTransition
                 className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
-                {v.drinks!.photo_url ? (
-                  <Img src={thumbUrl(v.drinks!.photo_url, 112)} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
-                ) : (
-                  <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
-                )}
+                <TransitionThumb to={`/whisky/${v.drinks!.id}`} photoUrl={v.drinks!.photo_url} name={v.drinks!.name} />
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-stone-100 truncate">{v.drinks!.name}</p>
                   <p className="text-sm text-stone-400 truncate">
@@ -375,12 +385,8 @@ export default function GlobalLanding() {
                 key={w.id}
                 className="flex items-center gap-4 bg-stone-900 rounded-xl p-4"
               >
-                <Link to={`/whisky/${w.drinks!.id}`} className="flex items-center gap-4 flex-1 min-w-0">
-                  {w.drinks!.photo_url ? (
-                    <Img src={thumbUrl(w.drinks!.photo_url, 112)} alt={w.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
-                  ) : (
-                    <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
-                  )}
+                <Link to={`/whisky/${w.drinks!.id}`} viewTransition className="flex items-center gap-4 flex-1 min-w-0">
+                  <TransitionThumb to={`/whisky/${w.drinks!.id}`} photoUrl={w.drinks!.photo_url} name={w.drinks!.name} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-stone-100 truncate">{w.drinks!.name}</p>
                     <p className="text-sm text-stone-400 truncate">

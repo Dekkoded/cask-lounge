@@ -348,10 +348,23 @@ button:not(:disabled):active {
 }
 .intro-arrow { transition: transform 200ms var(--ease-out); }
 
+/* ── View Transitions ───────────────────────────────────────────────
+   Geteiltes Element „whisky-photo": das angetippte Listen-Foto morpht in
+   den Detail-Header (App-Store-Manier). Eigene Kurve/Dauer für den Hero-
+   Übergang; der Rest bleibt beim dezenten UA-Crossfade des Root. */
+::view-transition-group(whisky-photo) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--ease-out);
+}
+
 /* Barrierefreiheit: Nutzer mit „Bewegung reduzieren" bekommen keine
    Positions-/Scale-Animationen mehr – Opacity/Farbe bleiben erhalten,
    da sie dem Verständnis dienen. */
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+
   *,
   *::before,
   *::after {
