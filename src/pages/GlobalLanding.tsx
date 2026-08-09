@@ -80,9 +80,21 @@ export default function GlobalLanding() {
     })
   }, [user])
 
-  const removeFromWishlist = async (entryId: string) => {
-    setWishlist(prev => prev.filter(w => w.id !== entryId))
-    await removeWishlistEntry(entryId)
+  const [removingIds, setRemovingIds] = useState<Set<string>>(new Set())
+
+  const removeFromWishlist = (entryId: string) => {
+    // Erst kollabieren lassen (Höhe + gap), dann endgültig entfernen – kein
+    // hartes Wegpoppen mehr. Serverseitiges Löschen läuft optimistisch parallel.
+    setRemovingIds(prev => new Set(prev).add(entryId))
+    removeWishlistEntry(entryId).catch(() => {})
+    window.setTimeout(() => {
+      setWishlist(prev => prev.filter(w => w.id !== entryId))
+      setRemovingIds(prev => {
+        const next = new Set(prev)
+        next.delete(entryId)
+        return next
+      })
+    }, 280)
   }
 
   const q = search.toLowerCase()
@@ -383,27 +395,30 @@ export default function GlobalLanding() {
             {filteredWishlist.filter(w => w.drinks).map(w => (
               <div
                 key={w.id}
-                className="flex items-center gap-4 bg-stone-900 rounded-xl p-4"
+                data-removing={removingIds.has(w.id) ? '' : undefined}
+                className="wl-collapse"
               >
-                <Link to={`/whisky/${w.drinks!.id}`} viewTransition className="flex items-center gap-4 flex-1 min-w-0">
-                  <TransitionThumb to={`/whisky/${w.drinks!.id}`} photoUrl={w.drinks!.photo_url} name={w.drinks!.name} />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-stone-100 truncate">{w.drinks!.name}</p>
-                    <p className="text-sm text-stone-400 truncate">
-                      {[w.drinks!.producer, w.drinks!.region].filter(Boolean).join(' · ')}
-                    </p>
-                    <p className="text-xs text-stone-600 mt-0.5">
-                      {t('landing.savedOn', { date: formatDate(w.created_at, i18n.language) })}
-                    </p>
-                  </div>
-                </Link>
-                <button
-                  onClick={() => removeFromWishlist(w.id)}
-                  aria-label={t('landing.removeFromWishlist')}
-                  className="text-stone-500 hover:text-red-400 transition-colors flex-shrink-0 p-2 -m-2"
-                >
-                  ✕
-                </button>
+                <div className="wl-collapse-inner flex items-center gap-4 bg-stone-900 rounded-xl p-4">
+                  <Link to={`/whisky/${w.drinks!.id}`} viewTransition className="flex items-center gap-4 flex-1 min-w-0">
+                    <TransitionThumb to={`/whisky/${w.drinks!.id}`} photoUrl={w.drinks!.photo_url} name={w.drinks!.name} />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-stone-100 truncate">{w.drinks!.name}</p>
+                      <p className="text-sm text-stone-400 truncate">
+                        {[w.drinks!.producer, w.drinks!.region].filter(Boolean).join(' · ')}
+                      </p>
+                      <p className="text-xs text-stone-600 mt-0.5">
+                        {t('landing.savedOn', { date: formatDate(w.created_at, i18n.language) })}
+                      </p>
+                    </div>
+                  </Link>
+                  <button
+                    onClick={() => removeFromWishlist(w.id)}
+                    aria-label={t('landing.removeFromWishlist')}
+                    className="text-stone-500 hover:text-red-400 transition-colors flex-shrink-0 p-2 -m-2"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             ))}
           </div>
