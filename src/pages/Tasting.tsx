@@ -3,6 +3,17 @@ import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { listWhiskyOptions, createDrink } from '../lib/queries/drinks'
+import {
+  getTasting,
+  listTastingDrinks,
+  loadTastingRatings,
+  addTastingDrink,
+  upsertTastingRating,
+  closeTasting as closeTastingReq,
+  type Tasting as TastingRow,
+  type TastingDrink,
+  type TastingRating,
+} from '../lib/queries/tastings'
 import { useAuth } from '../context/AuthContext'
 import WheelStepper from '../components/WheelStepper'
 import AromaTags from '../components/AromaTags'
@@ -14,33 +25,6 @@ const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: 
   taste: Array(12).fill(0),
   aromas: [],
   extra: [],
-}
-
-interface Tasting {
-  id: string
-  title: string
-  status: string
-  hosted_by: string
-  group_id: string
-  event_date: string | null
-}
-
-interface TastingDrink {
-  drink_id: string
-  position: number
-  drinks: { id: string; name: string; producer: string | null; photo_url: string | null }
-}
-
-interface TastingRating {
-  id: string
-  drink_id: string
-  user_id: string
-  nose: number | null
-  taste: number | null
-  finish: number | null
-  overall: number | null
-  wheels: { nose: number[]; taste: number[]; aromas?: string[]; extra?: string[] }
-  note: string | null
 }
 
 interface RankEntry {
@@ -58,7 +42,7 @@ export default function Tasting() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  const [tasting, setTasting] = useState<Tasting | null>(null)
+  const [tasting, setTasting] = useState<TastingRow | null>(null)
   const [drinks, setDrinks] = useState<TastingDrink[]>([])
   const [allRatings, setAllRatings] = useState<TastingRating[]>([])
   const [activeTab, setActiveTab] = useState<'bewerten' | 'rangliste'>('rangliste')
@@ -86,26 +70,24 @@ export default function Tasting() {
   const [loadError, setLoadError] = useState(false)
 
   const loadRatings = async () => {
-    const { data } = await supabase
-      .from('tasting_ratings')
-      .select('*')
-      .eq('tasting_id', tid)
-    setAllRatings(data ?? [])
+    if (!tid) return
+    setAllRatings(await loadTastingRatings(tid))
   }
 
   const load = async () => {
     if (!tid) return
     setLoadError(false)
 
-    const { data: tastingData, error } = await supabase.from('tastings').select('*').eq('id', tid).single()
-    if (error) { setLoadError(true); return }
+    let tastingData: TastingRow | null
+    try {
+      tastingData = await getTasting(tid)
+    } catch {
+      setLoadError(true)
+      return
+    }
     if (tastingData) setTasting(tastingData)
 
-    supabase.from('tasting_drinks')
-      .select('drink_id, position, drinks(id, name, producer, photo_url)')
-      .eq('tasting_id', tid)
-      .order('position')
-      .then(({ data }) => { setDrinks((data as unknown as TastingDrink[]) ?? []) })
+    listTastingDrinks(tid).then(setDrinks)
 
     loadRatings()
 
@@ -165,32 +147,37 @@ export default function Tasting() {
     if (!user || !selectedDrink || !tid) return
     setSaving(true)
     const overall = Math.round(((nose + taste + finish) / 3) * 10) / 10
-    const { error } = await supabase.from('tasting_ratings').upsert({
-      tasting_id: tid,
-      drink_id: selectedDrink.drink_id,
-      user_id: user.id,
-      nose, taste, finish, overall, wheels,
-      note: note.trim() || null,
-    }, { onConflict: 'tasting_id,drink_id,user_id' })
+    try {
+      await upsertTastingRating({
+        tasting_id: tid,
+        drink_id: selectedDrink.drink_id,
+        user_id: user.id,
+        nose, taste, finish, overall, wheels,
+        note: note.trim() || null,
+      })
+    } catch (err) {
+      setSaving(false)
+      setSaveError((err as Error).message)
+      return
+    }
     setSaving(false)
-    if (error) { setSaveError(error.message) }
-    else { setSaveError(null); setSaved(true); setTimeout(() => setSaved(false), 2000); loadRatings() }
+    setSaveError(null); setSaved(true); setTimeout(() => setSaved(false), 2000); loadRatings()
   }
 
   const addDrinkToTasting = async (drinkId: string, name: string, producer: string | null = null, photo_url: string | null = null) => {
     if (!tid) return
     const pos = drinks.length
-    const { error } = await supabase.from('tasting_drinks').insert({
-      tasting_id: tid, drink_id: drinkId, position: pos,
-    })
-    if (!error) {
-      setDrinks(prev => [...prev, {
-        drink_id: drinkId, position: pos,
-        drinks: { id: drinkId, name, producer, photo_url }
-      }])
-      setDrinkSearch('')
-      setShowAddDrink(false)
+    try {
+      await addTastingDrink(tid, drinkId, pos)
+    } catch {
+      return
     }
+    setDrinks(prev => [...prev, {
+      drink_id: drinkId, position: pos,
+      drinks: { id: drinkId, name, producer, photo_url }
+    }])
+    setDrinkSearch('')
+    setShowAddDrink(false)
   }
 
   const createAndAddDrink = async () => {
@@ -232,7 +219,7 @@ export default function Tasting() {
 
   const closeTasting = async () => {
     if (!tid) return
-    await supabase.from('tastings').update({ status: 'closed' }).eq('id', tid)
+    await closeTastingReq(tid)
     setTasting(t => t ? { ...t, status: 'closed' } : t)
   }
 
