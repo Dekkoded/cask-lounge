@@ -168,6 +168,11 @@ body {
   to { opacity: 1; }
 }
 
+/* Bilder blenden beim Laden ein statt hart zu poppen (siehe <Img>). Nur
+   opacity (GPU); der geladene Zustand wird per data-Attribut gesetzt. */
+.img-fade { opacity: 0; transition: opacity 400ms var(--ease-out); }
+.img-fade[data-loaded] { opacity: 1; }
+
 /* ── Motion-Schicht ─────────────────────────────────────────────────
    Enter-Animationen für Overlays. Emil: Entering → ease-out; Sheets
    fühlen sich mit --ease-drawer physisch an. Dauer <300ms für Panels,

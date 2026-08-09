@@ -16,6 +16,7 @@ import type { GlobalDrinkScore } from '../lib/types'
 import { usePageMeta } from '../lib/pageMeta'
 import { formatDate, formatNumber } from '../lib/format'
 import { thumbUrl } from '../lib/image'
+import Img from '../components/Img'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
@@ -146,18 +147,24 @@ export default function GlobalLanding() {
           </div>
         )}
 
-        {/* Untertabs Sammlung / Wunschliste */}
+        {/* Untertabs Sammlung / Wunschliste – die goldene Pille gleitet unter
+            den aktiven Tab (Emil/Apple: räumliche Kontinuität statt hartem
+            Farbsprung). Nur transform (GPU); Text-Farbe blendet weich mit. */}
         {user && (view === 'vitrine' || view === 'wishlist') && (
-          <div className="flex gap-1 bg-stone-900 rounded-xl p-1">
+          <div className="relative flex bg-stone-900 rounded-xl p-1">
+            <div
+              aria-hidden
+              className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg bg-amber-500 transition-transform duration-300 ease-[var(--ease-out)] ${view === 'wishlist' ? 'translate-x-full' : 'translate-x-0'}`}
+            />
             <button
               onClick={() => setView('vitrine')}
-              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+              className={`relative z-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'text-stone-950' : 'text-stone-300'}`}
             >
               {t('landing.tabCollection')}
             </button>
             <button
               onClick={() => setView('wishlist')}
-              className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'wishlist' ? 'bg-amber-500 text-stone-950' : 'text-stone-300 hover:bg-stone-800'}`}
+              className={`relative z-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'wishlist' ? 'text-stone-950' : 'text-stone-300'}`}
             >
               {t('landing.tabWishlist')}
             </button>
@@ -206,7 +213,7 @@ export default function GlobalLanding() {
                   {rank + 1}
                 </span>
                 {s.photo_url ? (
-                  <img src={thumbUrl(s.photo_url, 112)} alt={s.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <Img src={thumbUrl(s.photo_url, 112)} alt={s.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}
@@ -290,7 +297,7 @@ export default function GlobalLanding() {
                 className="press flex items-center gap-4 bg-stone-900 hover:bg-stone-800 rounded-xl p-4 transition-colors"
               >
                 {v.drinks!.photo_url ? (
-                  <img src={thumbUrl(v.drinks!.photo_url, 112)} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <Img src={thumbUrl(v.drinks!.photo_url, 112)} alt={v.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}
@@ -370,7 +377,7 @@ export default function GlobalLanding() {
               >
                 <Link to={`/whisky/${w.drinks!.id}`} className="flex items-center gap-4 flex-1 min-w-0">
                   {w.drinks!.photo_url ? (
-                    <img src={thumbUrl(w.drinks!.photo_url, 112)} alt={w.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <Img src={thumbUrl(w.drinks!.photo_url, 112)} alt={w.drinks!.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                   ) : (
                     <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                   )}

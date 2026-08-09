@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../context/auth-context'
@@ -7,8 +8,25 @@ export default function TopBar() {
   const { user } = useAuth()
   const { t } = useTranslation()
 
+  // Header liegt im Ruhezustand flach auf dem Grund; erst beim Scrollen
+  // erscheinen Trennlinie + weicher Schatten (Apple-Standard: Elevation on
+  // scroll). Passiver Listener, initial einmal geprüft.
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 0)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <div className="sticky top-0 z-40 bg-app/90 backdrop-blur border-b border-stone-800/50">
+    <div
+      className={`sticky top-0 z-40 bg-app/90 backdrop-blur border-b transition-[border-color,box-shadow] duration-200 ${
+        scrolled
+          ? 'border-stone-800/50 shadow-[0_4px_20px_-12px_rgba(0,0,0,0.6)]'
+          : 'border-transparent'
+      }`}
+    >
       <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
         <button
           onClick={() => navigate('/')}

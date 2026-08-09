@@ -26,6 +26,7 @@ import WheelStepper from '../components/WheelStepper'
 import ColorPicker from '../components/ColorPicker'
 import Lightbox from '../components/Lightbox'
 import AromaTags from '../components/AromaTags'
+import Img from '../components/Img'
 import { aromaLabel } from '../lib/aromas'
 import { usePageMeta } from '../lib/pageMeta'
 import { amazonSearchUrl, AMAZON_ENABLED } from '../lib/affiliate'
@@ -330,7 +331,7 @@ export default function WhiskyDetail() {
       {/* Whisky-Header */}
       <div className="flex gap-4 mb-6">
         {drink.photo_url ? (
-          <img
+          <Img
             src={thumbUrl(drink.photo_url, 256)}
             alt={drink.name}
             onClick={() => setLightboxSrc(drink.photo_url)}
