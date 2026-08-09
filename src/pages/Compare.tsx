@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { getDrinkForCompare } from '../lib/queries/drinks'
@@ -45,7 +45,8 @@ export default function Compare() {
   const { t } = useTranslation()
   usePageMeta({ title: t('compare.title'), description: t('compare.subtitle') })
   const [params, setParams] = useSearchParams()
-  const ids = (params.get('ids') || '').split(',').filter(Boolean).slice(0, MAX)
+  const idsParam = params.get('ids') || ''
+  const ids = useMemo(() => idsParam.split(',').filter(Boolean).slice(0, MAX), [idsParam])
 
   const [scores, setScores] = useState<GlobalDrinkScore[]>([])
   const [scoresError, setScoresError] = useState(false)
@@ -101,7 +102,7 @@ export default function Compare() {
       if (!cancelled) setData(d => ({ ...d, ...updates }))
     })()
     return () => { cancelled = true }
-  }, [ids.join(','), data])
+  }, [ids, data])
 
   const setIds = (next: string[]) => {
     const uniq = [...new Set(next)].slice(0, MAX)

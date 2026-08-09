@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { joinGroup } from '../lib/queries/groups'
 import { useAuth } from '../context/AuthContext'
 
 export default function JoinGroup() {
@@ -14,13 +14,15 @@ export default function JoinGroup() {
   useEffect(() => {
     if (loading || !user || !code) return
 
-    supabase.rpc('join_group', { p_invite_code: code }).then(({ data, error }) => {
-      if (error || !data) {
-        setError(error?.message ?? t('groups.joinFailed'))
-        return
-      }
-      navigate(`/groups/${data}`, { replace: true })
-    })
+    joinGroup(code)
+      .then(groupId => {
+        if (!groupId) { setError(t('groups.joinFailed')); return }
+        navigate(`/groups/${groupId}`, { replace: true })
+      })
+      .catch(err => setError((err as Error).message ?? t('groups.joinFailed')))
+    // t bewusst nicht als Dependency: der Beitritt soll nur bei Auth/Code-Änderung
+    // erneut laufen, nicht bei einem Sprachwechsel.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, code, navigate])
 
   if (loading) {

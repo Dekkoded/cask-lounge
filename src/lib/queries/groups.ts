@@ -56,3 +56,23 @@ export async function removeMember(groupId: string, userId: string): Promise<voi
     .eq('user_id', userId)
   if (error) throw error
 }
+
+/** Legt eine Gruppe an und liefert deren ID. Wirft bei Fehler. */
+export async function createGroup(name: string, description: string | null): Promise<string> {
+  const { data, error } = await supabase.rpc('create_group', {
+    p_name: name,
+    p_description: description,
+  })
+  if (error) throw error
+  return data as string
+}
+
+/**
+ * Tritt einer Gruppe per Einladungscode bei und liefert deren ID.
+ * Wirft bei Fehler; liefert null, wenn kein passender Code gefunden wurde.
+ */
+export async function joinGroup(inviteCode: string): Promise<string | null> {
+  const { data, error } = await supabase.rpc('join_group', { p_invite_code: inviteCode })
+  if (error) throw error
+  return (data as string | null) ?? null
+}

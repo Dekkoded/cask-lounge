@@ -1,24 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase'
+import { listMyGroups, createGroup, joinGroup, type GroupSummary } from '../lib/queries/groups'
 import { useAuth } from '../context/AuthContext'
-
-interface Group {
-  id: string
-  name: string
-  description: string | null
-  owner_id: string
-  invite_code: string
-  created_at: string
-}
 
 export default function Groups() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [groups, setGroups] = useState<Group[]>([])
+  const [groups, setGroups] = useState<GroupSummary[]>([])
   const [loading, setLoading] = useState(true)
 
   const [searchParams] = useSearchParams()
@@ -32,25 +23,26 @@ export default function Groups() {
   const [joining, setJoining] = useState(false)
   const [joinError, setJoinError] = useState<string | null>(null)
 
-  const loadGroups = async () => {
-    const { data } = await supabase
-      .from('groups')
-      .select('*')
-      .order('created_at', { ascending: false })
-    const gs = data ?? []
-    // Mitglied in ≥1 Gruppe → direkt ins Aktivitäts-Log der zuletzt verwendeten Gruppe,
-    // außer man will bewusst erstellen/beitreten (?create=1).
-    if (!showCreate && gs.length > 0) {
-      const last = localStorage.getItem('lastGroupId')
-      const target = gs.find(g => g.id === last)?.id ?? gs[0].id
-      navigate(`/groups/${target}`, { replace: true })
-      return
-    }
-    setGroups(gs)
-    setLoading(false)
-  }
-
-  useEffect(() => { loadGroups() }, [])
+  useEffect(() => {
+    let cancelled = false
+    listMyGroups().then(gs => {
+      if (cancelled) return
+      // Mitglied in ≥1 Gruppe → direkt ins Aktivitäts-Log der zuletzt verwendeten Gruppe,
+      // außer man will bewusst erstellen/beitreten (?create=1).
+      if (!showCreate && gs.length > 0) {
+        const last = localStorage.getItem('lastGroupId')
+        const target = gs.find(g => g.id === last)?.id ?? gs[0].id
+        navigate(`/groups/${target}`, { replace: true })
+        return
+      }
+      setGroups(gs)
+      setLoading(false)
+    })
+    return () => { cancelled = true }
+    // Nur beim Mount: Die Redirect-Entscheidung hängt am initialen ?create=1;
+    // ein Re-Run bei showCreate-Toggle würde den Nutzer ungewollt wegleiten.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault()
@@ -58,17 +50,13 @@ export default function Groups() {
     setCreating(true)
     setCreateError(null)
 
-    const { data: groupId, error } = await supabase
-      .rpc('create_group', {
-        p_name: newName.trim(),
-        p_description: newDesc.trim() || null,
-      })
-
-    if (error) { setCreateError(error.message); setCreating(false); return }
-
-    const group = { id: groupId as string }
-
-    navigate(`/groups/${group.id}`)
+    try {
+      const groupId = await createGroup(newName.trim(), newDesc.trim() || null)
+      navigate(`/groups/${groupId}`)
+    } catch (err) {
+      setCreateError((err as Error).message)
+      setCreating(false)
+    }
   }
 
   const handleJoin = async (e: FormEvent) => {
@@ -77,16 +65,15 @@ export default function Groups() {
     setJoining(true)
     setJoinError(null)
 
-    const { data: groupId, error } = await supabase
-      .rpc('join_group', { p_invite_code: joinCode.trim() })
-
-    if (error || !groupId) {
-      setJoinError(error?.message === 'Gruppe nicht gefunden' ? t('groups.noGroupForCode') : (error?.message ?? t('groups.joinError')))
+    try {
+      const groupId = await joinGroup(joinCode.trim())
+      if (!groupId) { setJoinError(t('groups.joinError')); setJoining(false); return }
+      navigate(`/groups/${groupId}`)
+    } catch (err) {
+      const msg = (err as Error).message
+      setJoinError(msg === 'Gruppe nicht gefunden' ? t('groups.noGroupForCode') : (msg ?? t('groups.joinError')))
       setJoining(false)
-      return
     }
-
-    navigate(`/groups/${groupId}`)
   }
 
   return (
