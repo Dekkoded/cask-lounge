@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 interface ModalProps {
@@ -39,6 +39,29 @@ export default function Modal({
   dismissible = true,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+
+  // Lebenszyklus mit Exit-Animation: Beim Schließen bleibt der Dialog kurz
+  // gemountet und spielt seine Out-Animation, bevor er wirklich verschwindet.
+  // So poppt nichts hart weg (Emil: asymmetrisches Enter/Exit, Exit schneller).
+  const [rendered, setRendered] = useState(open)
+  const [closing, setClosing] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setRendered(true)
+      setClosing(false)
+      return
+    }
+    if (!rendered) return
+    setClosing(true)
+    // Dauer = längste beteiligte Exit-Animation (Sheet slidet weiter als es fadet).
+    const ms = variant === 'sheet' ? 260 : 160
+    const id = window.setTimeout(() => {
+      setRendered(false)
+      setClosing(false)
+    }, ms)
+    return () => window.clearTimeout(id)
+  }, [open, rendered, variant])
 
   useEffect(() => {
     if (!open) return
@@ -91,13 +114,17 @@ export default function Modal({
     }
   }, [open, onClose, dismissible])
 
-  if (!open) return null
+  if (!rendered) return null
 
   const isSheet = variant === 'sheet'
+  const overlayAnim = closing ? 'anim-overlay-out' : 'anim-overlay'
+  const panelAnim = isSheet
+    ? closing ? 'anim-sheet-out' : 'anim-sheet'
+    : closing ? 'anim-panel-out' : 'anim-panel'
   return createPortal(
     <div
       onClick={dismissible ? onClose : undefined}
-      className={`fixed inset-0 z-[100] flex justify-center p-4 bg-black/70 anim-overlay ${
+      className={`fixed inset-0 z-[100] flex justify-center p-4 bg-black/70 ${overlayAnim} ${
         blur ? 'backdrop-blur-sm' : ''
       } ${isSheet ? 'items-end' : 'items-center'}`}
     >
@@ -108,8 +135,8 @@ export default function Modal({
         aria-label={ariaLabel}
         tabIndex={-1}
         onClick={e => e.stopPropagation()}
-        className={`bg-stone-900 rounded-2xl flex flex-col focus:outline-none ${
-          isSheet ? 'anim-sheet mb-[env(safe-area-inset-bottom)]' : 'anim-panel'
+        className={`bg-stone-900 rounded-2xl flex flex-col focus:outline-none ${panelAnim}${
+          isSheet ? ' mb-[env(safe-area-inset-bottom)]' : ''
         } ${className}`}
       >
         {children}

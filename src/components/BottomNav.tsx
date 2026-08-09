@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import LivePostModal from './LivePostModal'
@@ -9,9 +9,28 @@ export default function BottomNav() {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetClosing, setSheetClosing] = useState(false)
   const [livePostOpen, setLivePostOpen] = useState(false)
   const [tastingOpen, setTastingOpen] = useState(false)
   const { t } = useTranslation()
+
+  // Aktions-Sheet spielt beim Schließen seine Exit-Animation, bevor es
+  // wirklich verschwindet (Emil: nichts poppt hart weg, Exit ist schneller).
+  const [sheetRendered, setSheetRendered] = useState(false)
+  useEffect(() => {
+    if (sheetOpen) {
+      setSheetRendered(true)
+      setSheetClosing(false)
+      return
+    }
+    if (!sheetRendered) return
+    setSheetClosing(true)
+    const id = window.setTimeout(() => {
+      setSheetRendered(false)
+      setSheetClosing(false)
+    }, 260)
+    return () => window.clearTimeout(id)
+  }, [sheetOpen, sheetRendered])
 
   const path = location.pathname
   const view = searchParams.get('view')
@@ -40,10 +59,10 @@ export default function BottomNav() {
 
   return (
     <>
-      {sheetOpen && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-end anim-overlay" onClick={() => setSheetOpen(false)}>
+      {sheetRendered && (
+        <div className={`fixed inset-0 bg-black/70 z-50 flex items-end ${sheetClosing ? 'anim-overlay-out' : 'anim-overlay'}`} onClick={() => setSheetOpen(false)}>
           <div
-            className="bg-stone-900 rounded-t-2xl w-full max-w-2xl mx-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-2 anim-sheet"
+            className={`bg-stone-900 rounded-t-2xl w-full max-w-2xl mx-auto p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-2 ${sheetClosing ? 'anim-sheet-out' : 'anim-sheet'}`}
             onClick={e => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-stone-700 rounded-full mx-auto mb-2" />

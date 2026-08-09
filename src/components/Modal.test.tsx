@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Modal from './Modal'
 
@@ -95,6 +95,34 @@ describe('Modal', () => {
       </Modal>,
     )
     expect(document.body.style.overflow).toBe('')
+  })
+
+  it('bleibt beim Schließen kurz für die Exit-Animation gemountet und verschwindet danach', () => {
+    vi.useFakeTimers()
+    try {
+      const { rerender } = render(
+        <Modal open onClose={() => {}} variant="center" ariaLabel="Test">
+          <p>Inhalt</p>
+        </Modal>,
+      )
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      // Schließen: Dialog spielt Exit-Animation, bleibt aber zunächst im DOM.
+      rerender(
+        <Modal open={false} onClose={() => {}} variant="center" ariaLabel="Test">
+          <p>Inhalt</p>
+        </Modal>,
+      )
+      const dialog = screen.getByRole('dialog')
+      expect(dialog).toBeInTheDocument()
+      expect(dialog.className).toContain('anim-panel-out')
+
+      // Nach Ablauf der Exit-Dauer ist der Dialog vollständig entfernt.
+      act(() => { vi.advanceTimersByTime(200) })
+      expect(screen.queryByRole('dialog')).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('setzt den Fokus beim Öffnen auf das erste fokussierbare Element', () => {

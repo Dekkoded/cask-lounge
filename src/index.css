@@ -193,6 +193,18 @@ body {
 /* Zentrierte Panels: leichtes Scale + Fade (nie von scale(0)). */
 .anim-panel { animation: panelIn 200ms var(--ease-out); }
 
+/* Exit-Animationen. Emil: Schließen ist schneller als Öffnen – der Nutzer
+   hat die Entscheidung getroffen, das UI soll nicht nachhängen. Nur
+   transform/opacity (GPU); „forwards", damit der End-Zustand bis zum
+   Unmount hält (kein Zurückschnappen kurz vor dem Verschwinden). */
+@keyframes overlayOut { from { opacity: 1 } to { opacity: 0 } }
+@keyframes sheetOut { from { transform: translateY(0) } to { transform: translateY(100%) } }
+@keyframes panelOut { from { opacity: 1; transform: scale(1) } to { opacity: 0; transform: scale(0.96) } }
+
+.anim-overlay-out { animation: overlayOut 160ms var(--ease-out) forwards; }
+.anim-sheet-out { animation: sheetOut 260ms var(--ease-drawer) forwards; }
+.anim-panel-out { animation: panelOut 150ms var(--ease-out) forwards; }
+
 /* Press-Feedback: jeder Tap bestätigt sich sofort mit einem kurzen
    Scale. Nur transform (GPU), interruptibel. Die Transition führt auch
    Farb-/Border-Wechsel weich mit, damit Hover-States sauber bleiben. */
