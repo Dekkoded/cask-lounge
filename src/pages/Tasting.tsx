@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -50,6 +50,17 @@ export default function Tasting() {
   const [allRatings, setAllRatings] = useState<TastingRating[]>([])
   const [activeTab, setActiveTab] = useState<'bewerten' | 'rangliste'>('rangliste')
   const [selectedDrink, setSelectedDrink] = useState<TastingDrink | null>(null)
+  const formRef = useRef<HTMLDivElement>(null)
+
+  // Nach Auswahl eines Drinks das Formular nach oben scrollen. Sonst landet
+  // das Geschmacksrad auf Mobilgeräten am unteren Rand hinter der fixierten
+  // Bottom-Nav samt „+"-FAB (der genau über der Rad-Mitte sitzt) – Taps aufs
+  // Rad greifen dann nicht. Nach oben gescrollt liegt es frei im Tippbereich.
+  useEffect(() => {
+    if (selectedDrink) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [selectedDrink])
   const [allDrinks, setAllDrinks] = useState<{ id: string; name: string; producer: string | null }[]>([])
   const [drinkSearch, setDrinkSearch] = useState('')
   const [showAddDrink, setShowAddDrink] = useState(false)
@@ -447,7 +458,7 @@ export default function Tasting() {
 
           {/* Bewertungsformular */}
           {selectedDrink && tasting.status === 'open' && (
-            <div className="bg-stone-900 rounded-2xl p-5 flex flex-col gap-5">
+            <div ref={formRef} className="bg-stone-900 rounded-2xl p-5 flex flex-col gap-5 scroll-mt-4">
               <h3 className="font-semibold text-stone-200">{selectedDrink.drinks.name}</h3>
 
               <WheelStepper wheels={wheels} onUpdate={updateWheel} />

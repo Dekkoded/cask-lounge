@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { getDrink, deleteDrink } from '../lib/queries/drinks'
@@ -61,6 +61,18 @@ export default function WhiskyDetail() {
   const [publicRatings, setPublicRatings] = useState<PublicRating[]>([])
   const [globalScore, setGlobalScore] = useState<{ avg: number | null; count: number }>({ avg: null, count: 0 })
   const [tab, setTab] = useState<Tab>('uebersicht')
+  const tabsRef = useRef<HTMLDivElement>(null)
+
+  // Beim Wechsel in den Bewerten-Tab die Sektion nach oben scrollen. Sonst
+  // erscheint das Geschmacksrad auf Mobilgeräten am unteren Rand – teilweise
+  // hinter der fixierten Bottom-Nav und dem „+"-FAB, der genau über der Rad-
+  // Mitte sitzt. Taps landen dann auf dem FAB statt auf dem Rad („nichts
+  // auswählbar"). Nach oben gescrollt liegt das Rad frei im tippbaren Bereich.
+  useEffect(() => {
+    if (tab === 'bewertung') {
+      tabsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [tab])
 
   // Formular-State
   const [nose, setNose] = useState<number>(5)
@@ -416,15 +428,17 @@ export default function WhiskyDetail() {
       )}
 
       {/* Tabs */}
-      <SegmentedControl
-        className="mb-6"
-        value={tab}
-        onChange={setTab}
-        options={[
-          { value: 'uebersicht' as const, label: t('whisky.tabs.overview') },
-          ...(user ? [{ value: 'bewertung' as const, label: myRating?.overall != null ? t('whisky.tabs.myRating') : t('whisky.tabs.rate') }] : []),
-        ]}
-      />
+      <div ref={tabsRef} className="scroll-mt-4">
+        <SegmentedControl
+          className="mb-6"
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'uebersicht' as const, label: t('whisky.tabs.overview') },
+            ...(user ? [{ value: 'bewertung' as const, label: myRating?.overall != null ? t('whisky.tabs.myRating') : t('whisky.tabs.rate') }] : []),
+          ]}
+        />
+      </div>
 
       {/* Übersicht */}
       {tab === 'uebersicht' && (
