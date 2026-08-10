@@ -64,7 +64,19 @@ export default function ActivityTab({
       </button>
 
       {loading ? (
-        <p className="text-stone-500 text-center py-8 animate-pulse">{t('common.loading')}</p>
+        <div className="flex flex-col gap-4">
+          {[0, 1, 2].map(i => (
+            <div key={i} className="bg-stone-900 rounded-xl p-4 skeleton">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-stone-800 flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="h-3.5 w-1/3 bg-stone-800 rounded mb-2" />
+                  <div className="h-3 w-2/3 bg-stone-800 rounded" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       ) : activity.length === 0 ? (
         <EmptyState icon="✨" title={t('groups.noActivity')} hint={t('groups.noActivitySub')} />
       ) : (
