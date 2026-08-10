@@ -275,21 +275,22 @@ export default function GlobalLanding() {
             ))}
           </div>
         ) : filteredVitrine.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-stone-500 mb-4">
-              {vitrine.length === 0
-                ? t('landing.noRatedWhiskies')
-                : t('landing.noVitrineMatches')}
-            </p>
-            {vitrine.length === 0 && (
-              <button
-                onClick={() => setView('ranking')}
-                className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
-              >
-                {t('landing.discoverWhiskies')}
-              </button>
-            )}
-          </div>
+          vitrine.length === 0 ? (
+            <EmptyState
+              icon="🥃"
+              title={t('landing.noRatedWhiskies')}
+              action={
+                <button
+                  onClick={() => setView('ranking')}
+                  className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
+                >
+                  {t('landing.discoverWhiskies')}
+                </button>
+              }
+            />
+          ) : (
+            <EmptyState icon="🔍" title={t('landing.noVitrineMatches')} />
+          )
         ) : (
           <div className="stagger flex flex-col gap-3">
             {collectionValue > 0 && (
@@ -355,29 +356,30 @@ export default function GlobalLanding() {
             ))}
           </div>
         ) : filteredWishlist.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-stone-500 mb-4">
-              {wishlist.length === 0
-                ? t('landing.noWishlist')
-                : t('landing.noWishlistMatches')}
-            </p>
-            {wishlist.length === 0 && (
-              <div className="flex flex-col items-center gap-2">
-                <button
-                  onClick={() => setView('ranking')}
-                  className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
-                >
-                  {t('landing.discoverWhiskies')}
-                </button>
-                <button
-                  onClick={() => navigate('/add-whisky?to=wishlist')}
-                  className="text-amber-400 hover:text-amber-300 text-sm font-medium py-1"
-                >
-                  {t('landing.addNewToWishlist')}
-                </button>
-              </div>
-            )}
-          </div>
+          wishlist.length === 0 ? (
+            <EmptyState
+              icon="⭐"
+              title={t('landing.noWishlist')}
+              action={
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    onClick={() => setView('ranking')}
+                    className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
+                  >
+                    {t('landing.discoverWhiskies')}
+                  </button>
+                  <button
+                    onClick={() => navigate('/add-whisky?to=wishlist')}
+                    className="text-amber-400 hover:text-amber-300 text-sm font-medium py-1"
+                  >
+                    {t('landing.addNewToWishlist')}
+                  </button>
+                </div>
+              }
+            />
+          ) : (
+            <EmptyState icon="🔍" title={t('landing.noWishlistMatches')} />
+          )
         ) : (
           <div className="stagger flex flex-col gap-3">
             <button
