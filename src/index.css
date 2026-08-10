@@ -293,12 +293,18 @@ button:not(:disabled):active {
 
 /* Listen erscheinen gestaffelt (Emil: 30–80ms Versatz). Jedes Kind
    steigt sanft auf; nach dem 10. Element kein weiterer Delay, damit
-   lange Listen nicht träge wirken. */
+   lange Listen nicht träge wirken.
+
+   fill-mode: backwards (nicht both) – der End-Keyframe entspricht ohnehin
+   dem Normalzustand (opacity 1, transform none), daher muss er nicht
+   „festgehalten" werden. Würde er es (both), bliebe transform gepinnt und
+   überschriebe das :active-Press-Feedback der Karten. So dürfen gestaffelte
+   Karten gleichzeitig gestaffelt einblenden UND beim Tap einsinken. */
 @keyframes riseIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.stagger > * { animation: riseIn 380ms var(--ease-out) both; }
+.stagger > * { animation: riseIn 380ms var(--ease-out) backwards; }
 .stagger > *:nth-child(1) { animation-delay: 0ms; }
 .stagger > *:nth-child(2) { animation-delay: 45ms; }
 .stagger > *:nth-child(3) { animation-delay: 90ms; }
