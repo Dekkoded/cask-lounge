@@ -28,6 +28,7 @@ import Lightbox from '../components/Lightbox'
 import AromaTags from '../components/AromaTags'
 import Img from '../components/Img'
 import CountUp from '../components/CountUp'
+import SegmentedControl from '../components/SegmentedControl'
 import { aromaLabel } from '../lib/aromas'
 import { usePageMeta } from '../lib/pageMeta'
 import { haptic } from '../lib/haptics'
@@ -416,18 +417,15 @@ export default function WhiskyDetail() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        <button onClick={() => setTab('uebersicht')}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'uebersicht' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-          {t('whisky.tabs.overview')}
-        </button>
-        {user && (
-          <button onClick={() => setTab('bewertung')}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${tab === 'bewertung' ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-            {myRating?.overall != null ? t('whisky.tabs.myRating') : t('whisky.tabs.rate')}
-          </button>
-        )}
-      </div>
+      <SegmentedControl
+        className="mb-6"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'uebersicht' as const, label: t('whisky.tabs.overview') },
+          ...(user ? [{ value: 'bewertung' as const, label: myRating?.overall != null ? t('whisky.tabs.myRating') : t('whisky.tabs.rate') }] : []),
+        ]}
+      />
 
       {/* Übersicht */}
       {tab === 'uebersicht' && (

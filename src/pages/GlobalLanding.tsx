@@ -17,6 +17,7 @@ import { usePageMeta } from '../lib/pageMeta'
 import { formatDate, formatNumber } from '../lib/format'
 import { thumbUrl } from '../lib/image'
 import Img from '../components/Img'
+import SegmentedControl from '../components/SegmentedControl'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
@@ -179,24 +180,15 @@ export default function GlobalLanding() {
             den aktiven Tab (Emil/Apple: räumliche Kontinuität statt hartem
             Farbsprung). Nur transform (GPU); Text-Farbe blendet weich mit. */}
         {user && (view === 'vitrine' || view === 'wishlist') && (
-          <div className="relative flex bg-stone-900 rounded-xl p-1">
-            <div
-              aria-hidden
-              className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-lg bg-amber-500 transition-transform duration-300 ease-[var(--ease-out)] ${view === 'wishlist' ? 'translate-x-full' : 'translate-x-0'}`}
-            />
-            <button
-              onClick={() => setView('vitrine')}
-              className={`relative z-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'vitrine' ? 'text-stone-950' : 'text-stone-300'}`}
-            >
-              {t('landing.tabCollection')}
-            </button>
-            <button
-              onClick={() => setView('wishlist')}
-              className={`relative z-10 flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${view === 'wishlist' ? 'text-stone-950' : 'text-stone-300'}`}
-            >
-              {t('landing.tabWishlist')}
-            </button>
-          </div>
+          <SegmentedControl
+            variant="gold"
+            value={view}
+            onChange={setView}
+            options={[
+              { value: 'vitrine', label: t('landing.tabCollection') },
+              { value: 'wishlist', label: t('landing.tabWishlist') },
+            ]}
+          />
         )}
       </div>
 

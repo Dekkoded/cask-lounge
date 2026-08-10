@@ -18,6 +18,7 @@ import {
 import { loadGroupArchive, type ArchiveDrink } from '../lib/queries/archive'
 import { useAuth } from '../context/auth-context'
 import LoadError from '../components/LoadError'
+import SegmentedControl from '../components/SegmentedControl'
 import GroupSwitcher from '../components/groups/GroupSwitcher'
 import ActivityTab, { type Activity } from '../components/groups/ActivityTab'
 import ArchiveTab from '../components/groups/ArchiveTab'
@@ -240,16 +241,19 @@ export default function GroupHome() {
       />
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['aktivitaet', 'archiv', 'tastings', 'battles', 'mitglieder'] as Tab[]).map(tabKey => (
-          <button key={tabKey} onClick={() => setTab(tabKey)}
-            className={`flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors ${
-              tab === tabKey ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'
-            }`}>
-            {tabKey === 'aktivitaet' ? t('groups.tabs.activity') : tabKey === 'archiv' ? t('groups.tabs.archive') : tabKey === 'tastings' ? t('groups.tabs.tastings') : tabKey === 'battles' ? t('battle.tab') : t('groups.tabs.members')}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        className="mb-6"
+        size="sm"
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'aktivitaet', label: t('groups.tabs.activity') },
+          { value: 'archiv', label: t('groups.tabs.archive') },
+          { value: 'tastings', label: t('groups.tabs.tastings') },
+          { value: 'battles', label: t('battle.tab') },
+          { value: 'mitglieder', label: t('groups.tabs.members') },
+        ]}
+      />
 
       {tab === 'aktivitaet' && (
         <ActivityTab

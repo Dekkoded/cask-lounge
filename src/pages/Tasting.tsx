@@ -19,6 +19,7 @@ import WheelStepper from '../components/WheelStepper'
 import AromaTags from '../components/AromaTags'
 import { thumbUrl } from '../lib/image'
 import Img from '../components/Img'
+import SegmentedControl from '../components/SegmentedControl'
 import LoadError from '../components/LoadError'
 
 const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: string[] } = {
@@ -375,14 +376,15 @@ export default function Tasting() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6">
-        {(['rangliste', 'bewerten'] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${activeTab === tab ? 'bg-stone-700 text-stone-100' : 'text-stone-500 hover:text-stone-300'}`}>
-            {tab === 'rangliste' ? t('tasting.tabRanking') : t('tasting.tabRate')}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        className="mb-6"
+        value={activeTab}
+        onChange={setActiveTab}
+        options={[
+          { value: 'rangliste', label: t('tasting.tabRanking') },
+          { value: 'bewerten', label: t('tasting.tabRate') },
+        ]}
+      />
 
       {/* Rangliste */}
       {activeTab === 'rangliste' && (
