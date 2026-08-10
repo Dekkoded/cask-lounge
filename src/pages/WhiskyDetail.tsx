@@ -27,6 +27,7 @@ import ColorPicker from '../components/ColorPicker'
 import Lightbox from '../components/Lightbox'
 import AromaTags from '../components/AromaTags'
 import Img from '../components/Img'
+import CountUp from '../components/CountUp'
 import { aromaLabel } from '../lib/aromas'
 import { usePageMeta } from '../lib/pageMeta'
 import { haptic } from '../lib/haptics'
@@ -354,7 +355,9 @@ export default function WhiskyDetail() {
           </div>
           {avgOverall != null && (
             <div className="mt-2 flex items-baseline gap-1">
-              <span className="font-display text-2xl font-semibold text-amber-400 tabular-nums">{avgOverall}</span>
+              <span className="font-display text-2xl font-semibold text-amber-400 tabular-nums">
+                <CountUp value={avgOverall} decimals={Number.isInteger(avgOverall) ? 0 : 1} />
+              </span>
               <span className="text-stone-500 text-sm">/10 · {t('whisky.ratingCount', { count: ratingCount })}</span>
             </div>
           )}
