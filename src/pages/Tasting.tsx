@@ -389,10 +389,11 @@ export default function Tasting() {
 
       {/* Rangliste */}
       {activeTab === 'rangliste' && (
-        <div className="flex flex-col gap-3">
-          {ranking.length === 0 ? (
-            <EmptyState icon="🥃" title={t('tasting.noRatings')} />
-          ) : ranking.map((entry, i) => (
+        ranking.length === 0 ? (
+          <EmptyState icon="🥃" title={t('tasting.noRatings')} />
+        ) : (
+        <div className="stagger flex flex-col gap-3">
+          {ranking.map((entry, i) => (
             <div key={entry.drink_id} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4">
               <span className="text-stone-500 font-mono w-6 text-center">{i + 1}</span>
               {entry.photo_url ? (
@@ -417,6 +418,7 @@ export default function Tasting() {
           ))}
           <p className="text-xs text-stone-600 text-center mt-2">{t('tasting.updatesLive')}</p>
         </div>
+        )
       )}
 
       {/* Bewerten */}
