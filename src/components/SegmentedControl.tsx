@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { haptic } from '../lib/haptics'
 
 export interface SegmentOption<T extends string> {
   value: T
@@ -47,7 +48,12 @@ export default function SegmentedControl<T extends string>({
       {options.map(o => (
         <button
           key={o.value}
-          onClick={() => onChange(o.value)}
+          onClick={() => {
+            // Leichter Auswahl-Impuls wie bei nativen Segment-Controls – nur
+            // bei echtem Wechsel, nicht beim erneuten Tippen des aktiven Tabs.
+            if (o.value !== value) haptic(8)
+            onChange(o.value)
+          }}
           className={`relative z-10 flex-1 rounded-lg ${pad} font-medium transition-colors ${value === o.value ? activeText : inactiveText}`}
         >
           {o.label}
