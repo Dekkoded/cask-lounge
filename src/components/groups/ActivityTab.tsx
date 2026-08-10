@@ -5,6 +5,7 @@ import { ReactionBar, CommentSection } from '../SessionSocial'
 import Modal from '../Modal'
 import { formatDateTime } from '../../lib/format'
 import { thumbUrl } from '../../lib/image'
+import Img from '../Img'
 import type { GroupSession, RatingShare } from '../../lib/queries/sessions'
 import type { DrinkListItem } from '../../lib/queries/drinks'
 
@@ -105,7 +106,7 @@ export default function ActivityTab({
           >
             <span className="text-2xl">⭐</span>
             {a.share.ratings?.drinks?.photo_url ? (
-              <img src={thumbUrl(a.share.ratings.drinks.photo_url, 96)} alt={a.share.ratings.drinks.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+              <Img src={thumbUrl(a.share.ratings.drinks.photo_url, 96)} alt={a.share.ratings.drinks.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
             ) : (
               <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
             )}

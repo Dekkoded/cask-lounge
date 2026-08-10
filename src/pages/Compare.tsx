@@ -8,6 +8,7 @@ import CompareWheel from '../components/CompareWheel'
 import { aromaLabel } from '../lib/aromas'
 import { usePageMeta } from '../lib/pageMeta'
 import { thumbUrl } from '../lib/image'
+import Img from '../components/Img'
 import LoadError from '../components/LoadError'
 
 const COLORS = ['#f59e0b', '#60a5fa', '#34d399']
@@ -145,7 +146,7 @@ export default function Compare() {
           {selected.map((d, i) => (
             <div key={d.id} className="bg-stone-900 rounded-xl p-3 flex flex-col items-center text-center">
               {d.photo_url ? (
-                <img src={thumbUrl(d.photo_url, 128)} alt={d.name} className="w-16 h-16 object-cover rounded-lg mb-2" />
+                <Img src={thumbUrl(d.photo_url, 128)} alt={d.name} className="w-16 h-16 object-cover rounded-lg mb-2" />
               ) : (
                 <div className="w-16 h-16 bg-stone-800 rounded-lg flex items-center justify-center text-2xl mb-2">🥃</div>
               )}
@@ -190,7 +191,7 @@ export default function Compare() {
                     className="flex items-center gap-3 text-left rounded-lg p-2 hover:bg-stone-800 transition-colors"
                   >
                     {s.photo_url ? (
-                      <img src={thumbUrl(s.photo_url, 80)} alt={s.name} loading="lazy" decoding="async" className="w-10 h-10 object-cover rounded flex-shrink-0" />
+                      <Img src={thumbUrl(s.photo_url, 80)} alt={s.name} loading="lazy" decoding="async" className="w-10 h-10 object-cover rounded flex-shrink-0" />
                     ) : (
                       <div className="w-10 h-10 bg-stone-800 rounded flex items-center justify-center flex-shrink-0">🥃</div>
                     )}

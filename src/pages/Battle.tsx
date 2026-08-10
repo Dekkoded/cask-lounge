@@ -15,6 +15,7 @@ import {
 } from '../lib/queries/battles'
 import { useAuth } from '../context/auth-context'
 import { thumbUrl } from '../lib/image'
+import Img from '../components/Img'
 import LoadError from '../components/LoadError'
 
 export default function Battle() {
@@ -195,7 +196,7 @@ export default function Battle() {
               />
               <div className="relative flex items-center gap-4">
                 {drink.photo_url ? (
-                  <img src={thumbUrl(drink.photo_url, 112)} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                  <Img src={thumbUrl(drink.photo_url, 112)} alt={drink.name} loading="lazy" decoding="async" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
                 ) : (
                   <div className="w-14 h-14 bg-stone-800 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">🥃</div>
                 )}

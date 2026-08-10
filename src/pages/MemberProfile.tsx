@@ -6,6 +6,7 @@ import { lookupDistillery } from '../lib/distilleries'
 import Lightbox from '../components/Lightbox'
 import { usePageMeta } from '../lib/pageMeta'
 import { thumbUrl } from '../lib/image'
+import Img from '../components/Img'
 import type { MapPin } from '../components/DistilleryMap'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
@@ -84,7 +85,7 @@ export default function MemberProfile() {
 
       <div className="flex flex-col items-center mb-8">
         {member.avatar_url ? (
-          <img
+          <Img
             src={thumbUrl(member.avatar_url, 256)}
             alt={name}
             onClick={() => setLightboxSrc(member.avatar_url)}
@@ -125,7 +126,7 @@ export default function MemberProfile() {
           {whiskies.map((w, i) => (
             <Link key={w.id} to={`/whisky/${w.id}`} className="press flex items-center gap-3 bg-stone-900 hover:bg-stone-800 rounded-xl p-3 transition-colors">
               {w.photo_url ? (
-                <img src={thumbUrl(w.photo_url, 96)} alt={w.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
+                <Img src={thumbUrl(w.photo_url, 96)} alt={w.name} loading="lazy" decoding="async" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />
               ) : (
                 <div className="w-12 h-12 bg-stone-800 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🥃</div>
               )}
