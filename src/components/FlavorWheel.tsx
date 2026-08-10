@@ -53,7 +53,11 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
     return `${x},${y}`
   }).join(' ')
 
-  const handleClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  // Ein einziger Pointer-Handler für Maus UND Touch. Pointer-Events feuern auf
+  // iOS Safari und Android zuverlässig beim Tippen – anders als `click` (das
+  // iOS auf SVG ohne `cursor:pointer` oft gar nicht auslöst) und `touchstart`
+  // mit preventDefault (das unter Reacts passivem Listener wirkungslos ist).
+  const handlePointer = (e: React.PointerEvent<SVGSVGElement>) => {
     if (!onChange) return
     const svg = e.currentTarget
     const rect = svg.getBoundingClientRect()
@@ -61,7 +65,7 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
     const mx = (e.clientX - rect.left) / rect.width * VW - CX
     const my = (e.clientY - rect.top) / rect.height * VH - CY
     const dist = Math.sqrt(mx * mx + my * my)
-    if (dist < 6) return // Klick zu nah am Zentrum ignorieren
+    if (dist < 6) return // Tap zu nah am Zentrum ignorieren
 
     // Nächste Achse finden — mit korrektem Winkel-Wrap
     const clickAng = Math.atan2(my, mx)
@@ -78,38 +82,13 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
     onChange(best, v)
   }
 
-  const handleTouch = (e: React.TouchEvent<SVGSVGElement>) => {
-    if (!onChange) return
-    e.preventDefault()
-    const touch = e.touches[0]
-    const svg = e.currentTarget
-    const rect = svg.getBoundingClientRect()
-    const mx = (touch.clientX - rect.left) / rect.width * VW - CX
-    const my = (touch.clientY - rect.top) / rect.height * VH - CY
-    const dist = Math.sqrt(mx * mx + my * my)
-    if (dist < 6) return
-
-    const clickAng = Math.atan2(my, mx)
-    let best = 0
-    let bestDiff = Infinity
-    for (let i = 0; i < 12; i++) {
-      const a = axisAngle(i)
-      let diff = ((clickAng - a) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-      diff = Math.abs(diff)
-      if (diff < bestDiff) { bestDiff = diff; best = i }
-    }
-    const v = Math.min(5, Math.max(0, Math.round((dist / R) * 5)))
-    onChange(best, v)
-  }
-
   return (
     <div className="flex flex-col items-center gap-1 w-full">
       <p className="text-sm font-medium text-stone-300">{label}</p>
       <svg
         viewBox={`0 0 ${VW} ${VH}`}
-        className={`w-full ${onChange ? 'cursor-crosshair touch-none' : ''}`}
-        onClick={handleClick}
-        onTouchStart={handleTouch}
+        className={`w-full ${onChange ? 'cursor-crosshair touch-none select-none' : ''}`}
+        onPointerDown={onChange ? handlePointer : undefined}
       >
         {/* Ringe */}
         {RINGS.map(r => (
