@@ -47,8 +47,8 @@ export default function MemberProfile() {
   if (loading) {
     return (
       <div className="max-w-lg mx-auto p-6">
-        <div className="h-4 w-20 bg-stone-800 rounded mb-8 animate-pulse" />
-        <div className="flex flex-col items-center gap-4 animate-pulse">
+        <div className="h-4 w-20 bg-stone-800 rounded mb-8 skeleton" />
+        <div className="flex flex-col items-center gap-4 skeleton">
           <div className="w-24 h-24 bg-stone-800 rounded-full" />
           <div className="h-5 bg-stone-800 rounded w-40" />
         </div>
@@ -111,7 +111,7 @@ export default function MemberProfile() {
       {pins.length > 0 && (
         <div className="mb-6">
           <p className="text-sm font-medium text-stone-300 mb-2">{t('member.distilleries')}</p>
-          <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl skeleton" />}>
             <DistilleryMap pins={pins} heightClass="h-72" />
           </Suspense>
         </div>

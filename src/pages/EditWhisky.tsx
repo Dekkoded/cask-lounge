@@ -95,8 +95,8 @@ export default function EditWhisky() {
   if (allowed === null) {
     return (
       <div className="max-w-lg mx-auto p-6">
-        <div className="h-7 w-48 bg-stone-800 rounded mb-6 animate-pulse" />
-        <div className="flex flex-col gap-4 animate-pulse">
+        <div className="h-7 w-48 bg-stone-800 rounded mb-6 skeleton" />
+        <div className="flex flex-col gap-4 skeleton">
           {Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-11 bg-stone-800 rounded-lg" />)}
         </div>
       </div>

@@ -149,8 +149,8 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="max-w-lg mx-auto p-6">
-        <div className="h-4 w-20 bg-stone-800 rounded mb-8 animate-pulse" />
-        <div className="flex flex-col items-center gap-4 animate-pulse">
+        <div className="h-4 w-20 bg-stone-800 rounded mb-8 skeleton" />
+        <div className="flex flex-col items-center gap-4 skeleton">
           <div className="w-24 h-24 bg-stone-800 rounded-full" />
           <div className="h-5 bg-stone-800 rounded w-40" />
         </div>

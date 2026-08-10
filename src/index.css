@@ -173,6 +173,25 @@ body {
 .img-fade { opacity: 0; transition: opacity 400ms var(--ease-out); }
 .img-fade[data-loaded] { opacity: 1; }
 
+/* Skeletons: ein Licht-Schimmer wandert über den Platzhalter, statt nur zu
+   pulsieren – wirkt deutlich wertiger und „lädt aktiv". Der Sweep liegt in
+   ::after (nur transform, GPU) und respektiert per overflow den Radius. Die
+   eigene bg-Farbe (stone-800/900) bleibt unangetastet. */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton { position: relative; overflow: hidden; }
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.06), transparent);
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+/* Auf hellem Pergament ist ein weißer Sweep unsichtbar – dort dunkel wischen. */
+:root[data-theme="light"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, oklch(0 0 0 / 0.05), transparent);
+}
+
 /* ── Motion-Schicht ─────────────────────────────────────────────────
    Enter-Animationen für Overlays. Emil: Entering → ease-out; Sheets
    fühlen sich mit --ease-drawer physisch an. Dauer <300ms für Panels,

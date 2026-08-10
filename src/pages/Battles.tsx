@@ -155,7 +155,7 @@ export default function Battles() {
       {loading ? (
         <div className="flex flex-col gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-16 bg-stone-900 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-stone-900 rounded-xl skeleton" />
           ))}
         </div>
       ) : loadError ? (

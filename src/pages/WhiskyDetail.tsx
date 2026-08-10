@@ -294,8 +294,8 @@ export default function WhiskyDetail() {
   if (!drink) {
     return (
       <div className="max-w-2xl mx-auto p-6 pb-24">
-        <div className="h-4 w-20 bg-stone-800 rounded mb-6 animate-pulse" />
-        <div className="flex gap-4 mb-8 animate-pulse">
+        <div className="h-4 w-20 bg-stone-800 rounded mb-6 skeleton" />
+        <div className="flex gap-4 mb-8 skeleton">
           <div className="w-24 h-24 bg-stone-800 rounded-xl flex-shrink-0" />
           <div className="flex-1">
             <div className="h-7 bg-stone-800 rounded w-48 mb-2" />
@@ -303,7 +303,7 @@ export default function WhiskyDetail() {
             <div className="h-3 bg-stone-800 rounded w-40" />
           </div>
         </div>
-        <div className="bg-stone-900 rounded-2xl p-6 flex flex-col gap-4 animate-pulse">
+        <div className="bg-stone-900 rounded-2xl p-6 flex flex-col gap-4 skeleton">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i}>
               <div className="h-3 bg-stone-800 rounded w-24 mb-2" />
@@ -492,7 +492,7 @@ export default function WhiskyDetail() {
               <p className="text-sm font-medium text-stone-300 mb-2">
                 {t('whisky.origin')} <span className="text-stone-500 font-normal">· {drink.producer}, {geo.country}</span>
               </p>
-              <Suspense fallback={<div className="h-56 bg-stone-900 rounded-xl animate-pulse" />}>
+              <Suspense fallback={<div className="h-56 bg-stone-900 rounded-xl skeleton" />}>
                 <DistilleryMap
                   pins={[{ name: drink.producer!, geo, whiskies: [{ id: drink.id, name: drink.name }] }]}
                   heightClass="h-56"

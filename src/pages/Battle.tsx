@@ -116,11 +116,11 @@ export default function Battle() {
   if (loading) {
     return (
       <div className="max-w-lg mx-auto p-4">
-        <div className="h-4 w-24 bg-stone-800 rounded mb-6 animate-pulse" />
-        <div className="h-7 w-56 bg-stone-800 rounded mb-6 animate-pulse" />
+        <div className="h-4 w-24 bg-stone-800 rounded mb-6 skeleton" />
+        <div className="h-7 w-56 bg-stone-800 rounded mb-6 skeleton" />
         <div className="flex flex-col gap-3">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="h-24 bg-stone-900 rounded-2xl animate-pulse" />
+            <div key={i} className="h-24 bg-stone-900 rounded-2xl skeleton" />
           ))}
         </div>
       </div>

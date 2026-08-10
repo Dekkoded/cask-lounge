@@ -88,7 +88,7 @@ export default function Groups() {
       {loading ? (
         <div className="flex flex-col gap-3 mb-6">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-stone-900 rounded-xl p-4 animate-pulse">
+            <div key={i} className="bg-stone-900 rounded-xl p-4 skeleton">
               <div className="h-4 bg-stone-800 rounded w-1/2 mb-2" />
               <div className="h-3 bg-stone-800 rounded w-1/3" />
             </div>

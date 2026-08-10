@@ -43,7 +43,7 @@ export default function Members() {
       {loading ? (
         <div className="flex flex-col gap-2">
           {[0, 1, 2].map(i => (
-            <div key={i} className="h-16 bg-stone-900 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-stone-900 rounded-xl skeleton" />
           ))}
         </div>
       ) : members.length === 0 ? (

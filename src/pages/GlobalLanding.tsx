@@ -206,7 +206,7 @@ export default function GlobalLanding() {
         loading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 animate-pulse">
+              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 skeleton">
                 <div className="w-6 h-4 bg-stone-800 rounded" />
                 <div className="w-14 h-14 bg-stone-800 rounded-lg flex-shrink-0" />
                 <div className="flex-1 flex flex-col gap-2">
@@ -270,7 +270,7 @@ export default function GlobalLanding() {
         vitrineLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 animate-pulse">
+              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 skeleton">
                 <div className="w-14 h-14 bg-stone-800 rounded-lg flex-shrink-0" />
                 <div className="flex-1 flex flex-col gap-2">
                   <div className="h-4 bg-stone-800 rounded w-3/4" />
@@ -310,7 +310,7 @@ export default function GlobalLanding() {
             {vitrinePins.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-stone-300 mb-2">{t('landing.distilleries')}</p>
-                <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl animate-pulse" />}>
+                <Suspense fallback={<div className="h-72 bg-stone-900 rounded-xl skeleton" />}>
                   <DistilleryMap pins={vitrinePins} heightClass="h-72" />
                 </Suspense>
               </div>
@@ -351,7 +351,7 @@ export default function GlobalLanding() {
         wishlistLoading ? (
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 animate-pulse">
+              <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 skeleton">
                 <div className="w-14 h-14 bg-stone-800 rounded-lg flex-shrink-0" />
                 <div className="flex-1 flex flex-col gap-2">
                   <div className="h-4 bg-stone-800 rounded w-3/4" />

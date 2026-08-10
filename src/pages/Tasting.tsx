@@ -248,21 +248,21 @@ export default function Tasting() {
 
   if (!tasting) return (
     <div className="max-w-lg mx-auto p-4 pb-24">
-      <div className="h-4 w-20 bg-stone-800 rounded mb-6 animate-pulse" />
-      <div className="flex justify-between items-start mb-4 animate-pulse">
+      <div className="h-4 w-20 bg-stone-800 rounded mb-6 skeleton" />
+      <div className="flex justify-between items-start mb-4 skeleton">
         <div>
           <div className="h-6 bg-stone-800 rounded w-48 mb-2" />
           <div className="h-4 bg-stone-800 rounded w-24" />
         </div>
         <div className="h-6 bg-stone-800 rounded-full w-24" />
       </div>
-      <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6 animate-pulse">
+      <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6 skeleton">
         <div className="flex-1 h-8 bg-stone-800 rounded-lg" />
         <div className="flex-1 h-8 bg-stone-800 rounded-lg" />
       </div>
       <div className="flex flex-col gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 animate-pulse">
+          <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 skeleton">
             <div className="w-6 h-4 bg-stone-800 rounded" />
             <div className="w-12 h-12 bg-stone-800 rounded-lg flex-shrink-0" />
             <div className="flex-1">

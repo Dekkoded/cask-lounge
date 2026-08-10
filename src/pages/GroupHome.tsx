@@ -177,21 +177,21 @@ export default function GroupHome() {
   if (!group) {
     return (
       <div className="max-w-lg mx-auto p-4">
-        <div className="flex items-center gap-3 py-4 mb-4 animate-pulse">
+        <div className="flex items-center gap-3 py-4 mb-4 skeleton">
           <div className="h-4 w-20 bg-stone-800 rounded" />
           <div className="flex-1" />
           <div className="h-8 w-28 bg-stone-800 rounded-lg" />
         </div>
-        <div className="h-7 bg-stone-800 rounded w-48 mb-1 animate-pulse" />
-        <div className="h-4 bg-stone-800 rounded w-32 mb-4 animate-pulse" />
-        <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6 animate-pulse">
+        <div className="h-7 bg-stone-800 rounded w-48 mb-1 skeleton" />
+        <div className="h-4 bg-stone-800 rounded w-32 mb-4 skeleton" />
+        <div className="flex gap-1 bg-stone-900 rounded-xl p-1 mb-6 skeleton">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex-1 h-8 bg-stone-800 rounded-lg" />
           ))}
         </div>
         <div className="flex flex-col gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 animate-pulse">
+            <div key={i} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4 skeleton">
               <div className="w-6 h-4 bg-stone-800 rounded" />
               <div className="w-14 h-14 bg-stone-800 rounded-lg flex-shrink-0" />
               <div className="flex-1">
