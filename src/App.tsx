@@ -8,6 +8,7 @@ import IntroTour from './components/IntroTour'
 import OfflineBanner from './components/OfflineBanner'
 import TopBar from './components/TopBar'
 import BottomNav from './components/BottomNav'
+import ScrollToTop from './components/ScrollToTop'
 import GlobalLanding from './pages/GlobalLanding'
 
 const Login = lazy(() => import('./pages/Login'))
@@ -34,6 +35,7 @@ function AppShell() {
   const { pathname } = useLocation()
   return (
     <>
+      <ScrollToTop />
       <InstallPrompt />
       <IntroTour />
       <OfflineBanner />
