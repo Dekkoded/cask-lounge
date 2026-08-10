@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const LABEL_KEYS = [
@@ -60,25 +60,33 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
 
-  // WICHTIG: Wir registrieren pointerdown als NATIVEN Listener direkt am <svg>
-  // statt über Reacts onPointerDown-Prop. Grund: Reacts synthetisches Event
-  // (Delegation an der Root) feuert NICHT, wenn der Tap auf einem SVG-Kind
-  // (line/circle/text) landet – und genau das passiert bei jedem echten Tipp.
-  // Ein nativer Listener am <svg> fängt das gebubbelte Event aus jedem Kind
-  // zuverlässig ab (auf iOS Safari, Android und Desktop gleichermaßen).
+  // TEMPORÄRE Diagnose: zeigt direkt auf dem Gerät, welches Event feuert.
+  const [dbg, setDbg] = useState('bereit')
+
+  // Wir setzen NICHT auf ein einziges Event-Modell, sondern fangen touchstart,
+  // pointerdown UND mousedown NATIV am <svg> ab (non-passive). Ein Zeit-Guard
+  // entprellt die Mehrfach-Events einer einzigen Berührung, sodass garantiert
+  // genau ein Pfad greift – egal ob iOS Safari, Android-Chrome oder Desktop.
   useEffect(() => {
     const svg = svgRef.current
     if (!svg || !onChange) return
 
-    const handlePointer = (e: PointerEvent) => {
+    let lastApply = 0
+
+    const apply = (clientX: number, clientY: number, src: string) => {
       const cb = onChangeRef.current
       if (!cb) return
+      const now = Date.now()
+      // Entprellen: eine Berührung löst oft touch+pointer+mouse+click aus.
+      if (now - lastApply < 500) { setDbg(`${src} (entprellt)`); return }
+      lastApply = now
+
       const rect = svg.getBoundingClientRect()
       // Koordinaten in ViewBox-Raum umrechnen
-      const mx = (e.clientX - rect.left) / rect.width * VW - CX
-      const my = (e.clientY - rect.top) / rect.height * VH - CY
+      const mx = (clientX - rect.left) / rect.width * VW - CX
+      const my = (clientY - rect.top) / rect.height * VH - CY
       const dist = Math.sqrt(mx * mx + my * my)
-      if (dist < 6) return // Tap zu nah am Zentrum ignorieren
+      if (dist < 6) { setDbg(`${src}: Zentrum`); return } // zu nah am Zentrum
 
       // Nächste Achse finden — mit korrektem Winkel-Wrap
       const clickAng = Math.atan2(my, mx)
@@ -93,10 +101,26 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
       }
       const v = Math.min(5, Math.max(0, Math.round((dist / R) * 5)))
       cb(best, v)
+      setDbg(`${src} → Achse ${best} = ${v}`)
     }
 
-    svg.addEventListener('pointerdown', handlePointer)
-    return () => svg.removeEventListener('pointerdown', handlePointer)
+    const onTouch = (e: TouchEvent) => {
+      const t = e.touches[0] ?? e.changedTouches[0]
+      if (!t) { setDbg('touchstart: keine Koordinate'); return }
+      e.preventDefault() // verhindert den nachfolgenden Geister-Klick/Scroll
+      apply(t.clientX, t.clientY, 'touch')
+    }
+    const onPointer = (e: PointerEvent) => apply(e.clientX, e.clientY, `pointer:${e.pointerType}`)
+    const onMouse = (e: MouseEvent) => apply(e.clientX, e.clientY, 'mouse')
+
+    svg.addEventListener('touchstart', onTouch, { passive: false })
+    svg.addEventListener('pointerdown', onPointer)
+    svg.addEventListener('mousedown', onMouse)
+    return () => {
+      svg.removeEventListener('touchstart', onTouch)
+      svg.removeEventListener('pointerdown', onPointer)
+      svg.removeEventListener('mousedown', onMouse)
+    }
     // Nur an-/abmelden wenn sich der editierbare Zustand ändert.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [!!onChange])
@@ -167,6 +191,13 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
       {/* Tipp-Text wenn editierbar */}
       {onChange && (
         <p className="text-xs text-stone-600">{t('whisky.flavorWheelTip')}</p>
+      )}
+
+      {/* TEMPORÄRE Diagnose-Anzeige – zeigt auf dem Gerät, was beim Tippen feuert. */}
+      {onChange && (
+        <p className="text-xs font-mono text-amber-500/80 bg-stone-800/60 rounded px-2 py-1">
+          debug: {dbg}
+        </p>
       )}
     </div>
   )
