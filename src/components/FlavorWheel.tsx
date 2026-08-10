@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
 const LABEL_KEYS = [
@@ -53,43 +54,67 @@ export default function FlavorWheel({ values, onChange, color = '#f59e0b', label
     return `${x},${y}`
   }).join(' ')
 
-  // Ein einziger Pointer-Handler für Maus UND Touch. Pointer-Events feuern auf
-  // iOS Safari und Android zuverlässig beim Tippen – anders als `click` (das
-  // iOS auf SVG ohne `cursor:pointer` oft gar nicht auslöst) und `touchstart`
-  // mit preventDefault (das unter Reacts passivem Listener wirkungslos ist).
-  const handlePointer = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (!onChange) return
-    const svg = e.currentTarget
-    const rect = svg.getBoundingClientRect()
-    // Koordinaten in ViewBox-Raum umrechnen
-    const mx = (e.clientX - rect.left) / rect.width * VW - CX
-    const my = (e.clientY - rect.top) / rect.height * VH - CY
-    const dist = Math.sqrt(mx * mx + my * my)
-    if (dist < 6) return // Tap zu nah am Zentrum ignorieren
+  // onChange in einer Ref halten, damit der native Listener immer die aktuelle
+  // Callback-Version nutzt, ohne bei jedem Render neu registriert zu werden.
+  const svgRef = useRef<SVGSVGElement>(null)
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
 
-    // Nächste Achse finden — mit korrektem Winkel-Wrap
-    const clickAng = Math.atan2(my, mx)
-    let best = 0
-    let bestDiff = Infinity
-    for (let i = 0; i < 12; i++) {
-      const a = axisAngle(i)
-      // Normalisiere beide Winkel auf [-π, π]
-      let diff = ((clickAng - a) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI
-      diff = Math.abs(diff)
-      if (diff < bestDiff) { bestDiff = diff; best = i }
+  // WICHTIG: Wir registrieren pointerdown als NATIVEN Listener direkt am <svg>
+  // statt über Reacts onPointerDown-Prop. Grund: Reacts synthetisches Event
+  // (Delegation an der Root) feuert NICHT, wenn der Tap auf einem SVG-Kind
+  // (line/circle/text) landet – und genau das passiert bei jedem echten Tipp.
+  // Ein nativer Listener am <svg> fängt das gebubbelte Event aus jedem Kind
+  // zuverlässig ab (auf iOS Safari, Android und Desktop gleichermaßen).
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg || !onChange) return
+
+    const handlePointer = (e: PointerEvent) => {
+      const cb = onChangeRef.current
+      if (!cb) return
+      const rect = svg.getBoundingClientRect()
+      // Koordinaten in ViewBox-Raum umrechnen
+      const mx = (e.clientX - rect.left) / rect.width * VW - CX
+      const my = (e.clientY - rect.top) / rect.height * VH - CY
+      const dist = Math.sqrt(mx * mx + my * my)
+      if (dist < 6) return // Tap zu nah am Zentrum ignorieren
+
+      // Nächste Achse finden — mit korrektem Winkel-Wrap
+      const clickAng = Math.atan2(my, mx)
+      let best = 0
+      let bestDiff = Infinity
+      for (let i = 0; i < 12; i++) {
+        const a = axisAngle(i)
+        // Normalisiere beide Winkel auf [-π, π]
+        let diff = ((clickAng - a) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI
+        diff = Math.abs(diff)
+        if (diff < bestDiff) { bestDiff = diff; best = i }
+      }
+      const v = Math.min(5, Math.max(0, Math.round((dist / R) * 5)))
+      cb(best, v)
     }
-    const v = Math.min(5, Math.max(0, Math.round((dist / R) * 5)))
-    onChange(best, v)
-  }
+
+    svg.addEventListener('pointerdown', handlePointer)
+    return () => svg.removeEventListener('pointerdown', handlePointer)
+    // Nur an-/abmelden wenn sich der editierbare Zustand ändert.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!onChange])
 
   return (
     <div className="flex flex-col items-center gap-1 w-full">
       <p className="text-sm font-medium text-stone-300">{label}</p>
       <svg
+        ref={svgRef}
         viewBox={`0 0 ${VW} ${VH}`}
         className={`w-full ${onChange ? 'cursor-crosshair touch-none select-none' : ''}`}
-        onPointerDown={onChange ? handlePointer : undefined}
       >
+        {/* Transparente Hintergrundfläche: macht auch die Lücken zwischen den
+            Formen tippbar, damit wirklich jeder Punkt im Rad ein Treffer ist. */}
+        {onChange && (
+          <rect x="0" y="0" width={VW} height={VH} fill="transparent" />
+        )}
+
         {/* Ringe */}
         {RINGS.map(r => (
           <circle key={r} cx={CX} cy={CY} r={(r / 5) * R}
