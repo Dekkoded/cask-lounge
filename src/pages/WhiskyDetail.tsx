@@ -340,11 +340,10 @@ export default function WhiskyDetail() {
             src={thumbUrl(drink.photo_url, 256)}
             alt={drink.name}
             onClick={() => setLightboxSrc(drink.photo_url)}
-            style={{ viewTransitionName: 'whisky-photo' }}
             className="w-24 h-24 object-cover rounded-xl flex-shrink-0 cursor-zoom-in"
           />
         ) : (
-          <div style={{ viewTransitionName: 'whisky-photo' }} className="w-24 h-24 bg-stone-800 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">🥃</div>
+          <div className="w-24 h-24 bg-stone-800 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">🥃</div>
         )}
         <div className="flex-1 min-w-0">
           <h1 className="font-display text-2xl font-semibold text-stone-100">{drink.name}</h1>
