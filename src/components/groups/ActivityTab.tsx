@@ -6,6 +6,7 @@ import Modal from '../Modal'
 import { formatDateTime } from '../../lib/format'
 import { thumbUrl } from '../../lib/image'
 import Img from '../Img'
+import EmptyState from '../EmptyState'
 import type { GroupSession, RatingShare } from '../../lib/queries/sessions'
 import type { DrinkListItem } from '../../lib/queries/drinks'
 
@@ -65,11 +66,7 @@ export default function ActivityTab({
       {loading ? (
         <p className="text-stone-500 text-center py-8 animate-pulse">{t('common.loading')}</p>
       ) : activity.length === 0 ? (
-        <p className="text-stone-500 text-center py-8">
-          {t('groups.noActivity')}
-          <br />
-          <span className="text-sm">{t('groups.noActivitySub')}</span>
-        </p>
+        <EmptyState icon="✨" title={t('groups.noActivity')} hint={t('groups.noActivitySub')} />
       ) : (
         activity.map(a => a.kind === 'session' ? (
           <div key={`s-${a.session.id}`} className="bg-stone-900 rounded-xl p-4">

@@ -7,6 +7,7 @@ import { listAllBattles, createBattle, type BattleFeedItem } from '../lib/querie
 import { useAuth } from '../context/auth-context'
 import { usePageMeta } from '../lib/pageMeta'
 import LoadError from '../components/LoadError'
+import EmptyState from '../components/EmptyState'
 
 export default function Battles() {
   const { t } = useTranslation()
@@ -161,11 +162,7 @@ export default function Battles() {
       ) : loadError ? (
         <LoadError onRetry={loadBattles} />
       ) : battles.length === 0 ? (
-        <p className="text-stone-500 text-center py-12">
-          {t('battle.noBattles')}
-          <br />
-          <span className="text-sm">{t('battle.noBattlesSub')}</span>
-        </p>
+        <EmptyState icon="⚔️" title={t('battle.noBattles')} hint={t('battle.noBattlesSub')} />
       ) : (
         <div className="stagger flex flex-col gap-3">
           {battles.map(b => (

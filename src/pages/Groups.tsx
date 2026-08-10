@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { listMyGroups, createGroup, joinGroup, type GroupSummary } from '../lib/queries/groups'
 import { useAuth } from '../context/auth-context'
+import EmptyState from '../components/EmptyState'
 
 export default function Groups() {
   const { t } = useTranslation()
@@ -95,7 +96,7 @@ export default function Groups() {
           ))}
         </div>
       ) : groups.length === 0 ? (
-        <p className="text-stone-500 text-center py-8">{t('groups.noGroups')}</p>
+        <EmptyState icon="👥" title={t('groups.noGroups')} />
       ) : (
         <div className="stagger flex flex-col gap-3 mb-6">
           {groups.map(g => (

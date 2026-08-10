@@ -181,6 +181,13 @@ body {
 .img-fade { opacity: 0; transition: opacity 400ms var(--ease-out); }
 .img-fade[data-loaded] { opacity: 1; }
 
+/* Leere Zustände (siehe <EmptyState>) blenden ruhig ein, das Symbol steigt
+   dabei kurz auf – wirkt bewusst gestaltet statt „plötzlich leer". */
+@keyframes emptyIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes emptyIconIn { from { opacity: 0; transform: scale(0.82); } to { opacity: 0.9; transform: none; } }
+.empty-state { animation: emptyIn 420ms var(--ease-out) both; }
+.empty-state > [aria-hidden] { animation: emptyIconIn 520ms var(--ease-out) both; }
+
 /* Skeletons: ein Licht-Schimmer wandert über den Platzhalter, statt nur zu
    pulsieren – wirkt deutlich wertiger und „lädt aktiv". Der Sweep liegt in
    ::after (nur transform, GPU) und respektiert per overflow den Radius. Die

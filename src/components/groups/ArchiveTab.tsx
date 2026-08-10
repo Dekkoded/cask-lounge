@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { thumbUrl } from '../../lib/image'
 import Img from '../Img'
+import EmptyState from '../EmptyState'
 import type { ArchiveDrink } from '../../lib/queries/archive'
 
 interface Props {
@@ -15,11 +16,7 @@ export default function ArchiveTab({ archive }: Props) {
   if (archive.length === 0) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-stone-500 text-center py-8">
-          {t('groups.noArchive')}
-          <br />
-          <span className="text-sm">{t('groups.noArchiveSub')}</span>
-        </p>
+        <EmptyState icon="📦" title={t('groups.noArchive')} hint={t('groups.noArchiveSub')} />
       </div>
     )
   }

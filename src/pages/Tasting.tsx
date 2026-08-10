@@ -20,6 +20,7 @@ import AromaTags from '../components/AromaTags'
 import { thumbUrl } from '../lib/image'
 import Img from '../components/Img'
 import SegmentedControl from '../components/SegmentedControl'
+import EmptyState from '../components/EmptyState'
 import LoadError from '../components/LoadError'
 
 const EMPTY_WHEELS: { nose: number[]; taste: number[]; aromas: string[]; extra: string[] } = {
@@ -390,7 +391,7 @@ export default function Tasting() {
       {activeTab === 'rangliste' && (
         <div className="flex flex-col gap-3">
           {ranking.length === 0 ? (
-            <p className="text-stone-500 text-center py-8">{t('tasting.noRatings')}</p>
+            <EmptyState icon="🥃" title={t('tasting.noRatings')} />
           ) : ranking.map((entry, i) => (
             <div key={entry.drink_id} className="flex items-center gap-4 bg-stone-900 rounded-xl p-4">
               <span className="text-stone-500 font-mono w-6 text-center">{i + 1}</span>

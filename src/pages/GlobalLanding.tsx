@@ -18,6 +18,7 @@ import { formatDate, formatNumber } from '../lib/format'
 import { thumbUrl } from '../lib/image'
 import Img from '../components/Img'
 import SegmentedControl from '../components/SegmentedControl'
+import EmptyState from '../components/EmptyState'
 
 const DistilleryMap = lazy(() => import('../components/DistilleryMap'))
 
@@ -210,17 +211,18 @@ export default function GlobalLanding() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-stone-500 mb-4">{t('landing.noWhiskies')}</p>
-            {user && (
+          <EmptyState
+            icon="🥃"
+            title={t('landing.noWhiskies')}
+            action={user ? (
               <button
                 onClick={() => navigate('/add-whisky')}
                 className="bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold rounded-lg px-4 py-2"
               >
                 {t('landing.addFirstWhisky')}
               </button>
-            )}
-          </div>
+            ) : undefined}
+          />
         ) : (
           <div className="stagger flex flex-col gap-3">
             {filtered.map((s, rank) => (

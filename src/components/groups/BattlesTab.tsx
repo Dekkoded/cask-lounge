@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import EmptyState from '../EmptyState'
 import type { BattleListItem } from '../../lib/queries/battles'
 import type { DrinkListItem } from '../../lib/queries/drinks'
 
@@ -46,11 +47,7 @@ export default function BattlesTab({ battles, allDrinks, onCreate }: Props) {
   return (
     <div className="flex flex-col gap-3">
       {battles.length === 0 && (
-        <p className="text-stone-500 text-center py-8">
-          {t('battle.noBattles')}
-          <br />
-          <span className="text-sm">{t('battle.noBattlesSub')}</span>
-        </p>
+        <EmptyState icon="⚔️" title={t('battle.noBattles')} hint={t('battle.noBattlesSub')} />
       )}
       {battles.map(b => (
         <Link
