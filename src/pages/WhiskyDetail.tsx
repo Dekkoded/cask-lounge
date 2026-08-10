@@ -29,6 +29,7 @@ import AromaTags from '../components/AromaTags'
 import Img from '../components/Img'
 import { aromaLabel } from '../lib/aromas'
 import { usePageMeta } from '../lib/pageMeta'
+import { haptic } from '../lib/haptics'
 import { amazonSearchUrl, AMAZON_ENABLED } from '../lib/affiliate'
 import { lookupDistillery } from '../lib/distilleries'
 import { formatDate } from '../lib/format'
@@ -193,6 +194,7 @@ export default function WhiskyDetail() {
     setSaving(false)
     setMyRating(data)
     removeFromWishlistSilently()
+    haptic(18)
     setSaved(true)
 
     // Öffentliche Ratings neu laden
@@ -216,6 +218,7 @@ export default function WhiskyDetail() {
       } else {
         await addToWishlist(id, user.id)
         setInWishlist(true)
+        haptic(12)
       }
     } catch { /* Zustand bleibt unverändert */ }
     setWishlistBusy(false)

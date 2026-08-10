@@ -91,6 +91,10 @@
   --color-amber-200: oklch(0.720 0.120 72);
 }
 
+/* Kein Gummiband-Overscroll zur Browserfläche – die installierte PWA soll
+   sich an den Rändern nativ „geschlossen" anfühlen. */
+html, body { overscroll-behavior-y: none; }
+
 body {
   @apply bg-app text-stone-100 min-h-screen;
   font-family: var(--font-sans);
@@ -140,6 +144,10 @@ body {
   outline-offset: 2px;
   border-radius: 0.5rem;
 }
+
+/* Scrollen innerhalb eines Dialogs kettet nicht auf die Seite dahinter
+   durch (zusätzlich zum Body-Scroll-Lock). */
+[role="dialog"] { overscroll-behavior: contain; }
 
 /* Markierter Text im Marken-Gold statt Browser-Blau. */
 ::selection {

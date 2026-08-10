@@ -6,6 +6,7 @@ import { searchWhiskiesByName, createDrink } from '../lib/queries/drinks'
 import { createCollectionEntry, addToWishlist } from '../lib/queries/ratings'
 import { useAuth } from '../context/auth-context'
 import { compressImage } from '../lib/image'
+import { haptic } from '../lib/haptics'
 import Modal from '../components/Modal'
 
 export default function AddWhisky() {
@@ -83,6 +84,7 @@ export default function AddWhisky() {
     // Sammlungs-Eintrag ohne Bewertung: privat, keine Noten.
     try {
       await createCollectionEntry(createdId, user.id)
+      haptic(18)
     } catch {
       // best-effort: trotzdem zum Whisky navigieren
     }
@@ -94,6 +96,7 @@ export default function AddWhisky() {
     setAddingWishlist(true)
     try {
       await addToWishlist(createdId, user.id)
+      haptic(18)
       navigate('/?view=wishlist')
     } catch {
       // best-effort: bei Fehler zum Whisky navigieren
