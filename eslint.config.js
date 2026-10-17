@@ -31,4 +31,13 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Vercel Serverless Functions laufen in Node, nicht im Browser.
+    files: ['api/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: globals.node,
+    },
+  },
 )
